@@ -33,14 +33,33 @@ body{
 }
 ::selection{background:var(--neon-pink);color:#000;}
 
+/* ============ PERSPECTIVE FLOOR (new, cheap — pure CSS gradient, no JS cost) ============ */
+.grid-floor{
+  position:fixed;left:0;right:0;bottom:0;height:46vh;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,255,242,0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,242,0.14) 1px, transparent 1px);
+  background-size:48px 48px;
+  transform:perspective(320px) rotateX(72deg);
+  transform-origin:bottom;
+  -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,0.85), transparent 85%);
+          mask-image:linear-gradient(to top, rgba(0,0,0,0.85), transparent 85%);
+  opacity:0.55;
+}
+.grid-floor::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 100%, rgba(255,15,123,0.25), transparent 60%);
+}
+
 /* ============ CRT / SCANLINE / VIGNETTE ============ */
 .crt-scanlines{
-  position:fixed;inset:0;z-index:996;pointer-events:none;
+  position:fixed;top:-42px;left:0;right:0;height:calc(100% + 42px);z-index:996;pointer-events:none;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 1px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0) 3px);
   mix-blend-mode:overlay;
+  will-change:transform;
   animation:scanShift 8s linear infinite;
 }
-@keyframes scanShift{0%{background-position:0 0;}100%{background-position:0 40px;}}
+@keyframes scanShift{0%{transform:translate3d(0,0,0);}100%{transform:translate3d(0,42px,0);}}
 .crt-vignette{
   position:fixed;inset:0;z-index:995;pointer-events:none;
   background:radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,0.75) 100%);
@@ -59,6 +78,14 @@ body{
   position:fixed;inset:0;z-index:993;pointer-events:none;opacity:0.035;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+/* sweeping holographic scan bar — transform-driven (compositor only, no layout/paint thrash) */
+.scan-sweep{
+  position:fixed;top:-120px;left:0;right:0;height:120px;z-index:992;pointer-events:none;
+  background:linear-gradient(180deg, transparent, rgba(0,255,242,0.06) 45%, rgba(0,255,242,0.10) 50%, rgba(0,255,242,0.06) 55%, transparent);
+  will-change:transform;
+  animation:sweepDown 7s linear infinite;
+}
+@keyframes sweepDown{0%{transform:translate3d(0,0,0);}100%{transform:translate3d(0,calc(100vh + 120px),0);}}
 
 /* ============ MATRIX RAIN ============ */
 #matrixCanvas{position:fixed;inset:0;z-index:0;opacity:0.16;pointer-events:none;}
@@ -71,14 +98,39 @@ body{
   position:fixed;inset:0;z-index:9999;background:#000;
   display:flex;align-items:center;justify-content:center;
   font-family:var(--font-mono);
+  cursor:default;
 }
 #bootScreen .boot-box{width:min(640px,88vw);}
-#bootLines{white-space:pre-wrap;color:var(--neon-cyan);font-size:0.82rem;line-height:1.7;min-height:260px;text-shadow:0 0 8px rgba(0,255,242,0.5);}
+#bootAscii{color:var(--neon-pink);font-size:0.46rem;line-height:1.05;white-space:pre;margin-bottom:14px;text-shadow:0 0 10px rgba(255,15,123,0.6);opacity:0.9;overflow-x:auto;}
+#bootLines{white-space:pre-wrap;color:var(--neon-cyan);font-size:0.82rem;line-height:1.7;min-height:200px;text-shadow:0 0 8px rgba(0,255,242,0.5);}
 #bootLines .cur{display:inline-block;width:8px;background:var(--neon-cyan);animation:blk 0.8s steps(1) infinite;}
 @keyframes blk{50%{opacity:0;}}
-.boot-bar-wrap{margin-top:18px;height:6px;width:100%;background:#141420;border:1px solid var(--border-color);}
-.boot-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));box-shadow:0 0 12px var(--neon-cyan);}
-.boot-pct{margin-top:6px;font-size:0.7rem;color:var(--text-dim);letter-spacing:2px;}
+.boot-bar-wrap{margin-top:18px;height:6px;width:100%;background:#141420;border:1px solid var(--border-color);overflow:hidden;}
+.boot-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));box-shadow:0 0 12px var(--neon-cyan);position:relative;}
+.boot-pct{margin-top:6px;font-size:0.7rem;color:var(--text-dim);letter-spacing:2px;display:flex;justify-content:space-between;}
+
+/* click-to-enter prompt — shown once boot finishes, gates audio playback behind a real user gesture */
+.enter-prompt{
+  display:none;flex-direction:column;align-items:center;gap:18px;margin-top:26px;
+  opacity:0;transform:translateY(10px);transition:opacity 0.5s ease, transform 0.5s ease;
+}
+.enter-prompt.show{opacity:1;transform:translateY(0);}
+.enter-title{
+  font-family:var(--font-mono);font-size:0.72rem;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;
+}
+.enter-title .blip{color:var(--neon-cyan);animation:blinker 1.4s linear infinite;}
+.enter-btn{
+  font-family:var(--font-display);font-weight:900;font-size:0.95rem;letter-spacing:2px;
+  color:#000;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));
+  padding:14px 34px;border-radius:3px;cursor:pointer;text-transform:uppercase;
+  box-shadow:0 0 24px rgba(0,255,242,0.4);animation:enterPulse 1.6s ease-in-out infinite;
+  border:none;
+}
+@keyframes enterPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 18px rgba(0,255,242,0.35);}
+  50%{transform:scale(1.045);box-shadow:0 0 34px rgba(255,15,123,0.55);}
+}
+.enter-hint{font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;}
 #bootScreen.hide{animation:bootOut 0.6s ease forwards;}
 @keyframes bootOut{
   0%{opacity:1;filter:brightness(1);}
@@ -88,7 +140,7 @@ body{
 
 /* ============ HUD / TARGETING CURSOR ============ */
 .hud-cursor{
-  position:fixed;top:0;left:0;width:0;height:0;z-index:999;pointer-events:none;
+  position:fixed;top:0;left:0;width:0;height:0;z-index:10000;pointer-events:none;
 }
 .hud-cursor .ring{
   position:absolute;top:0;left:0;width:120px;height:120px;margin:-60px 0 0 -60px;
@@ -114,11 +166,26 @@ body{
   position:absolute;top:16px;left:16px;font-size:9px;color:var(--neon-cyan);letter-spacing:1px;
   text-shadow:0 0 6px rgba(0,255,242,0.7);white-space:pre;
 }
+/* flashlight glow that follows the cursor and lights up the animated background behind it */
+.cursor-spotlight{
+  position:fixed;top:0;left:0;width:420px;height:420px;margin:-210px 0 0 -210px;
+  z-index:3;pointer-events:none;
+  background:radial-gradient(circle, rgba(0,255,242,0.16) 0%, rgba(176,38,255,0.08) 38%, transparent 70%);
+  mix-blend-mode:screen;will-change:transform;
+}
 .hud-cursor .corner{position:absolute;width:14px;height:14px;border-color:var(--neon-cyan);opacity:0.85;}
 .hud-cursor .c-tl{top:-70px;left:-70px;border-top:2px solid;border-left:2px solid;}
 .hud-cursor .c-tr{top:-70px;left:56px;border-top:2px solid;border-right:2px solid;}
 .hud-cursor .c-bl{top:56px;left:-70px;border-bottom:2px solid;border-left:2px solid;}
 .hud-cursor .c-br{top:56px;left:56px;border-bottom:2px solid;border-right:2px solid;}
+/* click ripple — new, cheap, single reused element per click */
+.click-ripple{
+  position:fixed;top:0;left:0;width:10px;height:10px;border-radius:50%;
+  border:1px solid var(--neon-cyan);box-shadow:0 0 12px var(--neon-cyan);
+  transform:translate(-50%,-50%);pointer-events:none;z-index:998;
+  animation:rippleOut 0.6s ease-out forwards;
+}
+@keyframes rippleOut{to{width:70px;height:70px;opacity:0;}}
 
 /* ============ AMBIENT SECRET TEXT ============ */
 .secret-overlay-layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:5;}
@@ -167,6 +234,11 @@ body{
   position:absolute;inset:-6px;border-radius:50%;
   border:1px dashed rgba(255,15,123,0.55);
   animation:ringSpin 7s linear infinite;
+}
+.avatar-ring2{
+  position:absolute;inset:-11px;border-radius:50%;
+  border:1px solid rgba(176,38,255,0.35);
+  animation:ringSpin 11s linear infinite reverse;
 }
 .avatar-status{
   position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;
@@ -218,10 +290,25 @@ body{
 
 .window-box,.box-3d-neon{
   background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;padding:20px;
-  position:relative;backdrop-filter:blur(10px);z-index:2;transform-style:preserve-3d;
+  position:relative;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2;transform-style:preserve-3d;
   box-shadow:0 10px 30px rgba(0,0,0,0.55);transition:transform 0.15s ease-out,box-shadow 0.15s ease-out,border-color 0.3s ease;
-  overflow:hidden;
+  overflow:hidden;contain:layout style paint;transform:translateZ(0);
 }
+/* corner brackets on every card — cheap CSS-only "cooler" upgrade, no extra JS cost */
+.window-box::after,.box-3d-neon::after{
+  content:"";position:absolute;inset:6px;pointer-events:none;border-radius:4px;
+  background:
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) top left/10px 1px no-repeat,
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) top left/1px 10px no-repeat,
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) top right/10px 1px no-repeat,
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) top right/1px 10px no-repeat,
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) bottom left/10px 1px no-repeat,
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) bottom left/1px 10px no-repeat,
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) bottom right/10px 1px no-repeat,
+    linear-gradient(var(--neon-cyan),var(--neon-cyan)) bottom right/1px 10px no-repeat;
+  opacity:0.35;transition:opacity 0.25s ease;
+}
+.window-box:hover::after,.box-3d-neon:hover::after{opacity:0.95;}
 .window-box::before,.box-3d-neon::before{
   content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;
   background:linear-gradient(100deg,transparent,rgba(0,255,242,0.07),transparent);
@@ -233,6 +320,19 @@ body{
 
 .box-3d-neon{background:rgba(15,8,26,0.68);border:2px solid var(--neon-pink);border-radius:8px;padding:22px;grid-column:span 3;
   box-shadow:0 15px 35px rgba(0,0,0,0.8),0 0 20px rgba(255,15,123,0.25),inset 0 0 15px rgba(255,15,123,0.15),inset 0 1px 0 rgba(255,255,255,0.15);}
+
+/* sticker pack — laptop-sticker style badges glued onto the top-right corner */
+.sticker-pack{position:absolute;top:8px;right:6px;z-index:6;pointer-events:none;transform:translateZ(60px);}
+.sticker{
+  position:absolute;top:0;right:0;font-family:var(--font-mono);font-size:0.56rem;font-weight:700;
+  padding:5px 8px 6px;border-radius:3px;line-height:1.15;letter-spacing:0.5px;text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.55), 0 0 1px rgba(255,255,255,0.4) inset;
+  border:1px solid rgba(255,255,255,0.25);text-transform:uppercase;
+}
+.sticker b{display:block;font-size:0.62rem;font-family:var(--font-display);font-weight:900;letter-spacing:0.5px;}
+.sticker-1{background:linear-gradient(155deg,#ffb000,#ff6a00);color:#1a0e00;transform:rotate(9deg) translate(6px,4px);z-index:3;}
+.sticker-2{background:linear-gradient(155deg,#00fff2,#0091ff);color:#001a1a;transform:rotate(-7deg) translate(-30px,20px);z-index:2;}
+.sticker-3{background:linear-gradient(155deg,#ff0f7b,#b026ff);color:#1a0014;transform:rotate(4deg) translate(-4px,44px);z-index:1;}
 
 .grid-collage>.box-3d-neon{animation:floatUp 6s ease-in-out infinite;}
 .grid-collage>.window-box:nth-of-type(2){animation:floatDown 7s ease-in-out infinite;animation-delay:0.5s;}
@@ -249,16 +349,43 @@ body{
 .window-box:hover,.box-3d-neon:hover{animation-play-state:paused;z-index:99;}
 
 .music-widget{grid-column:span 3;display:flex;align-items:center;gap:15px;border-color:rgba(255,15,123,0.3);}
-.music-cover{width:50px;height:50px;background:#120a1e;border:1px solid var(--neon-pink);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transform:translateZ(40px);position:relative;overflow:hidden;cursor:pointer;}
-.eq-bars{display:flex;align-items:flex-end;gap:2px;height:20px;}
-.eq-bars span{width:3px;background:var(--neon-cyan);box-shadow:0 0 6px var(--neon-cyan);animation:eq 0.9s ease-in-out infinite;animation-play-state:paused;}
-.eq-bars.playing span{animation-play-state:running;}
-.eq-bars span:nth-child(1){animation-delay:0s;height:40%;}
-.eq-bars span:nth-child(2){animation-delay:0.15s;height:80%;}
-.eq-bars span:nth-child(3){animation-delay:0.3s;height:55%;}
-.eq-bars span:nth-child(4){animation-delay:0.45s;height:90%;}
-.eq-bars span:nth-child(5){animation-delay:0.6s;height:30%;}
-@keyframes eq{0%,100%{transform:scaleY(0.4);}50%{transform:scaleY(1);}}
+.music-cover{width:76px;height:76px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;transform:translateZ(40px);position:relative;overflow:visible;cursor:pointer;flex-shrink:0;}
+
+/* reactive frequency ring canvas — sits behind the disc, drawn from real audio data */
+.disc-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;width:76px;height:76px;}
+
+/* spinning vinyl disc */
+.vinyl-disc{
+  width:52px;height:52px;border-radius:50%;position:relative;z-index:2;flex-shrink:0;
+  background:
+    repeating-radial-gradient(circle at center, #150c22 0px, #150c22 2px, #1d1329 3px, #1d1329 4px),
+    radial-gradient(circle at 34% 30%, rgba(255,255,255,0.10), transparent 55%);
+  border:1px solid var(--neon-pink);
+  box-shadow:0 0 14px rgba(255,15,123,0.35), inset 0 0 10px rgba(0,0,0,0.65);
+  display:flex;align-items:center;justify-content:center;
+  animation:discSpin 2.8s linear infinite;
+  animation-play-state:paused;
+  transition:box-shadow 0.15s ease;
+}
+.vinyl-disc.spinning{animation-play-state:running;}
+@keyframes discSpin{to{transform:rotate(360deg);}}
+.vinyl-label{
+  width:20px;height:20px;border-radius:50%;position:relative;overflow:hidden;
+  background:radial-gradient(circle, var(--neon-cyan), var(--neon-purple) 75%);
+  box-shadow:0 0 8px var(--neon-cyan);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:7px;font-weight:900;color:#050308;
+}
+.vinyl-label img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;position:relative;z-index:1;}
+.vinyl-label::after{content:"";position:absolute;inset:0;margin:auto;width:3px;height:3px;border-radius:50%;background:#050308;top:0;bottom:0;left:0;right:0;}
+/* tonearm — subtle detail, lifts onto the disc when playing */
+.vinyl-arm{
+  position:absolute;top:-4px;right:-2px;width:22px;height:3px;border-radius:2px;
+  background:linear-gradient(90deg, rgba(255,255,255,0.15), var(--neon-cyan));
+  transform-origin:right center;transform:rotate(-38deg);
+  transition:transform 0.35s ease;box-shadow:0 0 6px rgba(0,255,242,0.5);z-index:3;
+}
+.vinyl-arm.down{transform:rotate(-14deg);}
 
 .skill-circle{width:60px;height:60px;border:5px solid #141420;border-radius:50%;border-top-color:var(--neon-cyan);border-right-color:var(--neon-cyan);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;color:var(--neon-cyan);animation:spinSlow 5s linear infinite;}
 .skill-circle span{display:inline-block;animation:spinSlow 5s linear infinite reverse;}
@@ -270,6 +397,14 @@ body{
 .terminal-body .cur{display:inline-block;width:7px;background:var(--neon-cyan);animation:blk 0.8s steps(1) infinite;vertical-align:middle;}
 
 @keyframes blinker{50%{opacity:0.3;}}
+
+/* new: system status widget */
+.status-widget{grid-column:span 3;}
+.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:0.7rem;}
+.stat-label{width:40px;color:var(--text-dim);letter-spacing:1px;flex-shrink:0;}
+.stat-track{flex:1;height:6px;background:#141420;border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);}
+.stat-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));box-shadow:0 0 8px var(--neon-cyan);transition:width 0.6s ease;}
+.stat-val{width:34px;text-align:right;color:var(--neon-cyan);flex-shrink:0;}
 
 footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.3);font-size:0.7rem;color:var(--text-dim);letter-spacing:1px;text-align:center;}
 
@@ -303,12 +438,18 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 #musicToggleBtn.playing{
     transform:scale(1.15);box-shadow:0 0 18px var(--neon-cyan);animation:musicPulse 1.2s infinite;
 }
-#musicToggleCover.playing .eq-bars span{animation-play-state:running;}
-#musicToggleCover .eq-bars span{animation-play-state:paused;}
+
 
 @keyframes musicPulse{
     0%,100%{transform:scale(1);}
     50%{transform:scale(1.15);}
+}
+
+/* Respect reduced motion: cut the heavy ambient stuff for people who asked for it (perf + accessibility) */
+@media (prefers-reduced-motion: reduce){
+  .crt-scanlines,.crt-flicker,.scan-sweep,.avatar-ring,.avatar-ring2,.grid-collage>.box-3d-neon,
+  .grid-collage>.window-box:nth-of-type(2),.skill-circle,.skill-circle span{animation:none !important;}
+  #matrixCanvas,#networkCanvas{display:none;}
 }
 </style>
 </head>
@@ -316,20 +457,34 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 
 <div id="bootScreen">
   <div class="boot-box">
+    <div id="bootAscii"> ██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗
+ ██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝
+ ██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗  
+ ██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝  
+ ╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗
+  ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝</div>
     <div id="bootLines"></div>
     <div class="boot-bar-wrap"><div class="boot-bar" id="bootBar"></div></div>
-    <div class="boot-pct" id="bootPct">0%</div>
+    <div class="boot-pct"><span id="bootPct">0%</span><span>SYS_INIT</span></div>
+    <div class="enter-prompt" id="enterPrompt">
+      <div class="enter-title"><span class="blip">●</span> HỆ THỐNG SẴN SÀNG</div>
+      <button class="enter-btn" id="enterBtn" type="button">▶ Nhấn Để Vào</button>
+      <div class="enter-hint">bật luôn nhạc nền sau khi vào</div>
+    </div>
   </div>
 </div>
 
+<div class="grid-floor"></div>
 <canvas id="matrixCanvas"></canvas>
 <canvas id="networkCanvas"></canvas>
+<div class="cursor-spotlight" id="cursorSpotlight"></div>
 <div class="crt-scanlines"></div>
 <div class="crt-vignette"></div>
 <div class="crt-flicker"></div>
 <div class="noise-layer"></div>
+<div class="scan-sweep"></div>
 
-<audio id="bgMusic" src="https://raw.githubusercontent.com/KhangICO/music/main/Th%C3%AAm%20Bao%20Nhi%C3%AAu%20L%C3%A2u%20-%20%C4%90%E1%BA%A1t%20G%20__%20OFFICIAL%20MV%20%5BsinhZ1l54K8%5D.mp3" loop preload="auto"></audio>
+<audio id="bgMusic" crossorigin="anonymous" src="https://raw.githubusercontent.com/KhangICO/music/main/%E2%99%AB%20%C4%90%E1%BA%A2O%20NGH%E1%BB%8ACH%20_%20Reverse%E6%BA%AF%20(%E7%89%88%E9%92%A2%E7%90%B4)%20-%20THAZH%20X%20%C4%90%C3%94NG%20REMIX%20_%20B%E1%BA%A3n%20Nh%E1%BA%A1c%20Ch%E1%BB%AFa%20L%C3%A0nh%20T%C3%A2m%20H%E1%BB%93n%20Hot%20TikTok%20%E2%99%AB%20%5BvQVW7YTNz2c%5D.mp3" loop preload="auto"></audio>
 
 <div class="hud-cursor" id="hudCursor">
   <div class="ring"></div>
@@ -355,6 +510,7 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
   <nav class="nav-bar">
     <div class="nav-left">
       <div class="avatar-frame" id="avatarFrame">
+        <div class="avatar-ring2"></div>
         <div class="avatar-ring"></div>
         <img id="avatarImg" alt="avatar">
         <div class="avatar-fallback" id="avatarFallback">KV</div>
@@ -389,6 +545,8 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
     <div class="bg-giant-text"><br></div>
 
     <div class="box-3d-neon">
+      <div class="sticker-pack" aria-hidden="true">
+      </div>
       <div class="box-header-cyber"><span class="status-dot"></span><span>NỔI BẬT / 01</span></div>
       <div class="neon-text-main">VIẾT CODE BẰNG AI </div>
       <div class="neon-text-sub">TAO KO BIẾT VIẾT, TAO LÀ 1 THẰNG VIBE LỎ.</div>
@@ -408,14 +566,19 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 
     <div class="window-box music-widget">
       <div class="music-cover" id="musicToggleCover">
-          <div class="eq-bars" id="eqBars">
-              <span></span><span></span><span></span><span></span><span></span>
+          <canvas class="disc-ring" id="discRing" width="76" height="76"></canvas>
+          <div class="vinyl-disc" id="vinylDisc">
+              <div class="vinyl-arm" id="vinylArm"></div>
+              <div class="vinyl-label">
+                  <img id="vinylLabelImg"  alt="avatar">
+                  <span id="vinylLabelFallback">KV</span>
+              </div>
           </div>
       </div>
       <div class="music-info">
           <div class="window-header" style="border:none;margin:0;padding:0;">NOW PLAYING</div>
-          <div id="trackTitle" class="music-title">Thêm Bao Nhiêu Lâu</div>
-          <div id="trackArtist" class="music-artist">Đạt G</div>
+          <div id="trackTitle" class="music-title">♫ ĐẢO NGHỊCH | Reverse溯 (版钢琴)</div>
+          <div id="trackArtist" class="music-artist">THAZH X ĐÔNG REMIX</div>
           <input type="range" id="musicProgress" value="0" min="0" max="100">
           <div class="music-time">
               <span id="currentTime">0:00</span>
@@ -433,6 +596,14 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
       <div class="window-header"><span>TERMINAL://LOG</span><span style="color:var(--neon-pink);">LIVE</span></div>
       <div class="terminal-body" id="termBody"></div>
     </div>
+
+    <div class="window-box status-widget">
+      <div class="window-header"><span>SYSTEM STATUS</span><span class="blip" style="color:var(--neon-cyan);">●</span></div>
+      <div class="stat-row"><span class="stat-label">CPU</span><div class="stat-track"><div class="stat-fill" id="statCpu"></div></div><span class="stat-val" id="statCpuVal">0%</span></div>
+      <div class="stat-row"><span class="stat-label">GPU</span><div class="stat-track"><div class="stat-fill" id="statGpu"></div></div><span class="stat-val" id="statGpuVal">0%</span></div>
+      <div class="stat-row"><span class="stat-label">RAM</span><div class="stat-track"><div class="stat-fill" id="statRam"></div></div><span class="stat-val" id="statRamVal">0%</span></div>
+      <div class="secret-msg" style="margin-top:2px;">// [ẨN]: 90% RAM LÀ ANIME OPENING</div>
+    </div>
   </div>
 
   <footer>© <span id="yr"></span> KHANGICO — TRẠM ĐIỀU KHIỂN VÔ DỤNG — ALL RIGHTS RESERVED (KHÔNG AI ĐÒI)</footer>
@@ -440,6 +611,7 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+const REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= AVATAR ================= */
 (function(){
@@ -448,6 +620,16 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   if(img.getAttribute('src')){
     img.addEventListener('load', ()=>{ img.style.display='block'; fallback.style.display='none'; });
     img.addEventListener('error', ()=>{ img.style.display='none'; fallback.style.display='flex'; });
+  }
+
+  // Vinyl disc label avatar: uses its own image if set, otherwise mirrors the nav avatar, otherwise falls back to "KV"
+  const vImg = document.getElementById('vinylLabelImg');
+  const vFallback = document.getElementById('vinylLabelFallback');
+  const vSrc = vImg.getAttribute('src') || img.getAttribute('src');
+  if(vSrc){
+    vImg.src = vSrc;
+    vImg.addEventListener('load', ()=>{ vImg.style.display='block'; vFallback.style.display='none'; });
+    vImg.addEventListener('error', ()=>{ vImg.style.display='none'; vFallback.style.display='flex'; });
   }
 })();
 
@@ -487,15 +669,26 @@ document.getElementById("next10").onclick = () => {
     audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
 };
 
+const vinylDisc = document.getElementById('vinylDisc');
+const vinylArm = document.getElementById('vinylArm');
+const discRingCanvas = document.getElementById('discRing');
+const discRingCtx = discRingCanvas.getContext('2d');
+
 function updatePlayState(isPlaying) {
     if (isPlaying) {
         toggleBtn.innerHTML = "⏸";
         toggleBtn.classList.add("playing");
         toggleCover.classList.add("playing");
+        vinylDisc.classList.add("spinning");
+        vinylArm.classList.add("down");
+        startDiscReactivity();
     } else {
         toggleBtn.innerHTML = "▶";
         toggleBtn.classList.remove("playing");
         toggleCover.classList.remove("playing");
+        vinylDisc.classList.remove("spinning");
+        vinylArm.classList.remove("down");
+        stopDiscReactivity();
     }
 }
 
@@ -506,6 +699,83 @@ function toggleMusic() {
         audio.pause();
         updatePlayState(false);
     }
+}
+
+/* ================= REACTIVE DISC RING — real audio-frequency waveform (with graceful fallback) ================= */
+let audioCtx = null, analyser = null, freqData = null, discRafId = null, analyserReady = false;
+
+function ensureAudioAnalyser(){
+  if(audioCtx) return;
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+    const sourceNode = audioCtx.createMediaElementSource(audio);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64; // small = cheap to read every frame, still gives a lively ring
+    analyser.smoothingTimeConstant = 0.78;
+    freqData = new Uint8Array(analyser.frequencyBinCount);
+    sourceNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    analyserReady = true;
+  }catch(e){
+    // Cross-origin track without proper CORS, or browser blocked it — fall back to a simulated pulse
+    console.log("Audio analyser unavailable, using simulated waveform:", e.message);
+    analyserReady = false;
+  }
+}
+
+function drawRing(getBar){
+  const w = discRingCanvas.width, h = discRingCanvas.height;
+  discRingCtx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2, baseR = 27, bars = 28;
+  for(let i=0;i<bars;i++){
+    const val = getBar(i, bars); // 0..1
+    const angle = (i/bars) * Math.PI*2 - Math.PI/2;
+    const r1 = baseR;
+    const r2 = baseR + 3 + val*14;
+    const x1 = cx + Math.cos(angle)*r1, y1 = cy + Math.sin(angle)*r1;
+    const x2 = cx + Math.cos(angle)*r2, y2 = cy + Math.sin(angle)*r2;
+    discRingCtx.strokeStyle = i % 2 === 0
+      ? `rgba(0,255,242,${(0.35+val*0.65).toFixed(2)})`
+      : `rgba(255,15,123,${(0.35+val*0.65).toFixed(2)})`;
+    discRingCtx.lineWidth = 2;
+    discRingCtx.beginPath();
+    discRingCtx.moveTo(x1,y1);
+    discRingCtx.lineTo(x2,y2);
+    discRingCtx.stroke();
+  }
+}
+
+let simPhase = 0;
+function ringLoop(){
+  if(analyserReady && analyser){
+    analyser.getByteFrequencyData(freqData);
+    drawRing((i, bars) => freqData[i % freqData.length] / 255);
+    // punch the disc glow with the bass band
+    const bass = (freqData[0]+freqData[1]+freqData[2])/3/255;
+    vinylDisc.style.boxShadow = `0 0 ${14+bass*22}px rgba(255,15,123,${0.35+bass*0.5}), inset 0 0 10px rgba(0,0,0,0.65)`;
+  } else {
+    // simulated "giật theo nhạc" fallback — no real audio access, but still looks alive
+    simPhase += 0.14;
+    drawRing((i, bars) => {
+      const wobble = Math.sin(simPhase + i*0.9) * 0.5 + 0.5;
+      return wobble * (0.4 + Math.random()*0.3);
+    });
+    const bass = Math.sin(simPhase*0.6)*0.5+0.5;
+    vinylDisc.style.boxShadow = `0 0 ${14+bass*18}px rgba(255,15,123,${0.35+bass*0.4}), inset 0 0 10px rgba(0,0,0,0.65)`;
+  }
+  discRafId = requestAnimationFrame(ringLoop);
+}
+
+function startDiscReactivity(){
+  ensureAudioAnalyser();
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if(!discRafId) discRafId = requestAnimationFrame(ringLoop);
+}
+function stopDiscReactivity(){
+  if(discRafId){ cancelAnimationFrame(discRafId); discRafId = null; }
+  discRingCtx.clearRect(0,0,discRingCanvas.width,discRingCanvas.height);
+  vinylDisc.style.boxShadow = "";
 }
 
 toggleBtn.addEventListener('click', toggleMusic);
@@ -530,16 +800,7 @@ const bootScript = [
 let li = 0, ci = 0, outputText = "";
 function typeBoot(){
   if (li >= bootScript.length) {
-    setTimeout(() => {
-        bootScreen.classList.add("hide");
-        setTimeout(() => {
-            bootScreen.remove();
-            // Bắt đầu phát nhạc sau khi boot xong
-            audio.play().then(() => updatePlayState(true)).catch(err => {
-                console.log("Autoplay blocked:", err);
-            });
-        }, 700);
-    }, 350);
+    setTimeout(showEnterPrompt, 350);
     return;
   }
   const line = bootScript[li];
@@ -558,21 +819,61 @@ function typeBoot(){
 }
 typeBoot();
 
-/* ================= MATRIX RAIN ================= */
+/* ================= CLICK-TO-ENTER ================= */
+const enterPrompt = document.getElementById('enterPrompt');
+const enterBtn = document.getElementById('enterBtn');
+let entered = false;
+
+function showEnterPrompt(){
+  enterPrompt.style.display = 'flex';
+  requestAnimationFrame(()=> enterPrompt.classList.add('show'));
+}
+
+function enterSite(){
+  if(entered) return;
+  entered = true;
+  bootScreen.classList.add("hide");
+  setTimeout(() => {
+    bootScreen.remove();
+    // This runs directly off a real click, so Chrome's autoplay policy allows it —
+    // no more silent "Autoplay blocked" failures like before.
+    audio.play().then(() => updatePlayState(true)).catch(err => {
+      console.log("Play error:", err);
+    });
+  }, 700);
+}
+
+enterBtn.addEventListener('click', (e)=>{ e.stopPropagation(); enterSite(); });
+bootScreen.addEventListener('click', ()=>{ if(enterPrompt.classList.contains('show')) enterSite(); });
+
+/* ================= MATRIX RAIN (throttled to ~30fps, DPR-capped) ================= */
 const canvas = document.getElementById('matrixCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: true });
 let w,h,cols,drops;
 const glyphs = "アイウエオカキクケコ01木火水金土サシスセソ$#&%KHANG".split("");
+// Cap internal canvas resolution — full-viewport fillRect + text draws are the #1 Chrome jank
+// source on large/high-DPI screens, so render at a capped internal size and let CSS stretch it.
+const RENDER_SCALE = Math.min(1, 1500 / window.innerWidth);
 function resizeCanvas(){
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
+  w = canvas.width = Math.round(window.innerWidth * RENDER_SCALE);
+  h = canvas.height = Math.round(window.innerHeight * RENDER_SCALE);
+  canvas.style.width = "100vw";
+  canvas.style.height = "100vh";
   cols = Math.floor(w/18);
   drops = new Array(cols).fill(0).map(()=>Math.random()*-50);
 }
 resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-function drawMatrix(){
-  ctx.fillStyle = "rgba(3,2,6,0.08)";
+let resizeTimer;
+window.addEventListener('resize', ()=>{ clearTimeout(resizeTimer); resizeTimer = setTimeout(resizeCanvas, 150); });
+
+const FRAME_INTERVAL = 1000/30; // cap at 30fps — big lag saver vs uncapped rAF
+let lastMatrixTime = 0;
+function drawMatrix(ts){
+  requestAnimationFrame(drawMatrix);
+  if(REDUCED_MOTION) return;
+  if(ts - lastMatrixTime < FRAME_INTERVAL) return;
+  lastMatrixTime = ts;
+  ctx.fillStyle = "rgba(3,2,6,0.10)";
   ctx.fillRect(0,0,w,h);
   ctx.font = "14px monospace";
   for(let i=0;i<cols;i++){
@@ -584,28 +885,36 @@ function drawMatrix(){
     if(y > h && Math.random() > 0.975) drops[i] = 0;
     drops[i]++;
   }
-  requestAnimationFrame(drawMatrix);
 }
-drawMatrix();
+requestAnimationFrame(drawMatrix);
 
-/* ================= NETWORK MESH ================= */
+/* ================= NETWORK MESH (throttled to ~30fps, fewer nodes) ================= */
 (function(){
   const nc = document.getElementById('networkCanvas');
-  const nctx = nc.getContext('2d');
+  const nctx = nc.getContext('2d', { alpha: true });
   let nw, nh;
-  function resizeNet(){ nw = nc.width = window.innerWidth; nh = nc.height = window.innerHeight; }
+  const NET_SCALE = Math.min(1, 1500 / window.innerWidth);
+  function resizeNet(){
+    nw = nc.width = Math.round(window.innerWidth * NET_SCALE);
+    nh = nc.height = Math.round(window.innerHeight * NET_SCALE);
+    nc.style.width = "100vw";
+    nc.style.height = "100vh";
+  }
   resizeNet();
-  window.addEventListener('resize', resizeNet);
+  let netResizeTimer;
+  window.addEventListener('resize', ()=>{ clearTimeout(netResizeTimer); netResizeTimer = setTimeout(resizeNet, 150); });
 
   const COLORS = ['#00fff2','#ff0f7b','#b026ff','#ffb000'];
   const LINK_DIST = 150;
+  const LINK_DIST_SQ = LINK_DIST*LINK_DIST;
   const MERGE_DIST = 9;
   const MERGE_MS = 10000;
   const COOLDOWN_MS = 1600;
 
   function rand(a,b){ return a + Math.random()*(b-a); }
 
-  const NODE_COUNT = Math.max(26, Math.min(70, Math.floor((window.innerWidth*window.innerHeight)/32000)));
+  // fewer nodes than before = noticeably less lag on big/high-dpi screens, still dense enough to look alive
+  const NODE_COUNT = Math.max(18, Math.min(46, Math.floor((window.innerWidth*window.innerHeight)/48000)));
   let nodes = [];
   for(let i=0;i<NODE_COUNT;i++){
     nodes.push({
@@ -634,7 +943,14 @@ drawMatrix();
     if(best) pulses.push({ax:a.x, ay:a.y, bx:best.x, by:best.y, t:0, color:a.color});
   }
 
+  const NET_FRAME_INTERVAL = 1000/30;
+  let lastNetTime = 0;
   function netLoop(now){
+    requestAnimationFrame(netLoop);
+    if(REDUCED_MOTION) return;
+    if(now - lastNetTime < NET_FRAME_INTERVAL) return;
+    lastNetTime = now;
+
     nctx.clearRect(0,0,nw,nh);
 
     for(const n of nodes){
@@ -681,8 +997,10 @@ drawMatrix();
     for(let i=0;i<nodes.length;i++){
       for(let j=i+1;j<nodes.length;j++){
         const a=nodes[i], b=nodes[j];
-        const d = Math.hypot(a.x-b.x, a.y-b.y);
-        if(d < LINK_DIST){
+        const dx = a.x-b.x, dy = a.y-b.y;
+        const dSq = dx*dx+dy*dy;
+        if(dSq < LINK_DIST_SQ){
+          const d = Math.sqrt(dSq);
           const alpha = (1 - d/LINK_DIST) * 0.55;
           nctx.strokeStyle = `rgba(0,255,242,${alpha.toFixed(3)})`;
           nctx.lineWidth = 1;
@@ -739,7 +1057,6 @@ drawMatrix();
     }
 
     nctx.globalCompositeOperation = 'source-over';
-    requestAnimationFrame(netLoop);
   }
   requestAnimationFrame(netLoop);
 })();
@@ -775,62 +1092,110 @@ function typeTerm(){
 }
 setTimeout(typeTerm, 1200);
 
-/* ================= HUD CURSOR + AMBIENT REVEAL ================= */
+/* ================= SYSTEM STATUS WIDGET (new, lightweight interval not rAF) ================= */
+(function(){
+  const cpu = document.getElementById('statCpu'), cpuVal = document.getElementById('statCpuVal');
+  const gpu = document.getElementById('statGpu'), gpuVal = document.getElementById('statGpuVal');
+  const ram = document.getElementById('statRam'), ramVal = document.getElementById('statRamVal');
+  function jitter(base, range){ return Math.max(4, Math.min(99, Math.round(base + (Math.random()-0.5)*range))); }
+  function tick(){
+    const c = jitter(62, 30), g = jitter(78, 22), r = jitter(91, 8);
+    cpu.style.width = c+"%"; cpuVal.textContent = c+"%";
+    gpu.style.width = g+"%"; gpuVal.textContent = g+"%";
+    ram.style.width = r+"%"; ramVal.textContent = r+"%";
+  }
+  tick();
+  // plain setInterval, not rAF — this widget only needs to update ~once/sec, no need to burn a frame callback
+  setInterval(tick, 1400);
+})();
+
+/* ================= HUD CURSOR + AMBIENT REVEAL (rAF-driven, cached rects) ================= */
 let mouseX=-500, mouseY=-500, curX=-500, curY=-500;
 window.addEventListener('mousemove', e=>{ mouseX=e.clientX; mouseY=e.clientY; });
-window.addEventListener('mousedown', ()=>{ hudCursor.style.transform='translate(-50%,-50%) scale(0.85)'; });
+window.addEventListener('mousedown', ()=>{ hudCursor.style.transform='translate(-50%,-50%) scale(0.85)'; spawnRipple(mouseX,mouseY); });
 window.addEventListener('mouseup', ()=>{ hudCursor.style.transform='translate(-50%,-50%) scale(1)'; });
 
+function spawnRipple(x,y){
+  const el = document.createElement('div');
+  el.className = 'click-ripple';
+  el.style.left = x+'px';
+  el.style.top = y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 650);
+}
+
 const hudCursor = document.getElementById('hudCursor');
+const cursorSpotlight = document.getElementById('cursorSpotlight');
 const hudReadout = document.getElementById('hudReadout');
 const secretMessages = document.querySelectorAll('.secret-msg');
 const ambientTexts = document.querySelectorAll('.ambient-secret-text');
 
+// cache bounding boxes instead of recomputing layout for every element on every single frame;
+// this is the single biggest layout-thrash saver on this page. Recompute only on resize/scroll.
+let secretRects = [], ambientRects = [];
+function cacheRects(){
+  secretRects = Array.from(secretMessages).map(el=>{ const r = el.getBoundingClientRect(); return {el, cx:r.left+r.width/2, cy:r.top+r.height/2}; });
+  ambientRects = Array.from(ambientTexts).map(el=>{ const r = el.getBoundingClientRect(); return {el, cx:r.left+r.width/2, cy:r.top+r.height/2}; });
+}
+cacheRects();
+let rectResizeTimer;
+window.addEventListener('resize', ()=>{ clearTimeout(rectResizeTimer); rectResizeTimer = setTimeout(cacheRects, 150); });
+window.addEventListener('scroll', ()=>{ clearTimeout(rectResizeTimer); rectResizeTimer = setTimeout(cacheRects, 150); }, { passive:true });
+
 function loop(){
+  requestAnimationFrame(loop);
   curX += (mouseX-curX)*0.22;
   curY += (mouseY-curY)*0.22;
   hudCursor.style.left = curX + "px";
   hudCursor.style.top = curY + "px";
-  hudCursor.style.transform = (hudCursor.style.transform.includes('scale(0.85)') ? 'translate(-50%,-50%) scale(0.85)' : 'translate(-50%,-50%)');
   hudReadout.textContent = `REC ●\nX:${Math.round(curX)} Y:${Math.round(curY)}\nISO 800`;
+  cursorSpotlight.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
 
-  secretMessages.forEach(msg=>{
-    const r = msg.getBoundingClientRect();
-    const d = Math.hypot(curX-(r.left+r.width/2), curY-(r.top+r.height/2));
-    msg.classList.toggle('revealed', d < 130);
-  });
-  ambientTexts.forEach(el=>{
-    const r = el.getBoundingClientRect();
-    const d = Math.hypot(curX-(r.left+r.width/2), curY-(r.top+r.height/2));
-    el.classList.toggle('highlighted', d < 150);
-  });
-  requestAnimationFrame(loop);
+  for(const item of secretRects){
+    const d = Math.hypot(curX-item.cx, curY-item.cy);
+    item.el.classList.toggle('revealed', d < 130);
+  }
+  for(const item of ambientRects){
+    const d = Math.hypot(curX-item.cx, curY-item.cy);
+    item.el.classList.toggle('highlighted', d < 150);
+  }
 }
 requestAnimationFrame(loop);
 
-/* ================= 3D TILT ================= */
+/* ================= 3D TILT (rAF-throttled via mousemove, transform-only = GPU cheap) ================= */
 document.querySelectorAll('.window-box, .box-3d-neon').forEach(card=>{
-  card.addEventListener('mousemove', e=>{
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX-r.left)/r.width - 0.5;
-    const y = (e.clientY-r.top)/r.height - 0.5;
-    const t = 22;
-    const tiltX = (y*t).toFixed(2), tiltY = (-x*t).toFixed(2);
-    card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.04) translateY(-8px)`;
-    if(card.classList.contains('box-3d-neon')){
-      card.style.boxShadow = `${-tiltY*3}px ${tiltX*3}px 45px rgba(0,0,0,0.85), 0 0 35px var(--neon-cyan), inset 0 0 20px rgba(0,255,242,0.2)`;
-      card.style.borderColor = "var(--neon-cyan)";
+  let ticking = false, lastEvt = null;
+  const isNeon = card.classList.contains('box-3d-neon');
+  card.addEventListener('mouseenter', ()=>{
+    // box-shadow/border recompute is a real (non-compositor) repaint — do it ONCE per hover,
+    // not on every mousemove frame like before. Movement itself only ever touches `transform`.
+    card.style.borderColor = "var(--neon-cyan)";
+    if(isNeon){
+      card.style.boxShadow = "0 15px 35px rgba(0,0,0,0.85), 0 0 30px var(--neon-cyan), inset 0 0 20px rgba(0,255,242,0.2)";
       const mt = card.querySelector('.neon-text-main');
       if(mt) mt.style.textShadow = "0 0 10px rgba(255,255,255,0.5), 0 0 20px var(--neon-cyan)";
     } else {
-      card.style.boxShadow = `${-tiltY*2}px ${tiltX*2}px 40px rgba(0,0,0,0.7), 0 0 20px var(--neon-cyan)`;
-      card.style.borderColor = "var(--neon-cyan)";
+      card.style.boxShadow = "0 18px 34px rgba(0,0,0,0.7), 0 0 18px var(--neon-cyan)";
     }
   });
+  card.addEventListener('mousemove', e=>{
+    lastEvt = e;
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(()=>{
+      const r = card.getBoundingClientRect();
+      const x = (lastEvt.clientX-r.left)/r.width - 0.5;
+      const y = (lastEvt.clientY-r.top)/r.height - 0.5;
+      const t = 22;
+      const tiltX = (y*t).toFixed(2), tiltY = (-x*t).toFixed(2);
+      card.style.transform = `translateZ(0) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.04) translateY(-8px)`;
+      ticking = false;
+    });
+  });
   card.addEventListener('mouseleave', ()=>{
-    card.style.transform = "rotateX(0) rotateY(0) scale(1) translateY(0)";
+    card.style.transform = "translateZ(0) rotateX(0) rotateY(0) scale(1) translateY(0)";
     card.style.borderColor = "";
-    if(card.classList.contains('box-3d-neon')){
+    if(isNeon){
       card.style.boxShadow = "0 15px 35px rgba(0,0,0,0.8), 0 0 20px rgba(255,15,123,0.25), inset 0 0 15px rgba(255,15,123,0.15), inset 0 1px 0 rgba(255,255,255,0.15)";
       const mt = card.querySelector('.neon-text-main');
       if(mt) mt.style.textShadow = "0 0 10px rgba(255,255,255,0.5), 0 0 20px var(--neon-pink)";
