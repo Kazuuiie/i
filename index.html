@@ -280,7 +280,7 @@ body{
 .grid-collage{display:grid;grid-template-columns:repeat(12,1fr);grid-gap:26px;position:relative;transform-style:preserve-3d;z-index:2;}
 
 .bg-giant-text{
-  grid-column:span 7;font-family:var(--font-display);font-size:7.5rem;font-weight:900;
+  grid-column:span 5;font-family:var(--font-display);font-size:7.5rem;font-weight:900;
   color:transparent;-webkit-text-stroke:1px rgba(0,255,242,0.12);line-height:0.85;letter-spacing:-3px;
   text-transform:uppercase;user-select:none;z-index:1;align-self:start;
 }
@@ -370,7 +370,7 @@ body{
 .vinyl-disc.spinning{animation-play-state:running;}
 @keyframes discSpin{to{transform:rotate(360deg);}}
 .vinyl-label{
-  width:20px;height:20px;border-radius:50%;position:relative;overflow:hidden;
+  width:34px;height:34px;border-radius:50%;position:relative;overflow:hidden;
   background:radial-gradient(circle, var(--neon-cyan), var(--neon-purple) 75%);
   box-shadow:0 0 8px var(--neon-cyan);
   display:flex;align-items:center;justify-content:center;
@@ -399,9 +399,9 @@ body{
 @keyframes blinker{50%{opacity:0.3;}}
 
 /* new: system status widget */
-.status-widget{grid-column:span 3;}
+.status-widget{grid-column:span 2;}
 .stat-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:0.7rem;}
-.stat-label{width:40px;color:var(--text-dim);letter-spacing:1px;flex-shrink:0;}
+.stat-label{width:25px;color:var(--text-dim);letter-spacing:1px;flex-shrink:0;}
 .stat-track{flex:1;height:6px;background:#141420;border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);}
 .stat-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));box-shadow:0 0 8px var(--neon-cyan);transition:width 0.6s ease;}
 .stat-val{width:34px;text-align:right;color:var(--neon-cyan);flex-shrink:0;}
@@ -469,7 +469,7 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
     <div class="enter-prompt" id="enterPrompt">
       <div class="enter-title"><span class="blip">●</span> HỆ THỐNG SẴN SÀNG</div>
       <button class="enter-btn" id="enterBtn" type="button">▶ Nhấn Để Vào</button>
-      <div class="enter-hint">bật luôn nhạc nền sau khi vào</div>
+      <div class="enter-hint">HY VỌNG SẼ TỐT</div>
     </div>
   </div>
 </div>
@@ -498,7 +498,7 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 </div>
 
 <div class="secret-overlay-layer">
-  <div class="ambient-secret-text" style="top:8%;left:12%;">// [DATA_STREAM_01]: 0x9AF4::VO_TUAN_KHANG</div>
+  <div class="ambient-secret-text" style="top:8%;left:12%;">// [DATA_STREAM_01]: 0x9AF4::TOI_BI_NGU</div>
   <div class="ambient-secret-text" style="top:22%;left:64%;">// [SYS_NODE]: ACCESS_GRANTED_ROOT</div>
   <div class="ambient-secret-text" style="top:45%;left:4%;">// [WARNING]: SECURITY_BYPASS_ACTIVE</div>
   <div class="ambient-secret-text" style="top:60%;left:72%;">// [SECRET]: Wibu_Coder_Supreme</div>
@@ -554,6 +554,13 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
       <div class="secret-msg">// [BÍ MẬT]: TAO XÀI CLAUDE ,GEMINI ,CHATGPT!</div>
     </div>
 
+    <div class="window-box status-widget">
+      <div class="window-header"><span>SYSTEM STATUS</span><span class="blip" style="color:var(--neon-cyan);">●</span></div>
+      <div class="stat-row"><span class="stat-label">CPU</span><div class="stat-track"><div class="stat-fill" id="statCpu"></div></div><span class="stat-val" id="statCpuVal">0%</span></div>
+      <div class="stat-row"><span class="stat-label">GPU</span><div class="stat-track"><div class="stat-fill" id="statGpu"></div></div><span class="stat-val" id="statGpuVal">0%</span></div>
+      <div class="stat-row"><span class="stat-label">RAM</span><div class="stat-track"><div class="stat-fill" id="statRam"></div></div><span class="stat-val" id="statRamVal">0%</span></div>
+    </div>
+
     <div class="window-box" style="grid-column:span 3;">
       <div class="window-header"><span>THỐNG KÊ KỸ NĂNG</span></div>
       <div class="neon-text-main" style="font-size:1.1rem;">Wibu Level</div>
@@ -595,14 +602,6 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
     <div class="window-box terminal-card">
       <div class="window-header"><span>TERMINAL://LOG</span><span style="color:var(--neon-pink);">LIVE</span></div>
       <div class="terminal-body" id="termBody"></div>
-    </div>
-
-    <div class="window-box status-widget">
-      <div class="window-header"><span>SYSTEM STATUS</span><span class="blip" style="color:var(--neon-cyan);">●</span></div>
-      <div class="stat-row"><span class="stat-label">CPU</span><div class="stat-track"><div class="stat-fill" id="statCpu"></div></div><span class="stat-val" id="statCpuVal">0%</span></div>
-      <div class="stat-row"><span class="stat-label">GPU</span><div class="stat-track"><div class="stat-fill" id="statGpu"></div></div><span class="stat-val" id="statGpuVal">0%</span></div>
-      <div class="stat-row"><span class="stat-label">RAM</span><div class="stat-track"><div class="stat-fill" id="statRam"></div></div><span class="stat-val" id="statRamVal">0%</span></div>
-      <div class="secret-msg" style="margin-top:2px;">// [ẨN]: SYSTEM STATUS FAKE THÔI HIHI</div>
     </div>
   </div>
 
