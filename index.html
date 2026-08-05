@@ -414,6 +414,13 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
   .hud-cursor{display:none;}
   body{cursor:auto;}
 }
+  #devBlockScreen {
+  position: fixed; inset: 0; z-index: 99999; background: #050308;
+  display: none; align-items: center; justify-content: center; flex-direction: column;
+  color: var(--neon-pink); font-family: var(--font-mono); text-align: center; padding: 20px;
+}
+#devBlockScreen h1 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 10px; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+#devBlockScreen p { color: #c9cbdb; font-size: 0.9rem; letter-spacing: 1px; }
 .music-info{flex:1;}
 .music-title{color:white;font-weight:700;margin-top:4px;}
 .music-artist{color:#8a8ea7;font-size:12px;margin-bottom:10px;}
@@ -454,7 +461,10 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 </style>
 </head>
 <body>
-
+<div id="devBlockScreen">
+  <h1>// TRUY CẬP BỊ TỪ CHỐI</h1>
+  <p>Hệ thống phát hiện Developer Mode / Trình kiểm tra đang hoạt động.<br>Vui lòng tắt DevTools để tiếp tục sử dụng.</p>
+</div>
 <div id="bootScreen">
   <div class="boot-box">
     <div id="bootAscii"> ██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗
@@ -1216,6 +1226,54 @@ document.addEventListener('keydown', event => {
     event.preventDefault();
   }
 });
+  (function() {
+  const devBlock = document.getElementById('devBlockScreen');
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  document.addEventListener('keydown', e => {
+    if (
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+      (e.ctrlKey && e.key.toUpperCase() === 'U')
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  });
+
+  let devtoolsOpen = false;
+  const checkDevTools = () => {
+    const threshold = 160;
+    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+    
+    if (widthThreshold || heightThreshold) {
+      if (!devtoolsOpen) {
+        devtoolsOpen = true;
+        devBlock.style.display = 'flex';
+      }
+    } else {
+      if (devtoolsOpen) {
+        devtoolsOpen = false;
+        devBlock.style.display = 'none';
+      }
+    }
+  };
+
+  window.addEventListener('resize', checkDevTools);
+  setInterval(checkDevTools, 1000);
+
+  setInterval(() => {
+    const before = performance.now();
+    debugger;
+    const after = performance.now();
+    if (after - before > 100) {
+      devBlock.style.display = 'flex';
+    }
+  }, 1000);
+})();
 </script>
 </body>
 </html>
