@@ -33,7 +33,7 @@ body{
 }
 ::selection{background:var(--neon-pink);color:#000;}
 
-/* ============ PERSPECTIVE FLOOR (new, cheap — pure CSS gradient, no JS cost) ============ */
+/* ============ PERSPECTIVE FLOOR ============ */
 .grid-floor{
   position:fixed;left:0;right:0;bottom:0;height:46vh;z-index:0;pointer-events:none;
   background-image:
@@ -78,7 +78,6 @@ body{
   position:fixed;inset:0;z-index:993;pointer-events:none;opacity:0.035;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-/* sweeping holographic scan bar — transform-driven (compositor only, no layout/paint thrash) */
 .scan-sweep{
   position:fixed;top:-120px;left:0;right:0;height:120px;z-index:992;pointer-events:none;
   background:linear-gradient(180deg, transparent, rgba(0,255,242,0.06) 45%, rgba(0,255,242,0.10) 50%, rgba(0,255,242,0.06) 55%, transparent);
@@ -87,10 +86,7 @@ body{
 }
 @keyframes sweepDown{0%{transform:translate3d(0,0,0);}100%{transform:translate3d(0,calc(100vh + 120px),0);}}
 
-/* ============ MATRIX RAIN ============ */
 #matrixCanvas{position:fixed;inset:0;z-index:0;opacity:0.16;pointer-events:none;}
-
-/* ============ NETWORK MESH ============ */
 #networkCanvas{position:fixed;inset:0;z-index:1;opacity:0.95;pointer-events:none;}
 
 /* ============ BOOT SEQUENCE ============ */
@@ -109,7 +105,6 @@ body{
 .boot-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));box-shadow:0 0 12px var(--neon-cyan);position:relative;}
 .boot-pct{margin-top:6px;font-size:0.7rem;color:var(--text-dim);letter-spacing:2px;display:flex;justify-content:space-between;}
 
-/* click-to-enter prompt — shown once boot finishes, gates audio playback behind a real user gesture */
 .enter-prompt{
   display:none;flex-direction:column;align-items:center;gap:18px;margin-top:26px;
   opacity:0;transform:translateY(10px);transition:opacity 0.5s ease, transform 0.5s ease;
@@ -138,7 +133,7 @@ body{
   100%{opacity:0;filter:brightness(4) saturate(0);pointer-events:none;}
 }
 
-/* ============ HUD / TARGETING CURSOR ============ */
+/* ============ HUD CURSOR ============ */
 .hud-cursor{
   position:fixed;top:0;left:0;width:0;height:0;z-index:10000;pointer-events:none;
 }
@@ -166,7 +161,6 @@ body{
   position:absolute;top:16px;left:16px;font-size:9px;color:var(--neon-cyan);letter-spacing:1px;
   text-shadow:0 0 6px rgba(0,255,242,0.7);white-space:pre;
 }
-/* flashlight glow that follows the cursor and lights up the animated background behind it */
 .cursor-spotlight{
   position:fixed;top:0;left:0;width:420px;height:420px;margin:-210px 0 0 -210px;
   z-index:3;pointer-events:none;
@@ -178,7 +172,6 @@ body{
 .hud-cursor .c-tr{top:-70px;left:56px;border-top:2px solid;border-right:2px solid;}
 .hud-cursor .c-bl{top:56px;left:-70px;border-bottom:2px solid;border-left:2px solid;}
 .hud-cursor .c-br{top:56px;left:56px;border-bottom:2px solid;border-right:2px solid;}
-/* click ripple — new, cheap, single reused element per click */
 .click-ripple{
   position:fixed;top:0;left:0;width:10px;height:10px;border-radius:50%;
   border:1px solid var(--neon-cyan);box-shadow:0 0 12px var(--neon-cyan);
@@ -278,7 +271,6 @@ body{
 @keyframes tickerScroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
 .grid-collage{display:grid;grid-template-columns:repeat(12,1fr);grid-gap:26px;position:relative;transform-style:preserve-3d;z-index:2;}
-
 .bg-giant-text{
   grid-column:span 5;font-family:var(--font-display);font-size:7.5rem;font-weight:900;
   color:transparent;-webkit-text-stroke:1px rgba(0,255,242,0.12);line-height:0.85;letter-spacing:-3px;
@@ -294,7 +286,6 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,0.55);transition:transform 0.15s ease-out,box-shadow 0.15s ease-out,border-color 0.3s ease;
   overflow:hidden;contain:layout style paint;transform:translateZ(0);
 }
-/* corner brackets on every card — cheap CSS-only "cooler" upgrade, no extra JS cost */
 .window-box::after,.box-3d-neon::after{
   content:"";position:absolute;inset:6px;pointer-events:none;border-radius:4px;
   background:
@@ -321,18 +312,7 @@ body{
 .box-3d-neon{background:rgba(15,8,26,0.68);border:2px solid var(--neon-pink);border-radius:8px;padding:22px;grid-column:span 3;
   box-shadow:0 15px 35px rgba(0,0,0,0.8),0 0 20px rgba(255,15,123,0.25),inset 0 0 15px rgba(255,15,123,0.15),inset 0 1px 0 rgba(255,255,255,0.15);}
 
-/* sticker pack — laptop-sticker style badges glued onto the top-right corner */
 .sticker-pack{position:absolute;top:8px;right:6px;z-index:6;pointer-events:none;transform:translateZ(60px);}
-.sticker{
-  position:absolute;top:0;right:0;font-family:var(--font-mono);font-size:0.56rem;font-weight:700;
-  padding:5px 8px 6px;border-radius:3px;line-height:1.15;letter-spacing:0.5px;text-align:center;
-  box-shadow:0 4px 10px rgba(0,0,0,0.55), 0 0 1px rgba(255,255,255,0.4) inset;
-  border:1px solid rgba(255,255,255,0.25);text-transform:uppercase;
-}
-.sticker b{display:block;font-size:0.62rem;font-family:var(--font-display);font-weight:900;letter-spacing:0.5px;}
-.sticker-1{background:linear-gradient(155deg,#ffb000,#ff6a00);color:#1a0e00;transform:rotate(9deg) translate(6px,4px);z-index:3;}
-.sticker-2{background:linear-gradient(155deg,#00fff2,#0091ff);color:#001a1a;transform:rotate(-7deg) translate(-30px,20px);z-index:2;}
-.sticker-3{background:linear-gradient(155deg,#ff0f7b,#b026ff);color:#1a0014;transform:rotate(4deg) translate(-4px,44px);z-index:1;}
 
 .grid-collage>.box-3d-neon{animation:floatUp 6s ease-in-out infinite;}
 .grid-collage>.window-box:nth-of-type(2){animation:floatDown 7s ease-in-out infinite;animation-delay:0.5s;}
@@ -351,10 +331,8 @@ body{
 .music-widget{grid-column:span 3;display:flex;align-items:center;gap:15px;border-color:rgba(255,15,123,0.3);}
 .music-cover{width:76px;height:76px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;transform:translateZ(40px);position:relative;overflow:visible;cursor:pointer;flex-shrink:0;}
 
-/* reactive frequency ring canvas — sits behind the disc, drawn from real audio data */
 .disc-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;width:76px;height:76px;}
 
-/* spinning vinyl disc */
 .vinyl-disc{
   width:52px;height:52px;border-radius:50%;position:relative;z-index:2;flex-shrink:0;
   background:
@@ -378,7 +356,6 @@ body{
 }
 .vinyl-label img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;position:relative;z-index:1;}
 .vinyl-label::after{content:"";position:absolute;inset:0;margin:auto;width:3px;height:3px;border-radius:50%;background:#050308;top:0;bottom:0;left:0;right:0;}
-/* tonearm — subtle detail, lifts onto the disc when playing */
 .vinyl-arm{
   position:absolute;top:-4px;right:-2px;width:22px;height:3px;border-radius:2px;
   background:linear-gradient(90deg, rgba(255,255,255,0.15), var(--neon-cyan));
@@ -398,7 +375,6 @@ body{
 
 @keyframes blinker{50%{opacity:0.3;}}
 
-/* new: system status widget */
 .status-widget{grid-column:span 2;}
 .stat-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:0.7rem;}
 .stat-label{width:25px;color:var(--text-dim);letter-spacing:1px;flex-shrink:0;}
@@ -414,13 +390,15 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
   .hud-cursor{display:none;}
   body{cursor:auto;}
 }
-  #devBlockScreen {
+
+#devBlockScreen {
   position: fixed; inset: 0; z-index: 99999; background: #050308;
   display: none; align-items: center; justify-content: center; flex-direction: column;
   color: var(--neon-pink); font-family: var(--font-mono); text-align: center; padding: 20px;
 }
 #devBlockScreen h1 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 10px; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
 #devBlockScreen p { color: #c9cbdb; font-size: 0.9rem; letter-spacing: 1px; }
+
 .music-info{flex:1;}
 .music-title{color:white;font-weight:700;margin-top:4px;}
 .music-artist{color:#8a8ea7;font-size:12px;margin-bottom:10px;}
@@ -446,13 +424,11 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
     transform:scale(1.15);box-shadow:0 0 18px var(--neon-cyan);animation:musicPulse 1.2s infinite;
 }
 
-
 @keyframes musicPulse{
     0%,100%{transform:scale(1);}
     50%{transform:scale(1.15);}
 }
 
-/* Respect reduced motion: cut the heavy ambient stuff for people who asked for it (perf + accessibility) */
 @media (prefers-reduced-motion: reduce){
   .crt-scanlines,.crt-flicker,.scan-sweep,.avatar-ring,.avatar-ring2,.grid-collage>.box-3d-neon,
   .grid-collage>.window-box:nth-of-type(2),.skill-circle,.skill-circle span{animation:none !important;}
@@ -461,10 +437,12 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 </style>
 </head>
 <body>
+
 <div id="devBlockScreen">
   <h1>// TRUY CẬP BỊ TỪ CHỐI</h1>
   <p>Hệ thống phát hiện Developer Mode / Trình kiểm tra đang hoạt động.<br>Vui lòng tắt DevTools để tiếp tục sử dụng.</p>
 </div>
+
 <div id="bootScreen">
   <div class="boot-box">
     <div id="bootAscii"> ██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗
@@ -494,7 +472,7 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
 <div class="noise-layer"></div>
 <div class="scan-sweep"></div>
 
-<audio id="bgMusic" crossorigin="anonymous" src="https://raw.githubusercontent.com/Kjiiwei/music/main/%E2%99%AB%20%C4%90%E1%BA%A2O%20NGH%E1%BB%8ACH%20_%20Reverse%E6%BA%AF%20(%E7%89%88%E9%92%A2%E7%90%B4)%20-%20THAZH%20X%20%C4%90%C3%94NG%20REMIX%20_%20B%E1%BA%A3n%20Nh%E1%BA%A1c%20Ch%E1%BB%AFa%20L%C3%A0nh%20T%C3%A2m%20H%E1%BB%93n%20Hot%20TikTok%20%E2%99%AB%20%5BvQVW7YTNz2c%5D.mp3" loop preload="auto"></audio>
+<audio id="bgMusic" preload="auto"></audio>
 
 <div class="hud-cursor" id="hudCursor">
   <div class="ring"></div>
@@ -555,10 +533,9 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
     <div class="bg-giant-text"><br></div>
 
     <div class="box-3d-neon">
-      <div class="sticker-pack" aria-hidden="true">
-      </div>
+      <div class="sticker-pack" aria-hidden="true"></div>
       <div class="box-header-cyber"><span class="status-dot"></span><span>NỔI BẬT / 01</span></div>
-      <div class="neon-text-main">VIẾT CODE BẰNG AI </div>
+      <div class="neon-text-main">VIẾT CODE BẰNG AI</div>
       <div class="neon-text-sub">TAO KO BIẾT VIẾT, TAO LÀ 1 THẰNG VIBE LỎ.</div>
       <div style="font-size:0.75rem;color:var(--neon-cyan);background:rgba(0,255,242,0.08);padding:4px 10px;border-radius:3px;border:1px solid rgba(0,255,242,0.2);display:inline-block;transform:translateZ(25px);">HTML / CSS / JS / PYTHON/ LUA</div>
       <div class="secret-msg">// [BÍ MẬT]: TAO XÀI CLAUDE ,GEMINI ,CHATGPT!</div>
@@ -587,8 +564,8 @@ footer{margin-top:36px;padding-top:18px;border-top:1px dashed rgba(180,60,255,0.
           <div class="vinyl-disc" id="vinylDisc">
               <div class="vinyl-arm" id="vinylArm"></div>
               <div class="vinyl-label">
-                  <img id="vinylLabelImg" src="https://raw.githubusercontent.com/Kjiiwei/music/main/download.jpg" alt="avatar">
-                  <span id="vinylLabelFallback">KV</span>
+                  <img id="vinylLabelImg" alt="avatar">
+                  <span id="vinylLabelFallback"></span>
               </div>
           </div>
       </div>
@@ -631,7 +608,6 @@ const REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-
     img.addEventListener('error', ()=>{ img.style.display='none'; fallback.style.display='flex'; });
   }
 
-  // Vinyl disc label avatar: uses its own image if set, otherwise mirrors the nav avatar, otherwise falls back to "KV"
   const vImg = document.getElementById('vinylLabelImg');
   const vFallback = document.getElementById('vinylLabelFallback');
   const vSrc = vImg.getAttribute('src') || img.getAttribute('src');
@@ -642,8 +618,47 @@ const REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-
   }
 })();
 
-/* ================= NHẠC NỀN & AUDIO CONTROL (Global Scope) ================= */
+/* ================= NHẠC NỀN & AUDIO CONTROL ================= */
 const audio = document.getElementById('bgMusic');
+const playlist = [
+  {
+    title:"♫ ĐẢO NGHỊCH | Reverse溯 (版钢琴)",
+    artist:"THAZH X ĐÔNG REMIX",
+    cover:"https://raw.githubusercontent.com/Kjiiwei/music/main/download.jpg",
+    src:"https://raw.githubusercontent.com/Kjiiwei/music/main/%E2%99%AB%20%C4%90%E1%BA%A2O%20NGH%E1%BB%8ACH%20_%20Reverse%E6%BA%AF%20(%E7%89%88%E9%92%A2%E7%90%B4)%20-%20THAZH%20X%20%C4%90%C3%94NG%20REMIX%20_%20B%E1%BA%A3n%20Nh%E1%BA%A1c%20Ch%E1%BB%afa%20L%C3%A0nh%20T%C3%A2m%20H%E1%BB%93n%20Hot%20TikTok%20%E2%99%AB%20%5BvQVW7YTNz2c%5D.mp3"
+  },
+  {
+    title:"落泪 (Falling Tears)",
+    artist:"康熙/TOYOKI",
+    cover:"https://raw.githubusercontent.com/Kjiiwei/music/main/Screenshot%202026-08-05%20084235.png",
+    src:"https://raw.githubusercontent.com/Kjiiwei/music/main/%E5%BA%B7%E7%86%99%20TOYOKI%20-%20%E8%90%BD%E6%B3%AA%20(Falling%20Tears)%20Chinese%20ProgHouse%20Remix%20Hot%20TikTok%20Douyin%202026.mp3"
+  }
+];
+
+let currentSong = 0;
+
+function loadSong(index, shouldPlay = true) {
+    currentSong = index;
+    audio.src = playlist[index].src;
+    document.getElementById("trackTitle").textContent = playlist[index].title;
+    document.getElementById("trackArtist").textContent = playlist[index].artist;
+    
+    const img = document.getElementById("vinylLabelImg");
+    img.style.display = "none";
+    img.onload = () => { img.style.display = "block"; };
+    img.src = playlist[index].cover;
+
+    audio.load();
+    if (shouldPlay) {
+        audio.play().then(() => {
+            updatePlayState(true);
+        }).catch(e => {
+            console.log("Autoplay bị chặn:", e);
+            updatePlayState(false);
+        });
+    }
+}
+
 const toggleBtn = document.getElementById("musicToggleBtn");
 const toggleCover = document.getElementById("musicToggleCover");
 const progress = document.getElementById("musicProgress");
@@ -671,11 +686,15 @@ progress.addEventListener("input",()=>{
 });
 
 document.getElementById("back10").onclick = () => {
-    audio.currentTime = Math.max(0, audio.currentTime - 10);
+    currentSong--;
+    if(currentSong < 0) currentSong = playlist.length - 1;
+    loadSong(currentSong, true);
 };
 
 document.getElementById("next10").onclick = () => {
-    audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+    currentSong++;
+    if(currentSong >= playlist.length) currentSong = 0;
+    loadSong(currentSong, true);
 };
 
 const vinylDisc = document.getElementById('vinylDisc');
@@ -710,87 +729,45 @@ function toggleMusic() {
     }
 }
 
-/* ================= REACTIVE DISC RING — real audio-frequency waveform (with graceful fallback) ================= */
-let audioCtx = null, analyser = null, freqData = null, discRafId = null, analyserReady = false;
+audio.onended = () => {
+    currentSong++;
+    if(currentSong >= playlist.length) currentSong = 0;
+    loadSong(currentSong, true);
+};
 
-function ensureAudioAnalyser(){
-  if(audioCtx) return;
-  try{
-    const AC = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new AC();
-    const sourceNode = audioCtx.createMediaElementSource(audio);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 64; // small = cheap to read every frame, still gives a lively ring
-    analyser.smoothingTimeConstant = 0.78;
-    freqData = new Uint8Array(analyser.frequencyBinCount);
-    sourceNode.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    analyserReady = true;
-  }catch(e){
-    // Cross-origin track without proper CORS, or browser blocked it — fall back to a simulated pulse
-    console.log("Audio analyser unavailable, using simulated waveform:", e.message);
-    analyserReady = false;
-  }
-}
-
-function drawRing(getBar){
+let discRafId = null;
+let simPhase = 0;
+function ringLoop(){
+  simPhase += 0.14;
   const w = discRingCanvas.width, h = discRingCanvas.height;
-  discRingCtx.clearRect(0,0,w,h);
+  discRingCtx.clearRect(0, 0, w, h);
   const cx = w/2, cy = h/2, baseR = 27, bars = 28;
-  for(let i=0;i<bars;i++){
-    const val = getBar(i, bars); // 0..1
+  for(let i=0; i<bars; i++){
+    const wobble = Math.sin(simPhase + i*0.9) * 0.5 + 0.5;
+    const val = wobble * (0.4 + Math.random()*0.3);
     const angle = (i/bars) * Math.PI*2 - Math.PI/2;
     const r1 = baseR;
     const r2 = baseR + 3 + val*14;
-    const x1 = cx + Math.cos(angle)*r1, y1 = cy + Math.sin(angle)*r1;
-    const x2 = cx + Math.cos(angle)*r2, y2 = cy + Math.sin(angle)*r2;
-    discRingCtx.strokeStyle = i % 2 === 0
-      ? `rgba(0,255,242,${(0.35+val*0.65).toFixed(2)})`
-      : `rgba(255,15,123,${(0.35+val*0.65).toFixed(2)})`;
+    discRingCtx.strokeStyle = i % 2 === 0 ? `rgba(0,255,242,0.8)` : `rgba(255,15,123,0.8)`;
     discRingCtx.lineWidth = 2;
     discRingCtx.beginPath();
-    discRingCtx.moveTo(x1,y1);
-    discRingCtx.lineTo(x2,y2);
+    discRingCtx.moveTo(cx + Math.cos(angle)*r1, cy + Math.sin(angle)*r1);
+    discRingCtx.lineTo(cx + Math.cos(angle)*r2, cy + Math.sin(angle)*r2);
     discRingCtx.stroke();
-  }
-}
-
-let simPhase = 0;
-function ringLoop(){
-  if(analyserReady && analyser){
-    analyser.getByteFrequencyData(freqData);
-    drawRing((i, bars) => freqData[i % freqData.length] / 255);
-    // punch the disc glow with the bass band
-    const bass = (freqData[0]+freqData[1]+freqData[2])/3/255;
-    vinylDisc.style.boxShadow = `0 0 ${14+bass*22}px rgba(255,15,123,${0.35+bass*0.5}), inset 0 0 10px rgba(0,0,0,0.65)`;
-  } else {
-    // simulated "giật theo nhạc" fallback — no real audio access, but still looks alive
-    simPhase += 0.14;
-    drawRing((i, bars) => {
-      const wobble = Math.sin(simPhase + i*0.9) * 0.5 + 0.5;
-      return wobble * (0.4 + Math.random()*0.3);
-    });
-    const bass = Math.sin(simPhase*0.6)*0.5+0.5;
-    vinylDisc.style.boxShadow = `0 0 ${14+bass*18}px rgba(255,15,123,${0.35+bass*0.4}), inset 0 0 10px rgba(0,0,0,0.65)`;
   }
   discRafId = requestAnimationFrame(ringLoop);
 }
 
 function startDiscReactivity(){
-  ensureAudioAnalyser();
-  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   if(!discRafId) discRafId = requestAnimationFrame(ringLoop);
 }
 function stopDiscReactivity(){
   if(discRafId){ cancelAnimationFrame(discRafId); discRafId = null; }
-  discRingCtx.clearRect(0,0,discRingCanvas.width,discRingCanvas.height);
-  vinylDisc.style.boxShadow = "";
+  discRingCtx.clearRect(0, 0, discRingCanvas.width, discRingCanvas.height);
 }
 
 toggleBtn.addEventListener('click', toggleMusic);
 toggleCover.addEventListener('click', toggleMusic);
-audio.addEventListener('play', () => updatePlayState(true));
-audio.addEventListener('pause', () => updatePlayState(false));
 
 /* ================= BOOT SEQUENCE ================= */
 const bootLinesEl = document.getElementById('bootLines');
@@ -842,26 +819,20 @@ function enterSite(){
   if(entered) return;
   entered = true;
   bootScreen.classList.add("hide");
+  
   setTimeout(() => {
     bootScreen.remove();
-    // This runs directly off a real click, so Chrome's autoplay policy allows it —
-    // no more silent "Autoplay blocked" failures like before.
-    audio.play().then(() => updatePlayState(true)).catch(err => {
-      console.log("Play error:", err);
-    });
+    loadSong(0, true);
   }, 700);
 }
-
 enterBtn.addEventListener('click', (e)=>{ e.stopPropagation(); enterSite(); });
 bootScreen.addEventListener('click', ()=>{ if(enterPrompt.classList.contains('show')) enterSite(); });
 
-/* ================= MATRIX RAIN (throttled to ~30fps, DPR-capped) ================= */
+/* ================= MATRIX RAIN ================= */
 const canvas = document.getElementById('matrixCanvas');
 const ctx = canvas.getContext('2d', { alpha: true });
 let w,h,cols,drops;
 const glyphs = "アイウエオカキクケコ01木火水金土サシスセソ$#&%KHANG".split("");
-// Cap internal canvas resolution — full-viewport fillRect + text draws are the #1 Chrome jank
-// source on large/high-DPI screens, so render at a capped internal size and let CSS stretch it.
 const RENDER_SCALE = Math.min(1, 1500 / window.innerWidth);
 function resizeCanvas(){
   w = canvas.width = Math.round(window.innerWidth * RENDER_SCALE);
@@ -875,7 +846,7 @@ resizeCanvas();
 let resizeTimer;
 window.addEventListener('resize', ()=>{ clearTimeout(resizeTimer); resizeTimer = setTimeout(resizeCanvas, 150); });
 
-const FRAME_INTERVAL = 1000/30; // cap at 30fps — big lag saver vs uncapped rAF
+const FRAME_INTERVAL = 1000/30;
 let lastMatrixTime = 0;
 function drawMatrix(ts){
   requestAnimationFrame(drawMatrix);
@@ -897,7 +868,7 @@ function drawMatrix(ts){
 }
 requestAnimationFrame(drawMatrix);
 
-/* ================= NETWORK MESH (throttled to ~30fps, fewer nodes) ================= */
+/* ================= NETWORK MESH ================= */
 (function(){
   const nc = document.getElementById('networkCanvas');
   const nctx = nc.getContext('2d', { alpha: true });
@@ -922,7 +893,6 @@ requestAnimationFrame(drawMatrix);
 
   function rand(a,b){ return a + Math.random()*(b-a); }
 
-  // fewer nodes than before = noticeably less lag on big/high-dpi screens, still dense enough to look alive
   const NODE_COUNT = Math.max(18, Math.min(46, Math.floor((window.innerWidth*window.innerHeight)/48000)));
   let nodes = [];
   for(let i=0;i<NODE_COUNT;i++){
@@ -1101,7 +1071,7 @@ function typeTerm(){
 }
 setTimeout(typeTerm, 1200);
 
-/* ================= SYSTEM STATUS WIDGET (new, lightweight interval not rAF) ================= */
+/* ================= SYSTEM STATUS WIDGET ================= */
 (function(){
   const cpu = document.getElementById('statCpu'), cpuVal = document.getElementById('statCpuVal');
   const gpu = document.getElementById('statGpu'), gpuVal = document.getElementById('statGpuVal');
@@ -1114,11 +1084,10 @@ setTimeout(typeTerm, 1200);
     ram.style.width = r+"%"; ramVal.textContent = r+"%";
   }
   tick();
-  // plain setInterval, not rAF — this widget only needs to update ~once/sec, no need to burn a frame callback
   setInterval(tick, 1400);
 })();
 
-/* ================= HUD CURSOR + AMBIENT REVEAL (rAF-driven, cached rects) ================= */
+/* ================= HUD CURSOR + AMBIENT REVEAL ================= */
 let mouseX=-500, mouseY=-500, curX=-500, curY=-500;
 window.addEventListener('mousemove', e=>{ mouseX=e.clientX; mouseY=e.clientY; });
 window.addEventListener('mousedown', ()=>{ hudCursor.style.transform='translate(-50%,-50%) scale(0.85)'; spawnRipple(mouseX,mouseY); });
@@ -1139,8 +1108,6 @@ const hudReadout = document.getElementById('hudReadout');
 const secretMessages = document.querySelectorAll('.secret-msg');
 const ambientTexts = document.querySelectorAll('.ambient-secret-text');
 
-// cache bounding boxes instead of recomputing layout for every element on every single frame;
-// this is the single biggest layout-thrash saver on this page. Recompute only on resize/scroll.
 let secretRects = [], ambientRects = [];
 function cacheRects(){
   secretRects = Array.from(secretMessages).map(el=>{ const r = el.getBoundingClientRect(); return {el, cx:r.left+r.width/2, cy:r.top+r.height/2}; });
@@ -1171,13 +1138,11 @@ function loop(){
 }
 requestAnimationFrame(loop);
 
-/* ================= 3D TILT (rAF-throttled via mousemove, transform-only = GPU cheap) ================= */
+/* ================= 3D TILT ================= */
 document.querySelectorAll('.window-box, .box-3d-neon').forEach(card=>{
   let ticking = false, lastEvt = null;
   const isNeon = card.classList.contains('box-3d-neon');
   card.addEventListener('mouseenter', ()=>{
-    // box-shadow/border recompute is a real (non-compositor) repaint — do it ONCE per hover,
-    // not on every mousemove frame like before. Movement itself only ever touches `transform`.
     card.style.borderColor = "var(--neon-cyan)";
     if(isNeon){
       card.style.boxShadow = "0 15px 35px rgba(0,0,0,0.85), 0 0 30px var(--neon-cyan), inset 0 0 20px rgba(0,255,242,0.2)";
@@ -1213,20 +1178,9 @@ document.querySelectorAll('.window-box, .box-3d-neon').forEach(card=>{
     }
   });
 });
-// Chặn click chuột phải
-document.addEventListener('contextmenu', event => event.preventDefault());
 
-// Chặn các phím tắt mở code
-document.addEventListener('keydown', event => {
-  if (
-    event.key === 'F12' || 
-    (event.ctrlKey && event.shiftKey && (event.key === 'I' || event.key === 'J' || event.key === 'C')) || 
-    (event.ctrlKey && event.key === 'U')
-  ) {
-    event.preventDefault();
-  }
-});
-  (function() {
+/* ================= DEVTOOLS PROTECTION ================= */
+(function() {
   const devBlock = document.getElementById('devBlockScreen');
 
   document.addEventListener('contextmenu', e => e.preventDefault());
