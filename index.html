@@ -460,36 +460,17 @@
 
   .weather{
     position: fixed; right: clamp(24px, 5vw, 64px); bottom: 40px; z-index: 3;
-    width: min(420px, calc(100vw - 48px));
-    display:flex; flex-direction:column; gap:12px;
-    background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)), var(--panel);
-    border: 1px solid var(--panel-border);
-    backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%);
-    padding: 14px 16px; border-radius: 16px;
-    box-shadow: 0 18px 50px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.04);
+    display:flex; align-items:center; gap: 12px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    padding: 12px 18px; border-radius: var(--radius-sm);
   }
-  .weather-head{ display:flex; align-items:center; gap:12px; }
-  .weather-pin{ width:38px; height:38px; border-radius:12px; background: rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .weather-pin svg{ width:16px; height:16px; }
-  .weather-main{ min-width:0; flex:1; }
-  .weather-loc{ font-size: 12.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .weather-sub{ font-size: 11px; color: var(--text-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .weather-temp{ display:flex; align-items:center; gap:7px; margin-left:auto; font-size: 18px; font-weight:800; white-space:nowrap; }
-  .weather-temp svg{ width:18px; height:18px; opacity:.9; }
-  .weather-temp small{ font-size:10px; color:var(--text-faint); font-weight:700; margin-left:-2px; }
-  .weather-updated{ font-size:10px; color:var(--text-faint); margin-left:10px; white-space:nowrap; }
-  .weather-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-  .weather-stat{ min-width:0; padding:9px 10px; border-radius:11px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.045); }
-  .weather-stat-label{ font-size:9px; color:var(--text-faint); font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
-  .weather-stat-value{ margin-top:3px; font-size:11.5px; color:var(--text); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .weather-progress{ height:4px; border-radius:999px; background:rgba(255,255,255,.06); overflow:hidden; margin-top:7px; }
-  .weather-progress > i{ display:block; height:100%; width:0; border-radius:inherit; background:var(--accent); transition:width .35s ease; }
-
-  @media (max-width: 560px){
-    .weather{ width:calc(100vw - 36px); right:18px; bottom:18px; padding:13px; }
-    .weather-grid{ grid-template-columns:repeat(2,1fr); }
-    .weather-updated{ display:none; }
-  }
+  .weather-pin{ width:30px; height:30px; border-radius:50%; background: rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .weather-pin svg{ width:14px; height:14px; }
+  .weather-loc{ font-size: 12.5px; font-weight:700; }
+  .weather-sub{ font-size: 11px; color: var(--text-dim); margin-top:1px; }
+  .weather-temp{ display:flex; align-items:center; gap:6px; margin-left: 6px; font-size: 13px; font-weight:700; white-space:nowrap; }
+  .weather-temp svg{ width:15px; height:15px; opacity:.8; }
 
   @media (max-width: 900px){
     .links{ grid-template-columns: repeat(2,1fr); }
@@ -1164,14 +1145,11 @@ const Player = {
 };
 
 /* ------------------------------- WEATHER (API THẬT) ------------------------------ */
-/* Open-Meteo — miễn phí, không cần API key.
-   Vị trí luôn cố định theo BIO_CONFIG.weather.fallback; không xin GPS. */
+/* Dùng Open-Meteo (miễn phí, không cần API key, cho phép gọi trực tiếp từ trình duyệt).
+   Docs: https://open-meteo.com/                                                     */
 const Weather = {
-  lastLat: null,
-  lastLon: null,
-  lastName: null,
-  lastData: null,
 
+  // Mã thời tiết WMO -> icon + nhãn tiếng Việt (rút gọn các mã phổ biến)
   codeMap(code){
     if (code === 0) return { icon: ICONS.sun, label: 'Trời quang' };
     if ([1,2].includes(code)) return { icon: ICONS.sun, label: 'Ít mây' };
@@ -1184,120 +1162,99 @@ const Weather = {
     return { icon: ICONS.cloud, label: 'Nhiều mây' };
   },
 
-  windDir(deg){
-    const dirs = ['B','ĐB','Đ','ĐN','N','TN','T','TB'];
-    return dirs[Math.round((deg || 0) / 45) % 8];
-  },
-
   renderLoading(){
     $('#weather').innerHTML = `
-      <div class="weather-head">
-        <div class="weather-pin">${ICONS.pin}</div>
-        <div class="weather-main">
-          <div class="weather-loc">${BIO_CONFIG.weather.fallback.location}</div>
-          <div class="weather-sub">Đang tải dữ liệu thời tiết...</div>
-        </div>
-        <div class="weather-temp">--°C</div>
+      <div class="weather-pin">${ICONS.pin}</div>
+      <div>
+        <div class="weather-loc">Đang xác định vị trí...</div>
+        <div class="weather-sub">Đang tải thời tiết</div>
       </div>
-      <div class="weather-grid">
-        ${['Cảm nhận','Độ ẩm','Gió','Mưa'].map(label => `<div class="weather-stat"><div class="weather-stat-label">${label}</div><div class="weather-stat-value">--</div></div>`).join('')}
-      </div>`;
+    `;
   },
 
-  renderData(locationName, data){
-    const c = data.current;
-    const w = this.codeMap(c.weather_code);
-    const rainMm = Number(c.precipitation || 0);
-    const humidity = Math.round(c.relative_humidity_2m ?? 0);
-    const wind = Math.round(c.wind_speed_10m ?? 0);
-    const feels = Math.round(c.apparent_temperature ?? c.temperature_2m);
-    const cloud = Math.round(c.cloud_cover ?? 0);
-    const updated = new Date(c.time).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
-
+  renderData(locationName, tempC, code){
+    const w = this.codeMap(code);
     $('#weather').innerHTML = `
-      <div class="weather-head">
-        <div class="weather-pin">${w.icon}</div>
-        <div class="weather-main">
-          <div class="weather-loc">${locationName}</div>
-          <div class="weather-sub">${w.label} · Mây ${cloud}% · cập nhật ${updated}</div>
-        </div>
-        <div class="weather-temp">${Math.round(c.temperature_2m)}°C <small>• ${w.label}</small></div>
+      <div class="weather-pin">${ICONS.pin}</div>
+      <div>
+        <div class="weather-loc">${locationName}</div>
+        <div class="weather-sub">${w.label}</div>
       </div>
-      <div class="weather-grid">
-        <div class="weather-stat"><div class="weather-stat-label">Cảm nhận</div><div class="weather-stat-value">${feels}°C</div></div>
-        <div class="weather-stat"><div class="weather-stat-label">Độ ẩm</div><div class="weather-stat-value">${humidity}%</div><div class="weather-progress"><i style="width:${Math.min(100, humidity)}%"></i></div></div>
-        <div class="weather-stat"><div class="weather-stat-label">Gió</div><div class="weather-stat-value">${wind} km/h · ${this.windDir(c.wind_direction_10m)}</div></div>
-        <div class="weather-stat"><div class="weather-stat-label">Lượng mưa</div><div class="weather-stat-value">${rainMm.toFixed(1)} mm</div></div>
-      </div>`;
+      <div class="weather-temp">${w.icon}${Math.round(tempC)}°C</div>
+    `;
   },
 
   renderError(){
     $('#weather').innerHTML = `
-      <div class="weather-head">
-        <div class="weather-pin">${ICONS.cloud}</div>
-        <div class="weather-main">
-          <div class="weather-loc">${BIO_CONFIG.weather.fallback.location}</div>
-          <div class="weather-sub">Không thể cập nhật thời tiết · sẽ thử lại</div>
-        </div>
-        <div class="weather-temp">--°C</div>
-      </div>`;
+      <div class="weather-pin">${ICONS.pin}</div>
+      <div>
+        <div class="weather-loc">Không lấy được thời tiết</div>
+        <div class="weather-sub">Vui lòng thử lại sau</div>
+      </div>
+    `;
   },
 
   async fetchWeather(lat, lon){
-    const params = new URLSearchParams({
-      latitude: lat,
-      longitude: lon,
-      current: [
-        'temperature_2m',
-        'apparent_temperature',
-        'relative_humidity_2m',
-        'weather_code',
-        'precipitation',
-        'rain',
-        'showers',
-        'cloud_cover',
-        'wind_speed_10m',
-        'wind_direction_10m',
-        'pressure_msl',
-        'visibility'
-      ].join(','),
-      daily: ['sunrise','sunset'].join(','),
-      timezone: 'auto',
-      forecast_days: '1'
-    });
-    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
-    if (!res.ok) throw new Error(`weather fetch failed: ${res.status}`);
-    return await res.json();
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('weather fetch failed');
+    const data = await res.json();
+    return { tempC: data.current.temperature_2m, code: data.current.weather_code };
   },
+
+  async reverseGeocode(lat, lon){
+    try{
+      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('geocode failed');
+      const data = await res.json();
+      const city = data.city || data.locality || data.principalSubdivision;
+      const country = data.countryName;
+      return [city, country].filter(Boolean).join(', ');
+    }catch(e){
+      return null;
+    }
+  },
+
+  lastLat: null,
+  lastLon: null,
+  lastName: null,
 
   async loadFor(lat, lon, knownName){
     this.lastLat = lat;
     this.lastLon = lon;
-    this.lastName = knownName || 'Vị trí cố định';
     try{
-      this.lastData = await this.fetchWeather(lat, lon);
-      this.renderData(this.lastName, this.lastData);
+      const [weatherData, name] = await Promise.all([
+        this.fetchWeather(lat, lon),
+        knownName ? Promise.resolve(knownName) : this.reverseGeocode(lat, lon)
+      ]);
+      this.lastName = name || 'Vị trí của bạn';
+      this.renderData(this.lastName, weatherData.tempC, weatherData.code);
     }catch(e){
-      console.warn('[Weather]', e);
       this.renderError();
     }
   },
 
+  // Gọi lại API để cập nhật tình trạng (nắng/mưa/mây...) mà không phải xin
+  // vị trí hay tra tên khu vực lại từ đầu.
   async refresh(){
     if (this.lastLat == null || this.lastLon == null) return;
     try{
-      this.lastData = await this.fetchWeather(this.lastLat, this.lastLon);
-      this.renderData(this.lastName, this.lastData);
+      const weatherData = await this.fetchWeather(this.lastLat, this.lastLon);
+      this.renderData(this.lastName, weatherData.tempC, weatherData.code);
     }catch(e){
-      console.warn('[Weather refresh]', e);
+      // giữ nguyên dữ liệu cũ trên UI nếu lần cập nhật này lỗi, thử lại ở chu kỳ sau
     }
   },
 
   init(){
     this.renderLoading();
-    const { fallback, refreshMs = 10 * 60 * 1000 } = BIO_CONFIG.weather;
+    const { fallback } = BIO_CONFIG.weather;
+    // Luôn dùng toạ độ cố định trong config — không xin quyền vị trí trình duyệt.
     this.loadFor(fallback.lat, fallback.lon, fallback.location);
-    setInterval(() => this.refresh(), refreshMs);
+
+    // Tự động cập nhật tình trạng thời tiết mỗi 10 phút (không load lại trang)
+    setInterval(() => this.refresh(), 10 * 60 * 1000);
   }
 };
 
