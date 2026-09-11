@@ -34,24 +34,92 @@
     overflow-x: hidden;
   }
 
+  /* ====================== DYNAMIC ANIME ROOM ====================== */
   .bg{
     position: fixed; inset: 0; z-index: 0;
+    display:grid; place-items:center; overflow:hidden;
+    background:#05060a;
+  }
+  .room-stage{
+    position:relative;
+    width:min(100vw, 177.7778vh);
+    height:min(100vh, 56.25vw);
+    aspect-ratio:16 / 9;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .room-base{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:center; display:block;
+    filter:saturate(.96) contrast(1.02) brightness(.82);
+    transform:scale(1.003);
+  }
+  /* Vùng cửa sổ được viết theo tỉ lệ của chính ảnh 2048×1152.
+     Nếu bạn thay ảnh bằng ảnh khác, chỉ cần chỉnh 4 biến này. */
+  .weather-window{
+    --wx-left:39.8%;
+    --wx-top:3.6%;
+    --wx-width:33.7%;
+    --wx-height:69.4%;
+    position:absolute; z-index:3;
+    left:var(--wx-left); top:var(--wx-top);
+    width:var(--wx-width); height:var(--wx-height);
+    overflow:hidden;
+    background:#0f1d2b;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.055), inset 0 0 80px rgba(0,0,0,.28);
+    border-radius:2px;
+  }
+  #weatherCanvas{
+    position:absolute; inset:0; width:100%; height:100%; display:block;
+  }
+  .weather-glass{
+    position:absolute; inset:0; pointer-events:none;
     background:
-      radial-gradient(1200px 700px at 78% 38%, rgba(255,150,90,0.10), transparent 60%),
-      linear-gradient(180deg, #0c1320 0%, #090c14 45%, #05060a 100%);
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 28%, rgba(8,12,20,.15)),
+      radial-gradient(120% 90% at 52% 28%, rgba(255,255,255,.07), transparent 62%);
+    mix-blend-mode:screen;
+    opacity:.65;
   }
-  .bg::after{
-    content: "BACKGROUND — thay ảnh sau";
-    position:absolute; right: 6%; bottom: 4%;
-    font-size: 12px; letter-spacing: .04em;
-    color: rgba(255,255,255,0.18); font-weight:600;
+  .weather-fog{
+    position:absolute; inset:-10%; pointer-events:none;
+    background:
+      radial-gradient(40% 28% at 18% 74%, rgba(255,255,255,.20), transparent 72%),
+      radial-gradient(46% 34% at 76% 32%, rgba(255,255,255,.14), transparent 72%),
+      radial-gradient(38% 35% at 55% 84%, rgba(190,220,240,.09), transparent 72%);
+    filter:blur(14px);
+    opacity:.22;
+    transition:opacity 1.4s ease, filter 1.4s ease;
   }
+  .weather-window[data-state="rain"] .weather-fog,
+  .weather-window[data-state="drizzle"] .weather-fog,
+  .weather-window[data-state="storm"] .weather-fog{ opacity:.42; filter:blur(18px); }
+  .weather-window[data-state="clear"] .weather-fog{ opacity:.08; filter:blur(12px); }
+  .weather-window[data-state="fog"] .weather-fog{ opacity:.72; filter:blur(22px); }
+  .weather-flash{
+    position:absolute; inset:0; background:#dff4ff; opacity:0; pointer-events:none;
+    mix-blend-mode:screen;
+  }
+  .weather-window.lightning .weather-flash{ animation:weatherLightning .24s ease-out; }
+  @keyframes weatherLightning{ 0%{opacity:0} 14%{opacity:.85} 25%{opacity:.15} 42%{opacity:.72} 100%{opacity:0} }
+  .weather-vignette{
+    position:absolute; inset:0; pointer-events:none;
+    box-shadow: inset 0 0 46px rgba(0,0,0,.34);
+  }
+  .weather-badge{
+    position:fixed; right:clamp(24px,5vw,64px); top:88px; z-index:6;
+    display:flex; align-items:center; gap:8px;
+    padding:8px 11px; border-radius:999px;
+    background:rgba(10,12,16,.42); border:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    color:rgba(255,255,255,.72); font-size:11px; font-weight:700; letter-spacing:.02em;
+  }
+  .weather-badge-dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px rgba(125,211,168,.4); }
 
   .scrim-left{
     position: fixed; inset: 0; z-index: 1;
     background: linear-gradient(90deg,
-      rgba(5,6,10,0.92) 0%, rgba(5,6,10,0.86) 30%,
-      rgba(5,6,10,0.35) 48%, rgba(5,6,10,0) 60%);
+      rgba(5,6,10,0.80) 0%, rgba(5,6,10,0.68) 30%,
+      rgba(5,6,10,0.28) 48%, rgba(5,6,10,0) 64%);
     pointer-events: none;
   }
 
@@ -473,6 +541,16 @@
   .weather-temp svg{ width:15px; height:15px; opacity:.8; }
 
   @media (max-width: 900px){
+    .weather-badge{ top:auto; bottom:110px; right:18px; }
+  }
+  @media (max-width: 560px){
+    .weather-window{
+      --wx-left:39.2%; --wx-top:4.0%; --wx-width:34.8%; --wx-height:66.5%;
+    }
+    .weather-badge{ display:none; }
+  }
+
+  @media (max-width: 900px){
     .links{ grid-template-columns: repeat(2,1fr); }
     .weather{ position: static; margin-top: 24px; width: fit-content; }
   }
@@ -488,8 +566,22 @@
 </head>
 <body>
 
-  <div class="bg"></div>
+  <div class="bg" aria-hidden="true">
+    <div class="room-stage">
+      <img class="room-base" src="assets/room.webp" alt="">
+      <div class="weather-window" id="weatherWindow" data-state="loading">
+        <canvas id="weatherCanvas"></canvas>
+        <div class="weather-glass"></div>
+        <div class="weather-fog"></div>
+        <div class="weather-flash"></div>
+        <div class="weather-vignette"></div>
+      </div>
+    </div>
+  </div>
   <div class="scrim-left"></div>
+  <div class="weather-badge" id="weatherBadge" aria-live="polite">
+    <span class="weather-badge-dot"></span><span id="weatherBadgeText">Weather engine</span>
+  </div>
 
   <div class="page">
     <nav id="nav"></nav>
@@ -595,7 +687,8 @@ const BIO_CONFIG = {
 
   /* ---- THỜI TIẾT THỰC TẾ ---- */
   weather: {
-    useGeolocation: false,  // false = không xin quyền vị trí, luôn dùng toạ độ cố định bên dưới
+    useGeolocation: true,   // true = lấy vị trí hiện tại nếu người dùng cho phép
+    refreshMinutes: 5,      // cập nhật thời tiết định kỳ
     fallback: { location: "Vĩnh Long, Việt Nam", lat: 10.2537, lon: 105.9722 }
   },
 
@@ -1144,15 +1237,170 @@ const Player = {
   }
 };
 
+/* ----------------------- ROOM WEATHER VISUAL ENGINE ----------------------- */
+const RoomWeatherFX = {
+  canvas: null,
+  ctx: null,
+  windowEl: null,
+  width: 0,
+  height: 0,
+  dpr: 1,
+  state: { condition:'clear', rain:0, cloud:20, wind:6, temp:28, isDay:true },
+  drops: [],
+  clouds: [],
+  lights: [],
+  raf: 0,
+  last: 0,
+  clock: 0,
+  init(){
+    this.canvas = document.getElementById('weatherCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.windowEl = document.getElementById('weatherWindow');
+    this.resize();
+    window.addEventListener('resize', () => this.resize(), { passive:true });
+    this.seed();
+    this.raf = requestAnimationFrame(t => this.frame(t));
+  },
+  resize(){
+    if (!this.canvas) return;
+    const r = this.canvas.getBoundingClientRect();
+    this.width = Math.max(1, r.width);
+    this.height = Math.max(1, r.height);
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = Math.round(this.width * this.dpr);
+    this.canvas.height = Math.round(this.height * this.dpr);
+    this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+    this.seed();
+  },
+  seed(){
+    const w=this.width||600, h=this.height||700;
+    this.drops = Array.from({length:220},()=>({x:Math.random()*w,y:Math.random()*h,len:8+Math.random()*22,speed:260+Math.random()*420,alpha:.10+Math.random()*.45,w:0.6+Math.random()*1.2}));
+    this.clouds = Array.from({length:7},()=>({x:Math.random()*w,y:20+Math.random()*h*.45,r:20+Math.random()*45,s:0.06+Math.random()*.15,a:.10+Math.random()*.18}));
+    this.lights = Array.from({length:70},()=>({x:Math.random()*w,y:h*.34+Math.random()*h*.50,w:1.5+Math.random()*4,h:2+Math.random()*7,a:.2+Math.random()*.65,phase:Math.random()*Math.PI*2}));
+  },
+  setWeather(data){
+    const code = data.code ?? 0;
+    let condition='clear';
+    if ([45,48].includes(code)) condition='fog';
+    else if ([51,53,55,56,57].includes(code)) condition='drizzle';
+    else if ([61,63,65,66,67,80,81,82].includes(code)) condition='rain';
+    else if ([95,96,99].includes(code)) condition='storm';
+    else if (code===3) condition='cloudy';
+    else if ([1,2].includes(code)) condition='partly';
+    this.state = {
+      condition,
+      rain: data.rain ?? (condition==='storm' ? 1 : condition==='rain' ? .72 : condition==='drizzle' ? .28 : 0),
+      cloud: data.cloud ?? 20,
+      wind: data.wind ?? 8,
+      temp: data.tempC ?? 28,
+      isDay: data.isDay ?? 1,
+    };
+    if (this.windowEl) this.windowEl.dataset.state = condition;
+    const badge = document.getElementById('weatherBadgeText');
+    if (badge) badge.textContent = `Realtime weather · ${condition}`;
+  },
+  palette(){
+    const s=this.state;
+    if (s.isDay) {
+      if (s.condition==='rain' || s.condition==='storm' || s.condition==='drizzle') return ['#5a7892','#8aa1b2','#2a3a48'];
+      if (s.condition==='fog') return ['#8897a1','#aeb8bc','#59656c'];
+      return ['#6ba4d6','#a8c9e6','#536f86'];
+    }
+    if (s.condition==='storm' || s.condition==='rain') return ['#0b1828','#1b2f46','#07101b'];
+    return ['#0a1020','#213351','#070c17'];
+  },
+  drawSky(){
+    const c=this.ctx,w=this.width,h=this.height;
+    const [top,mid,bot]=this.palette();
+    const g=c.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,top); g.addColorStop(.55,mid); g.addColorStop(1,bot);
+    c.fillStyle=g; c.fillRect(0,0,w,h);
+    const dayGlow=this.state.isDay ? .18 : .07;
+    const rg=c.createRadialGradient(w*.70,h*.22,0,w*.70,h*.22,w*.55);
+    rg.addColorStop(0,`rgba(255,232,190,${dayGlow})`); rg.addColorStop(1,'rgba(255,232,190,0)');
+    c.fillStyle=rg;c.fillRect(0,0,w,h);
+    // Distant city silhouette
+    const base=h*.68;
+    c.fillStyle=this.state.isDay ? 'rgba(22,33,43,.44)' : 'rgba(3,8,15,.70)';
+    let x=0;
+    while(x<w){
+      const bw=14+Math.random()*34, bh=35+Math.random()*110;
+      c.fillRect(x,base-bh,bw,bh); x+=bw+4;
+    }
+    for(const l of this.lights){
+      const tw=.35+.35*Math.sin(this.clock*.0015+l.phase);
+      c.fillStyle=`rgba(255,205,120,${Math.min(1,l.a*tw)})`;
+      c.fillRect(l.x, l.y, l.w, l.h);
+    }
+    // moon / sun glow as a soft disc
+    c.globalCompositeOperation='screen';
+    c.beginPath(); c.arc(w*.82,h*.18, this.state.isDay?18:11,0,Math.PI*2);
+    c.fillStyle=this.state.isDay?'rgba(255,239,190,.55)':'rgba(218,233,255,.55)'; c.fill();
+    c.globalCompositeOperation='source-over';
+  },
+  drawClouds(dt){
+    const c=this.ctx,w=this.width,h=this.height;
+    const alphaScale=Math.min(1, this.state.cloud/100);
+    for(const cl of this.clouds){
+      cl.x += cl.s * dt * (1 + this.state.wind/20);
+      if (cl.x-cl.r>w) cl.x=-cl.r;
+      c.beginPath(); c.arc(cl.x,cl.y,cl.r,0,Math.PI*2);
+      c.fillStyle=`rgba(10,20,31,${cl.a*alphaScale})`; c.fill();
+    }
+  },
+  drawRain(dt){
+    const amount=Math.max(0,this.state.rain);
+    if(amount<=0) return;
+    const c=this.ctx,w=this.width,h=this.height;
+    const wind=this.state.wind*.35;
+    for(const d of this.drops){
+      d.x += wind*dt; d.y += d.speed*amount*dt;
+      if(d.y>h+30 || d.x>w+30){ d.x=Math.random()*w-w*.2; d.y=-30-Math.random()*40; }
+      c.beginPath();
+      c.moveTo(d.x,d.y); c.lineTo(d.x+wind*.04,d.y-d.len);
+      c.strokeStyle=`rgba(214,235,250,${d.alpha*amount})`;
+      c.lineWidth=d.w; c.stroke();
+    }
+    // soft rain veil
+    c.fillStyle=`rgba(165,195,215,${.025+amount*.045})`; c.fillRect(0,0,w,h);
+  },
+  drawCondensation(){
+    const c=this.ctx,w=this.width,h=this.height;
+    const s=this.state;
+    if(!['rain','drizzle','storm','fog'].includes(s.condition)) return;
+    const a=s.condition==='fog'?.16:.085 + s.rain*.06;
+    const g=c.createRadialGradient(w*.5,h*.60,0,w*.5,h*.60,w*.75);
+    g.addColorStop(0,`rgba(245,250,255,${a})`); g.addColorStop(1,'rgba(245,250,255,0)');
+    c.fillStyle=g;c.fillRect(0,0,w,h);
+    // A handful of larger droplets on the glass
+    c.strokeStyle=`rgba(235,248,255,${.18+s.rain*.13})`;
+    for(let i=0;i<16*s.rain+1;i++){
+      const x=(i*83 + this.clock*.02) % (w+40)-20;
+      const y=(i*47 + Math.sin(i*1.7)*30) % (h*.85);
+      c.beginPath(); c.moveTo(x,y); c.quadraticCurveTo(x+2,y+8,x-1,y+18); c.stroke();
+    }
+  },
+  frame(t){
+    const dt=Math.min(.04,(t-this.last)/1000||0); this.last=t; this.clock=t;
+    const c=this.ctx; if(!c){this.raf=requestAnimationFrame(t2=>this.frame(t2));return;}
+    c.clearRect(0,0,this.width,this.height);
+    this.drawSky(); this.drawClouds(dt); this.drawRain(dt); this.drawCondensation();
+    this.raf=requestAnimationFrame(t2=>this.frame(t2));
+  },
+  lightning(){
+    if(!this.windowEl) return;
+    this.windowEl.classList.remove('lightning'); void this.windowEl.offsetWidth; this.windowEl.classList.add('lightning');
+    setTimeout(()=>this.windowEl?.classList.remove('lightning'),300);
+  }
+};
+
 /* ------------------------------- WEATHER (API THẬT) ------------------------------ */
 /* Dùng Open-Meteo (miễn phí, không cần API key, cho phép gọi trực tiếp từ trình duyệt).
    Docs: https://open-meteo.com/                                                     */
 const Weather = {
-
-  // Mã thời tiết WMO -> icon + nhãn tiếng Việt (rút gọn các mã phổ biến)
   codeMap(code){
     if (code === 0) return { icon: ICONS.sun, label: 'Trời quang' };
-    if ([1,2].includes(code)) return { icon: ICONS.sun, label: 'Ít mây' };
+    if ([1,2].includes(code)) return { icon: ICONS.sun, label: 'Có mây nhẹ' };
     if (code === 3) return { icon: ICONS.cloud, label: 'Nhiều mây' };
     if ([45,48].includes(code)) return { icon: ICONS.cloud, label: 'Sương mù' };
     if ([51,53,55,56,57].includes(code)) return { icon: ICONS.rain, label: 'Mưa phùn' };
@@ -1161,100 +1409,73 @@ const Weather = {
     if ([95,96,99].includes(code)) return { icon: ICONS.rain, label: 'Dông' };
     return { icon: ICONS.cloud, label: 'Nhiều mây' };
   },
-
   renderLoading(){
-    $('#weather').innerHTML = `
-      <div class="weather-pin">${ICONS.pin}</div>
-      <div>
-        <div class="weather-loc">Đang xác định vị trí...</div>
-        <div class="weather-sub">Đang tải thời tiết</div>
-      </div>
-    `;
+    $('#weather').innerHTML = `<div class="weather-pin">${ICONS.pin}</div><div><div class="weather-loc">Đang xác định vị trí...</div><div class="weather-sub">Đang tải thời tiết</div></div>`;
   },
-
-  renderData(locationName, tempC, code){
-    const w = this.codeMap(code);
-    $('#weather').innerHTML = `
-      <div class="weather-pin">${ICONS.pin}</div>
-      <div>
-        <div class="weather-loc">${locationName}</div>
-        <div class="weather-sub">${w.label}</div>
-      </div>
-      <div class="weather-temp">${w.icon}${Math.round(tempC)}°C</div>
-    `;
+  renderData(locationName, data){
+    const w=this.codeMap(data.code);
+    $('#weather').innerHTML = `<div class="weather-pin">${ICONS.pin}</div><div><div class="weather-loc">${locationName}</div><div class="weather-sub">${w.label}${data.wind != null ? ` · ${Math.round(data.wind)} km/h` : ''}</div></div><div class="weather-temp">${w.icon}${Math.round(data.tempC)}°C</div>`;
   },
-
   renderError(){
-    $('#weather').innerHTML = `
-      <div class="weather-pin">${ICONS.pin}</div>
-      <div>
-        <div class="weather-loc">Không lấy được thời tiết</div>
-        <div class="weather-sub">Vui lòng thử lại sau</div>
-      </div>
-    `;
+    $('#weather').innerHTML = `<div class="weather-pin">${ICONS.pin}</div><div><div class="weather-loc">Không lấy được thời tiết</div><div class="weather-sub">Đang dùng hiệu ứng phòng mặc định</div></div>`;
   },
-
-  async fetchWeather(lat, lon){
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('weather fetch failed');
-    const data = await res.json();
-    return { tempC: data.current.temperature_2m, code: data.current.weather_code };
+  async fetchWeather(lat,lon){
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,rain,cloud_cover,wind_speed_10m,weather_code,is_day&timezone=auto`;
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok) throw new Error('weather fetch failed');
+    const data=await res.json();
+    return {
+      tempC:data.current.temperature_2m,
+      humidity:data.current.relative_humidity_2m,
+      precipitation:data.current.precipitation,
+      rain:data.current.rain,
+      cloud:data.current.cloud_cover,
+      wind:data.current.wind_speed_10m,
+      code:data.current.weather_code,
+      isDay:data.current.is_day
+    };
   },
-
-  async reverseGeocode(lat, lon){
+  async reverseGeocode(lat,lon){
     try{
-      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('geocode failed');
-      const data = await res.json();
-      const city = data.city || data.locality || data.principalSubdivision;
-      const country = data.countryName;
-      return [city, country].filter(Boolean).join(', ');
-    }catch(e){
-      return null;
-    }
+      const url=`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`;
+      const res=await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error('geocode failed');
+      const data=await res.json();
+      const city=data.city||data.locality||data.principalSubdivision;
+      const country=data.countryName; return [city,country].filter(Boolean).join(', ');
+    }catch{return null;}
   },
-
-  lastLat: null,
-  lastLon: null,
-  lastName: null,
-
-  async loadFor(lat, lon, knownName){
-    this.lastLat = lat;
-    this.lastLon = lon;
+  lastLat:null,lastLon:null,lastName:null,lastData:null,
+  async loadFor(lat,lon,knownName){
+    this.lastLat=lat;this.lastLon=lon;
     try{
-      const [weatherData, name] = await Promise.all([
-        this.fetchWeather(lat, lon),
-        knownName ? Promise.resolve(knownName) : this.reverseGeocode(lat, lon)
-      ]);
-      this.lastName = name || 'Vị trí của bạn';
-      this.renderData(this.lastName, weatherData.tempC, weatherData.code);
-    }catch(e){
-      this.renderError();
-    }
+      const [weatherData,name]=await Promise.all([this.fetchWeather(lat,lon),knownName?Promise.resolve(knownName):this.reverseGeocode(lat,lon)]);
+      this.lastName=name||'Vị trí của bạn'; this.lastData=weatherData;
+      this.renderData(this.lastName,weatherData); RoomWeatherFX.setWeather(weatherData);
+      if([95,96,99].includes(weatherData.code) && Math.random()<.25) RoomWeatherFX.lightning();
+    }catch(e){ this.renderError(); }
   },
-
-  // Gọi lại API để cập nhật tình trạng (nắng/mưa/mây...) mà không phải xin
-  // vị trí hay tra tên khu vực lại từ đầu.
   async refresh(){
-    if (this.lastLat == null || this.lastLon == null) return;
+    if(this.lastLat==null||this.lastLon==null) return;
     try{
-      const weatherData = await this.fetchWeather(this.lastLat, this.lastLon);
-      this.renderData(this.lastName, weatherData.tempC, weatherData.code);
-    }catch(e){
-      // giữ nguyên dữ liệu cũ trên UI nếu lần cập nhật này lỗi, thử lại ở chu kỳ sau
-    }
+      const weatherData=await this.fetchWeather(this.lastLat,this.lastLon); this.lastData=weatherData;
+      this.renderData(this.lastName,weatherData); RoomWeatherFX.setWeather(weatherData);
+      if([95,96,99].includes(weatherData.code) && Math.random()<.35) RoomWeatherFX.lightning();
+    }catch{}
   },
-
   init(){
     this.renderLoading();
-    const { fallback } = BIO_CONFIG.weather;
-    // Luôn dùng toạ độ cố định trong config — không xin quyền vị trí trình duyệt.
-    this.loadFor(fallback.lat, fallback.lon, fallback.location);
-
-    // Tự động cập nhật tình trạng thời tiết mỗi 10 phút (không load lại trang)
-    setInterval(() => this.refresh(), 10 * 60 * 1000);
+    const cfg=BIO_CONFIG.weather;
+    const fallback=cfg.fallback;
+    const useGeo=cfg.useGeolocation !== false;
+    const onFallback=()=>this.loadFor(fallback.lat,fallback.lon,fallback.location);
+    if(useGeo && navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        pos=>this.loadFor(pos.coords.latitude,pos.coords.longitude),
+        ()=>onFallback(),
+        {enableHighAccuracy:false,timeout:7000,maximumAge:10*60*1000}
+      );
+    }else onFallback();
+    setInterval(()=>this.refresh(), Math.max(2, cfg.refreshMinutes||5)*60*1000);
   }
 };
 
@@ -1503,6 +1724,7 @@ renderProfile();
 renderSocials();
 renderFooter();
 Player.mount();
+RoomWeatherFX.init();
 Weather.init();
 Discord.init();
 </script>
