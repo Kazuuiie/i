@@ -17,6 +17,8 @@
     --text-dim: #9a9aa3;
     --text-faint: #6b6b74;
     --accent: #7dd3a8;
+    --music-accent: #8fd6b0;
+    --music-accent-soft: #c9b79d;
     --radius: 18px;
     --radius-sm: 12px;
   }
@@ -251,10 +253,10 @@
     pointer-events:none;
   }
   .player.is-playing{
-    border-color: rgba(125,211,168,.18);
+    border-color: rgba(143,214,176,.14);
     box-shadow:
       0 18px 55px rgba(0,0,0,.28),
-      0 0 35px rgba(125,211,168,.07),
+      0 0 35px rgba(143,214,176,.06),
       inset 0 1px 0 rgba(255,255,255,.05);
   }
 
@@ -270,7 +272,7 @@
   }
   .player.is-playing .player-art{
     transform:scale(1.025);
-    box-shadow: 0 9px 28px rgba(0,0,0,.34), 0 0 18px rgba(125,211,168,.10);
+    box-shadow: 0 9px 28px rgba(0,0,0,.34), 0 0 18px rgba(143,214,176,.08);
   }
   .player-art-eq{
     position:absolute; left:8px; bottom:7px;
@@ -318,7 +320,7 @@
   .icon-btn:active{ transform:scale(.94); }
   .icon-btn svg{ width:15px; height:15px; }
   .icon-btn.spotify svg{ width:16px; height:16px; color:#1ed760; }
-  .icon-btn.list-open{ background:rgba(125,211,168,.12); color:var(--accent); border-color:rgba(125,211,168,.12); }
+  .icon-btn.list-open{ background:rgba(143,214,176,.10); color:var(--accent); border-color:rgba(143,214,176,.10); }
 
   .progress-row{
     display:flex; align-items:center; gap:9px; font-size:10px;
@@ -419,15 +421,25 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .playlist-item .pi-dur{ flex-shrink:0; font-size:10.5px; color:var(--text-faint); font-weight:700; }
+  /* Visualizer THẬT trong playlist — chiều cao được JS lấy từ AnalyserNode,
+     không dùng animation CSS giả. Chỉ bài đang phát mới hiển thị. */
   .playlist-playing{
-    display:flex; align-items:flex-end; gap:2px; height:14px; margin-right:2px;
-    opacity:0; color:var(--accent);
+    display:flex; align-items:flex-end; justify-content:center; gap:2px;
+    width:15px; height:14px; margin-right:2px;
+    opacity:0; color:var(--music-accent);
   }
   .playlist-item.active .playlist-playing{ opacity:1; }
-  .playlist-playing i{ width:2px; height:5px; border-radius:2px; background:currentColor; }
-  .playlist-playing i:nth-child(1){ animation:eq1 .7s ease-in-out infinite; }
-  .playlist-playing i:nth-child(2){ animation:eq2 .56s ease-in-out infinite; }
-  .playlist-playing i:nth-child(3){ animation:eq3 .82s ease-in-out infinite; }
+  .playlist-playing i{
+    display:block; width:2.5px; height:3px; min-height:3px;
+    border-radius:3px; background:linear-gradient(180deg,var(--music-accent),rgba(201,183,157,.72));
+    box-shadow:0 0 7px rgba(143,214,176,.18);
+    transform-origin:bottom;
+    transition:height .07s linear, opacity .1s ease;
+  }
+  .playlist-playing i:nth-child(2){ opacity:.88; }
+  .playlist-playing i:nth-child(3){ opacity:.7; }
+  .playlist-item:not(.active) .playlist-playing i{ height:3px !important; }
+  .playlist-item:not(.active) .playlist-playing{ opacity:0; }
 
   @media (max-width:560px){
     .player{ padding:14px; border-radius:19px; }
@@ -733,6 +745,10 @@ const Player = {
   repeat: 'all', // off | all | one
   volume: 0.86,
   lastVolume: 0.86,
+  audioCtx: null,
+  analyser: null,
+  analyserData: null,
+  vizFrame: 0,
 
   currentTrack(){ return this.tracks[this.index]; },
 
@@ -787,6 +803,7 @@ const Player = {
 
     this.audio = $('#pAudio');
     this.audio.volume = this.volume;
+    this.setupVisualizer();
 
     this.audio.addEventListener('loadedmetadata', () => {
       this.durations[this.index] = this.audio.duration;
@@ -844,6 +861,79 @@ const Player = {
     this.syncControlUI();
   },
 
+  setupVisualizer(){
+    if (this.audioCtx || !this.audio) return;
+    try{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      this.audioCtx = new AudioCtx();
+      this.analyser = this.audioCtx.createAnalyser();
+      this.analyser.fftSize = 128;
+      this.analyser.smoothingTimeConstant = 0.78;
+      this.analyserData = new Uint8Array(this.analyser.frequencyBinCount);
+
+      const source = this.audioCtx.createMediaElementSource(this.audio);
+      source.connect(this.analyser);
+      this.analyser.connect(this.audioCtx.destination);
+    }catch(err){
+      /* Nguồn cross-origin không cho phép phân tích: vẫn phát nhạc bình thường. */
+      this.audioCtx = null;
+      this.analyser = null;
+      this.analyserData = null;
+    }
+  },
+
+  updatePlaylistVisualizer(){
+    if (!this.analyser || !this.analyserData || !this.playing){
+      this.stopPlaylistVisualizer(true);
+      return;
+    }
+
+    this.analyser.getByteFrequencyData(this.analyserData);
+
+    const item = document.querySelector(`.playlist-item[data-index="${this.index}"]`);
+    if (!item) return;
+
+    const bars = item.querySelectorAll('.playlist-playing i');
+    const n = bars.length;
+    const bins = this.analyserData.length;
+
+    for(let i = 0; i < n; i++){
+      const start = Math.floor((i / n) * bins * 0.55);
+      const end = Math.max(start + 1, Math.floor(((i + 1) / n) * bins * 0.55));
+      let sum = 0;
+      for(let j = start; j < end; j++) sum += this.analyserData[j];
+      const avg = sum / (end - start);
+
+      /* Nén biên độ để visualizer nhỏ nhưng vẫn bắt được beat/bass. */
+      const level = Math.min(1, Math.pow(avg / 255, 0.72) * 1.18);
+      const height = 3 + Math.round(level * 11);
+
+      bars[i].style.height = `${height}px`;
+      bars[i].style.opacity = `${0.62 + level * 0.38}`;
+    }
+
+    this.vizFrame = requestAnimationFrame(() => this.updatePlaylistVisualizer());
+  },
+
+  startPlaylistVisualizer(){
+    if (this.vizFrame) cancelAnimationFrame(this.vizFrame);
+    this.updatePlaylistVisualizer();
+  },
+
+  stopPlaylistVisualizer(clear = false){
+    if (this.vizFrame){
+      cancelAnimationFrame(this.vizFrame);
+      this.vizFrame = 0;
+    }
+
+    const bars = document.querySelectorAll('.playlist-playing i');
+    bars.forEach(bar => {
+      bar.style.height = '3px';
+      if (clear) bar.style.opacity = '';
+    });
+  },
+
   setPlayingState(isPlaying){
     this.playing = isPlaying;
     $('#player')?.classList.toggle('is-playing', isPlaying);
@@ -852,6 +942,13 @@ const Player = {
     const status = $('#pStatusText');
     if (status) status.textContent = isPlaying ? 'Now playing' : 'Paused';
     this.renderList();
+
+    if (isPlaying){
+      if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume().catch(()=>{});
+      this.startPlaylistVisualizer();
+    }else{
+      this.stopPlaylistVisualizer();
+    }
   },
 
   loadTrack(i, autoplay){
@@ -887,7 +984,7 @@ const Player = {
           <span class="pi-name"><b>${t.songTitle}</b></span>
           <span class="pi-artist">${t.artist || 'Unknown artist'}</span>
         </div>
-        <div class="playlist-playing" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="playlist-playing" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
         <span class="pi-dur">${this.durations[i] ? fmtTime(this.durations[i]) : '--:--'}</span>
       </div>
     `).join('');
@@ -921,6 +1018,10 @@ const Player = {
 
   play(){
     if (!this.audio || !this.audio.src) return;
+    this.setupVisualizer();
+    if (this.audioCtx && this.audioCtx.state === 'suspended'){
+      this.audioCtx.resume().catch(()=>{});
+    }
     const p = this.audio.play();
     if (p && p.catch){
       p.catch(() => {
