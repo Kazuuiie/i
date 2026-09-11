@@ -87,14 +87,30 @@
   }
 
   .status{ display:flex; align-items:center; gap:8px; font-size: 13px; color: var(--text-dim); font-weight: 600; }
-  .status .dot{ width:7px; height:7px; border-radius:50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(125,211,168,0.18); }
+  .status .dot{
+    --status-rgb: 125,211,168;
+    width:7px; height:7px; border-radius:50%;
+    background: rgb(var(--status-rgb));
+    animation: statusPulse 2.4s ease-out infinite;
+  }
+  @keyframes statusPulse{
+    0%   { box-shadow: 0 0 0 0 rgba(var(--status-rgb), 0.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(var(--status-rgb), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--status-rgb), 0); }
+  }
+
+  .activity-line{
+    display:none; align-items:center; gap:6px;
+    font-size: 12.5px; color: var(--text-dim); font-weight: 600;
+    margin-top: 2px;
+  }
 
   .identity{ display:flex; align-items:flex-start; gap: 22px; }
 
   .avatar-wrap{ position: relative; width: 88px; height: 88px; flex-shrink:0; }
 
   .avatar{
-    width: 88px; height: 88px; border-radius: 20px; flex-shrink:0;
+    width: 88px; height: 88px; border-radius: 50%; flex-shrink:0;
     background: linear-gradient(145deg, #2a2d38, #17181e);
     background-size: cover; background-position: center;
     border: 1px solid var(--panel-border);
@@ -102,7 +118,7 @@
     font-size: 10px; font-weight:700; letter-spacing:.03em;
     color: rgba(255,255,255,0.28); text-align:center; line-height:1.4; padding: 6px;
     white-space: pre-line;
-    transition: box-shadow .25s ease;
+    transition: box-shadow .35s ease, background-image .35s ease;
   }
 
   /* Lớp phủ viền trang trí Discord (avatar decoration / Nitro frame).
@@ -326,18 +342,19 @@ const BIO_CONFIG = {
      LƯU Ý BẮT BUỘC: tài khoản Discord của bạn phải tham gia server Lanyard
      tại https://discord.gg/lanyard thì hệ thống mới đọc được trạng thái. */
   discord: {
-    enabled: true,          
-    userId: "1473247060298961040",              // ví dụ: "123456789012345678"
-    useAvatar: true,
-    useAvatarDecoration: true,
-    useStatus: true,
-    pollIntervalMs: 10000 
+    enabled: true,                // đã bật — dùng ID bạn cung cấp
+    userId: "1473247060298961040",
+    useAvatar: true,          // avatar tự lấy từ Discord
+    useAvatarDecoration: true,// hiện khung trang trí (Nitro decoration) nếu có đang trang bị
+    useIdentity: true,        // tên hiển thị (h1) + @handle tự lấy theo Discord (global name + username)
+    useActivity: true,        // hiện dòng trạng thái tuỳ chỉnh / đang chơi gì bên dưới @handle
+    useStatus: true,          // chữ Online/Idle/... + viền màu trạng thái tự đổi theo Discord
+    pollIntervalMs: 20000     // tần suất kiểm tra lại (mili giây)
   },
 
   /* ---- THỜI TIẾT THỰC TẾ ---- */
   weather: {
-    useGeolocation: true,   // true = xin vị trí trình duyệt để lấy thời tiết đúng khu vực người xem
-    // Toạ độ + tên dự phòng nếu không lấy được vị trí (đã đặt gần khu vực Bến Tre / Vĩnh Long):
+    useGeolocation: false,  // false = không xin quyền vị trí, luôn dùng toạ độ cố định bên dưới
     fallback: { location: "Vĩnh Long, Việt Nam", lat: 10.2537, lon: 105.9722 }
   },
 
@@ -416,6 +433,7 @@ function renderProfile(){
     <div class="id-text">
       <h1>${profile.name}</h1>
       <div class="handle">${profile.handle}</div>
+      <div class="activity-line" id="discordActivity"></div>
     </div>
   `;
 
@@ -693,19 +711,9 @@ const Weather = {
 
   init(){
     this.renderLoading();
-    const { useGeolocation, fallback } = BIO_CONFIG.weather;
-
-    const useFallback = () => this.loadFor(fallback.lat, fallback.lon, fallback.location);
-
-    if (useGeolocation && 'geolocation' in navigator){
-      navigator.geolocation.getCurrentPosition(
-        (pos) => this.loadFor(pos.coords.latitude, pos.coords.longitude, null),
-        () => useFallback(),
-        { timeout: 6000 }
-      );
-    } else {
-      useFallback();
-    }
+    const { fallback } = BIO_CONFIG.weather;
+    // Luôn dùng toạ độ cố định trong config — không xin quyền vị trí trình duyệt.
+    this.loadFor(fallback.lat, fallback.lon, fallback.location);
 
     // Tự động cập nhật tình trạng thời tiết mỗi 10 phút (không load lại trang)
     setInterval(() => this.refresh(), 10 * 60 * 1000);
@@ -717,8 +725,12 @@ const Weather = {
    Docs: https://github.com/Phineas/lanyard — miễn phí, không cần key,
    chỉ cần userId đã tham gia server Lanyard.                                        */
 const Discord = {
-  colors:  { online: '#23a55a', idle: '#f0b232', dnd: '#f23f43', offline: '#80848e' },
-  labels:  { online: 'Online',  idle: 'Idle',     dnd: 'Do Not Disturb', offline: 'Offline' },
+  colors: {
+    online:  { rgb: '35,165,90',   label: 'Online' },
+    idle:    { rgb: '240,178,50',  label: 'Idle' },
+    dnd:     { rgb: '242,63,67',   label: 'Do Not Disturb' },
+    offline: { rgb: '128,132,142', label: 'Offline' }
+  },
 
   avatarUrl(user){
     if (!user) return null;
@@ -739,6 +751,15 @@ const Discord = {
     return `https://cdn.discordapp.com/avatar-decoration-presets/${deco.asset}.png?size=160`;
   },
 
+  applyAvatar(discordUser){
+    const url = this.avatarUrl(discordUser);
+    const avatarEl = document.querySelector('.avatar');
+    if (avatarEl && url){
+      avatarEl.style.backgroundImage = `url('${url}')`;
+      avatarEl.textContent = '';
+    }
+  },
+
   applyDecoration(discordUser){
     const decoEl = document.querySelector('#avatarDeco');
     if (!decoEl) return;
@@ -752,31 +773,58 @@ const Discord = {
     }
   },
 
-  applyStatus(status){
-    const color = this.colors[status] || this.colors.offline;
-    const label = this.labels[status] || 'Offline';
-
-    const dot = document.querySelector('#status .dot');
-    const label_el = document.querySelector('#status span:last-child');
-    const avatarEl = document.querySelector('.avatar');
-
-    if (dot) dot.style.background = color;
-    if (label_el) label_el.textContent = label;
-    // "khung viền" avatar — vòng viền quanh avatar đổi màu theo trạng thái, giống Discord
-    if (avatarEl) avatarEl.style.boxShadow = `0 0 0 3px ${color}`;
+  // Tên hiển thị (h1) lấy từ global_name (display name) của Discord, @handle lấy từ username.
+  applyIdentity(discordUser){
+    if (!discordUser) return;
+    const nameEl = document.querySelector('.id-text h1');
+    const handleEl = document.querySelector('.id-text .handle');
+    if (nameEl) nameEl.textContent = discordUser.global_name || discordUser.username;
+    if (handleEl) handleEl.textContent = '@' + discordUser.username;
   },
 
-  applyAvatar(discordUser){
-    const url = this.avatarUrl(discordUser);
+  // Hiện trạng thái tuỳ chỉnh (custom status) hoặc hoạt động đang làm (chơi game / xem / stream...)
+  applyActivity(activities){
+    const el = document.querySelector('#discordActivity');
+    if (!el) return;
+
+    const verbMap = { 0: 'Đang chơi', 1: 'Đang stream', 2: 'Đang nghe', 3: 'Đang xem', 5: 'Đang thi đấu' };
+    const custom = (activities || []).find(a => a.type === 4);
+    const other = (activities || []).find(a => a.type !== 4);
+
+    let text = '';
+    if (custom && custom.state){
+      text = (custom.emoji ? custom.emoji.name + ' ' : '') + custom.state;
+    } else if (other){
+      text = `${verbMap[other.type] || ''} ${other.name}`.trim();
+    }
+
+    if (text){
+      el.textContent = text;
+      el.style.display = 'flex';
+    } else {
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+  },
+
+  applyStatus(status){
+    const info = this.colors[status] || this.colors.offline;
+
+    const dot = document.querySelector('#status .dot');
+    const labelEl = document.querySelector('#status span:last-child');
     const avatarEl = document.querySelector('.avatar');
-    if (avatarEl && url){
-      avatarEl.style.backgroundImage = `url('${url}')`;
-      avatarEl.textContent = '';
+
+    if (dot) dot.style.setProperty('--status-rgb', info.rgb);
+    if (labelEl) labelEl.textContent = info.label;
+    // "khung viền" avatar — vòng viền + quầng sáng quanh avatar đổi màu theo trạng thái, giống Discord
+    if (avatarEl){
+      avatarEl.style.boxShadow =
+        `0 0 0 3px rgb(${info.rgb}), 0 0 18px 2px rgba(${info.rgb}, 0.35)`;
     }
   },
 
   async fetchPresence(){
-    const { userId, useAvatar, useAvatarDecoration, useStatus } = BIO_CONFIG.discord;
+    const { userId, useAvatar, useAvatarDecoration, useIdentity, useActivity, useStatus } = BIO_CONFIG.discord;
     if (!userId) return;
     try{
       const res = await fetch(`https://api.lanyard.rest/v1/users/${userId}`);
@@ -785,6 +833,8 @@ const Discord = {
       const d = json.data;
       if (useAvatar) this.applyAvatar(d.discord_user);
       if (useAvatarDecoration) this.applyDecoration(d.discord_user);
+      if (useIdentity) this.applyIdentity(d.discord_user);
+      if (useActivity) this.applyActivity(d.activities);
       if (useStatus) this.applyStatus(d.discord_status);
     }catch(e){
       console.warn('[Discord] Không lấy được trạng thái:', e.message);
@@ -793,7 +843,7 @@ const Discord = {
 
   init(){
     const cfg = BIO_CONFIG.discord;
-    if (!cfg.enabled || !cfg.userId) return; // chưa bật hoặc chưa điền userId thì bỏ qua, giữ avatar/status tĩnh
+    if (!cfg.enabled || !cfg.userId) return; // chưa bật hoặc chưa điền userId thì bỏ qua, giữ avatar/tên tĩnh
     this.fetchPresence();
     setInterval(() => this.fetchPresence(), cfg.pollIntervalMs || 20000);
   }
