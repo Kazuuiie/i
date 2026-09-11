@@ -110,6 +110,7 @@
   .avatar-wrap{ position: relative; width: 88px; height: 88px; flex-shrink:0; }
 
   .avatar{
+    --status-rgb: 125,211,168;
     width: 88px; height: 88px; border-radius: 50%; flex-shrink:0;
     background: linear-gradient(145deg, #2a2d38, #17181e);
     background-size: cover; background-position: center;
@@ -118,7 +119,29 @@
     font-size: 10px; font-weight:700; letter-spacing:.03em;
     color: rgba(255,255,255,0.28); text-align:center; line-height:1.4; padding: 6px;
     white-space: pre-line;
-    transition: box-shadow .35s ease, background-image .35s ease;
+    transition: background-image .35s ease;
+    animation: cloudGlow 6s ease-in-out infinite;
+  }
+
+  /* Quầng sáng mềm quanh avatar, nhiều lớp mờ chồng lên nhau như đám mây
+     thay vì một vòng viền cứng — màu lấy theo trạng thái Discord (--status-rgb). */
+  @keyframes cloudGlow{
+    0%, 100% {
+      box-shadow:
+        0 0 16px 3px  rgba(var(--status-rgb), 0.30),
+        0 0 34px 12px rgba(var(--status-rgb), 0.16),
+        0 0 56px 22px rgba(var(--status-rgb), 0.08);
+    }
+    50% {
+      box-shadow:
+        0 0 22px 6px  rgba(var(--status-rgb), 0.40),
+        0 0 44px 16px rgba(var(--status-rgb), 0.20),
+        0 0 68px 28px rgba(var(--status-rgb), 0.10);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .avatar{ animation: none; box-shadow: 0 0 24px 8px rgba(var(--status-rgb), 0.22); }
   }
 
   /* Lớp phủ viền trang trí Discord (avatar decoration / Nitro frame).
@@ -816,11 +839,8 @@ const Discord = {
 
     if (dot) dot.style.setProperty('--status-rgb', info.rgb);
     if (labelEl) labelEl.textContent = info.label;
-    // "khung viền" avatar — vòng viền + quầng sáng quanh avatar đổi màu theo trạng thái, giống Discord
-    if (avatarEl){
-      avatarEl.style.boxShadow =
-        `0 0 0 3px rgb(${info.rgb}), 0 0 18px 2px rgba(${info.rgb}, 0.35)`;
-    }
+    // Quầng sáng kiểu đám mây quanh avatar đổi màu theo trạng thái (xem @keyframes cloudGlow)
+    if (avatarEl) avatarEl.style.setProperty('--status-rgb', info.rgb);
   },
 
   async fetchPresence(){
