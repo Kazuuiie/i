@@ -460,20 +460,36 @@
 
   .weather{
     position: fixed; right: clamp(24px, 5vw, 64px); bottom: 40px; z-index: 3;
-    display:flex; align-items:center; gap: 12px;
-    background: var(--panel); border: 1px solid var(--panel-border);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    padding: 12px 18px; border-radius: var(--radius-sm);
+    width: min(420px, calc(100vw - 48px));
+    display:flex; flex-direction:column; gap:12px;
+    background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)), var(--panel);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%);
+    padding: 14px 16px; border-radius: 16px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.04);
   }
-  .weather-pin{ width:30px; height:30px; border-radius:50%; background: rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .weather-pin svg{ width:14px; height:14px; }
-  .weather-loc{ font-size: 12.5px; font-weight:700; }
-  .weather-sub{ font-size: 11px; color: var(--text-dim); margin-top:1px; }
-  .weather-temp{ display:flex; align-items:center; gap:6px; margin-left: 6px; font-size: 13px; font-weight:700; white-space:nowrap; }
-  .weather-temp svg{ width:15px; height:15px; opacity:.8; }
-  .weather-main{ min-width:0; }
-  .weather-temp{ flex-direction:column; align-items:flex-end; gap:1px; }
-  .weather-temp small{ font-size:9px; color:var(--text-faint); font-weight:600; }
+  .weather-head{ display:flex; align-items:center; gap:12px; }
+  .weather-pin{ width:38px; height:38px; border-radius:12px; background: rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .weather-pin svg{ width:16px; height:16px; }
+  .weather-main{ min-width:0; flex:1; }
+  .weather-loc{ font-size: 12.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .weather-sub{ font-size: 11px; color: var(--text-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .weather-temp{ display:flex; align-items:center; gap:7px; margin-left:auto; font-size: 18px; font-weight:800; white-space:nowrap; }
+  .weather-temp svg{ width:18px; height:18px; opacity:.9; }
+  .weather-temp small{ font-size:10px; color:var(--text-faint); font-weight:700; margin-left:-2px; }
+  .weather-updated{ font-size:10px; color:var(--text-faint); margin-left:10px; white-space:nowrap; }
+  .weather-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .weather-stat{ min-width:0; padding:9px 10px; border-radius:11px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.045); }
+  .weather-stat-label{ font-size:9px; color:var(--text-faint); font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+  .weather-stat-value{ margin-top:3px; font-size:11.5px; color:var(--text); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .weather-progress{ height:4px; border-radius:999px; background:rgba(255,255,255,.06); overflow:hidden; margin-top:7px; }
+  .weather-progress > i{ display:block; height:100%; width:0; border-radius:inherit; background:var(--accent); transition:width .35s ease; }
+
+  @media (max-width: 560px){
+    .weather{ width:calc(100vw - 36px); right:18px; bottom:18px; padding:13px; }
+    .weather-grid{ grid-template-columns:repeat(2,1fr); }
+    .weather-updated{ display:none; }
+  }
 
   @media (max-width: 900px){
     .links{ grid-template-columns: repeat(2,1fr); }
@@ -596,14 +612,9 @@ const BIO_CONFIG = {
     pollIntervalMs: 20000     // tần suất kiểm tra lại (mili giây)
   },
 
-  /* ---- THỜI TIẾT THỰC TẾ — WINDY POINT FORECAST ---- */
+  /* ---- THỜI TIẾT THỰC TẾ ---- */
   weather: {
-    // Dán Point Forecast API key của Windy vào đây.
-    // Khi deploy public, nên giới hạn key theo domain của website.
-    windyApiKey: "YOUR_WINDY_POINT_FORECAST_API_KEY",
-    model: "gfs",
-    useGeolocation: false,
-    refreshMs: 10 * 60 * 1000,
+    useGeolocation: false,  // false = không xin quyền vị trí, luôn dùng toạ độ cố định bên dưới
     fallback: { location: "Vĩnh Long, Việt Nam", lat: 10.2537, lon: 105.9722 }
   },
 
@@ -1152,162 +1163,122 @@ const Player = {
   }
 };
 
-/* ------------------------------- WEATHER — WINDY POINT FORECAST ------------------------------ */
-/*
-   Windy Point Forecast API:
-   POST https://api.windy.com/api/point-forecast/v2
-   Windy trả về forecast theo mảng timestamp; ta lấy mốc gần hiện tại nhất.
-   Docs: https://api.windy.com/point-forecast/docs
-*/
+/* ------------------------------- WEATHER (API THẬT) ------------------------------ */
+/* Open-Meteo — miễn phí, không cần API key.
+   Vị trí luôn cố định theo BIO_CONFIG.weather.fallback; không xin GPS. */
 const Weather = {
-  codeMap(ptype, clouds, precip){
-    if (ptype === 1){
-      if (precip >= 8) return { icon: ICONS.rain, label: 'Mưa lớn' };
-      if (precip >= 2) return { icon: ICONS.rain, label: 'Đang mưa' };
-      return { icon: ICONS.rain, label: 'Mưa nhẹ / có mưa' };
-    }
-    if (ptype === 5 || ptype === 7 || ptype === 8) return { icon: ICONS.cloud, label: 'Mưa tuyết / tuyết' };
-    if (clouds >= 80) return { icon: ICONS.cloud, label: 'Nhiều mây' };
-    if (clouds >= 45) return { icon: ICONS.cloud, label: 'Có mây' };
-    if (clouds >= 15) return { icon: ICONS.sun, label: 'Ít mây' };
-    return { icon: ICONS.sun, label: 'Trời quang' };
+  lastLat: null,
+  lastLon: null,
+  lastName: null,
+  lastData: null,
+
+  codeMap(code){
+    if (code === 0) return { icon: ICONS.sun, label: 'Trời quang' };
+    if ([1,2].includes(code)) return { icon: ICONS.sun, label: 'Ít mây' };
+    if (code === 3) return { icon: ICONS.cloud, label: 'Nhiều mây' };
+    if ([45,48].includes(code)) return { icon: ICONS.cloud, label: 'Sương mù' };
+    if ([51,53,55,56,57].includes(code)) return { icon: ICONS.rain, label: 'Mưa phùn' };
+    if ([61,63,65,66,67,80,81,82].includes(code)) return { icon: ICONS.rain, label: 'Mưa' };
+    if ([71,73,75,77,85,86].includes(code)) return { icon: ICONS.cloud, label: 'Có tuyết' };
+    if ([95,96,99].includes(code)) return { icon: ICONS.rain, label: 'Dông' };
+    return { icon: ICONS.cloud, label: 'Nhiều mây' };
+  },
+
+  windDir(deg){
+    const dirs = ['B','ĐB','Đ','ĐN','N','TN','T','TB'];
+    return dirs[Math.round((deg || 0) / 45) % 8];
   },
 
   renderLoading(){
     $('#weather').innerHTML = `
-      <div class="weather-pin">${ICONS.pin}</div>
-      <div>
-        <div class="weather-loc">Đang xác định vị trí...</div>
-        <div class="weather-sub">Đang tải dữ liệu Windy</div>
+      <div class="weather-head">
+        <div class="weather-pin">${ICONS.pin}</div>
+        <div class="weather-main">
+          <div class="weather-loc">${BIO_CONFIG.weather.fallback.location}</div>
+          <div class="weather-sub">Đang tải dữ liệu thời tiết...</div>
+        </div>
+        <div class="weather-temp">--°C</div>
       </div>
-    `;
+      <div class="weather-grid">
+        ${['Cảm nhận','Độ ẩm','Gió','Mưa'].map(label => `<div class="weather-stat"><div class="weather-stat-label">${label}</div><div class="weather-stat-value">--</div></div>`).join('')}
+      </div>`;
   },
 
   renderData(locationName, data){
-    const w = this.codeMap(data.ptype, data.clouds, data.precip);
-    const temp = Math.round(data.temp);
-    const wind = Math.round(data.windMs * 3.6);
-    const humidity = Math.round(data.rh);
-    const rain = Number(data.precip || 0).toFixed(1);
+    const c = data.current;
+    const w = this.codeMap(c.weather_code);
+    const rainMm = Number(c.precipitation || 0);
+    const humidity = Math.round(c.relative_humidity_2m ?? 0);
+    const wind = Math.round(c.wind_speed_10m ?? 0);
+    const feels = Math.round(c.apparent_temperature ?? c.temperature_2m);
+    const cloud = Math.round(c.cloud_cover ?? 0);
+    const updated = new Date(c.time).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
 
     $('#weather').innerHTML = `
-      <div class="weather-pin">${w.icon}</div>
-      <div class="weather-main">
-        <div class="weather-loc">${locationName}</div>
-        <div class="weather-sub">${w.label} · ${humidity}% RH · ${wind} km/h</div>
+      <div class="weather-head">
+        <div class="weather-pin">${w.icon}</div>
+        <div class="weather-main">
+          <div class="weather-loc">${locationName}</div>
+          <div class="weather-sub">${w.label} · Mây ${cloud}% · cập nhật ${updated}</div>
+        </div>
+        <div class="weather-temp">${Math.round(c.temperature_2m)}°C <small>• ${w.label}</small></div>
       </div>
-      <div class="weather-temp">
-        <span>${temp}°C</span>
-        <small>${rain} mm/3h</small>
-      </div>
-    `;
+      <div class="weather-grid">
+        <div class="weather-stat"><div class="weather-stat-label">Cảm nhận</div><div class="weather-stat-value">${feels}°C</div></div>
+        <div class="weather-stat"><div class="weather-stat-label">Độ ẩm</div><div class="weather-stat-value">${humidity}%</div><div class="weather-progress"><i style="width:${Math.min(100, humidity)}%"></i></div></div>
+        <div class="weather-stat"><div class="weather-stat-label">Gió</div><div class="weather-stat-value">${wind} km/h · ${this.windDir(c.wind_direction_10m)}</div></div>
+        <div class="weather-stat"><div class="weather-stat-label">Lượng mưa</div><div class="weather-stat-value">${rainMm.toFixed(1)} mm</div></div>
+      </div>`;
   },
 
-  renderError(message = 'Không lấy được thời tiết'){
+  renderError(){
     $('#weather').innerHTML = `
-      <div class="weather-pin">${ICONS.pin}</div>
-      <div>
-        <div class="weather-loc">${message}</div>
-        <div class="weather-sub">Kiểm tra Windy API key / quyền vị trí</div>
-      </div>
-    `;
+      <div class="weather-head">
+        <div class="weather-pin">${ICONS.cloud}</div>
+        <div class="weather-main">
+          <div class="weather-loc">${BIO_CONFIG.weather.fallback.location}</div>
+          <div class="weather-sub">Không thể cập nhật thời tiết · sẽ thử lại</div>
+        </div>
+        <div class="weather-temp">--°C</div>
+      </div>`;
   },
 
-  async fetchWindy(lat, lon){
-    const cfg = BIO_CONFIG.weather;
-    if (!cfg.windyApiKey || cfg.windyApiKey === 'YOUR_WINDY_POINT_FORECAST_API_KEY'){
-      throw new Error('missing windy api key');
-    }
-
-    const res = await fetch('https://api.windy.com/api/point-forecast/v2', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        lat,
-        lon,
-        model: cfg.model || 'gfs',
-        parameters: ['temp', 'precip', 'ptype', 'wind', 'rh', 'lclouds', 'mclouds', 'hclouds'],
-        levels: ['surface'],
-        key: cfg.windyApiKey
-      })
+  async fetchWeather(lat, lon){
+    const params = new URLSearchParams({
+      latitude: lat,
+      longitude: lon,
+      current: [
+        'temperature_2m',
+        'apparent_temperature',
+        'relative_humidity_2m',
+        'weather_code',
+        'precipitation',
+        'rain',
+        'showers',
+        'cloud_cover',
+        'wind_speed_10m',
+        'wind_direction_10m',
+        'pressure_msl',
+        'visibility'
+      ].join(','),
+      daily: ['sunrise','sunset'].join(','),
+      timezone: 'auto',
+      forecast_days: '1'
     });
-
-    if (!res.ok){
-      const detail = await res.text().catch(() => '');
-      throw new Error(`Windy HTTP ${res.status} ${detail}`);
-    }
-
-    const raw = await res.json();
-    const ts = raw.ts || [];
-    if (!ts.length) throw new Error('empty windy response');
-
-    const target = Date.now();
-    let best = 0;
-    let bestDiff = Math.abs(ts[0] - target);
-    for (let i = 1; i < ts.length; i++){
-      const diff = Math.abs(ts[i] - target);
-      if (diff < bestDiff){
-        best = i;
-        bestDiff = diff;
-      }
-    }
-
-    const get = (key, fallback = 0) => {
-      const arr = raw[key];
-      return Array.isArray(arr) && arr[best] != null ? Number(arr[best]) : fallback;
-    };
-
-    const windU = get('wind_u-surface', 0);
-    const windV = get('wind_v-surface', 0);
-    const windMs = Math.hypot(windU, windV);
-    const precip = get('past3hprecip-surface', 0);
-    const ptype = Math.round(get('ptype-surface', 0));
-    const l = get('lclouds-surface', 0);
-    const m = get('mclouds-surface', 0);
-    const h = get('hclouds-surface', 0);
-    const clouds = Math.max(l, m, h);
-
-    return {
-      temp: get('temp-surface', 0),
-      precip,
-      ptype,
-      rh: get('rh-surface', 0),
-      windMs,
-      clouds
-    };
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    if (!res.ok) throw new Error(`weather fetch failed: ${res.status}`);
+    return await res.json();
   },
-
-  async reverseGeocode(lat, lon){
-    try{
-      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('geocode failed');
-      const data = await res.json();
-      const city = data.city || data.locality || data.principalSubdivision;
-      const country = data.countryName;
-      return [city, country].filter(Boolean).join(', ');
-    }catch(e){
-      return null;
-    }
-  },
-
-  lastLat: null,
-  lastLon: null,
-  lastName: null,
 
   async loadFor(lat, lon, knownName){
     this.lastLat = lat;
     this.lastLon = lon;
-
+    this.lastName = knownName || 'Vị trí cố định';
     try{
-      const [weatherData, name] = await Promise.all([
-        this.fetchWindy(lat, lon),
-        knownName ? Promise.resolve(knownName) : this.reverseGeocode(lat, lon)
-      ]);
-      this.lastName = name || 'Vị trí của bạn';
-      this.renderData(this.lastName, weatherData);
+      this.lastData = await this.fetchWeather(lat, lon);
+      this.renderData(this.lastName, this.lastData);
     }catch(e){
-      console.error('[Weather/Windy]', e);
+      console.warn('[Weather]', e);
       this.renderError();
     }
   },
@@ -1315,44 +1286,18 @@ const Weather = {
   async refresh(){
     if (this.lastLat == null || this.lastLon == null) return;
     try{
-      const weatherData = await this.fetchWindy(this.lastLat, this.lastLon);
-      this.renderData(this.lastName || 'Vị trí của bạn', weatherData);
+      this.lastData = await this.fetchWeather(this.lastLat, this.lastLon);
+      this.renderData(this.lastName, this.lastData);
     }catch(e){
-      console.error('[Weather/Windy refresh]', e);
+      console.warn('[Weather refresh]', e);
     }
   },
 
-  useBrowserLocation(){
-    return new Promise((resolve) => {
-      if (!navigator.geolocation){
-        resolve(null);
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-        () => resolve(null),
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60 * 1000 }
-      );
-    });
-  },
-
-  async init(){
+  init(){
     this.renderLoading();
-    const cfg = BIO_CONFIG.weather;
-    let coords = null;
-
-    if (cfg.useGeolocation){
-      coords = await this.useBrowserLocation();
-    }
-
-    if (coords){
-      await this.loadFor(coords.lat, coords.lon, null);
-    } else {
-      await this.loadFor(cfg.fallback.lat, cfg.fallback.lon, cfg.fallback.location);
-    }
-
-    setInterval(() => this.refresh(), cfg.refreshMs || 10 * 60 * 1000);
+    const { fallback, refreshMs = 10 * 60 * 1000 } = BIO_CONFIG.weather;
+    this.loadFor(fallback.lat, fallback.lon, fallback.location);
+    setInterval(() => this.refresh(), refreshMs);
   }
 };
 
