@@ -100,7 +100,10 @@
   }
 
   /* Badge hoạt động (đang chơi game / đang nghe nhạc / custom status) —
-     nằm ngay dưới @handle, tức là kế bên avatar trong cùng cột id-text. */
+     nằm ngay dưới @handle, kế bên avatar. Bấm vào để mở rộng xem chi tiết
+     (khi có hoạt động thật, ví dụ đang chơi game) — xem .activity-detail. */
+  .activity-wrap{ display:flex; flex-direction:column; }
+
   .activity-line{
     display:none; align-items:center; gap:8px;
     font-size: 12.5px; color: var(--text); font-weight: 600;
@@ -110,16 +113,45 @@
     border: 1px solid var(--panel-border);
     padding: 5px 12px 5px 5px;
     border-radius: 999px;
+    transition: background .18s ease, border-color .18s ease;
   }
+  .activity-line.clickable{ cursor: pointer; }
+  .activity-line.clickable:hover{ background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.16); }
   .activity-line img{
     width: 20px; height: 20px; border-radius: 6px; flex-shrink:0;
     object-fit: cover; background: rgba(255,255,255,0.08);
   }
   .activity-line svg{ width:15px; height:15px; flex-shrink:0; opacity:.9; color: var(--accent); }
-  .activity-line span{
+  .activity-line span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .activity-line span b{ font-weight:700; }
+  .activity-line .chevron{
+    width:11px; height:11px; opacity:.55; margin-left:2px; flex-shrink:0;
+    transition: transform .2s ease;
+  }
+  .activity-line.open .chevron{ transform: rotate(180deg); }
+
+  /* Panel chi tiết — thu gọn bằng max-height/opacity nên có hiệu ứng mở rộng mượt */
+  .activity-detail{
+    max-height: 0; opacity: 0; overflow: hidden;
+    width: fit-content; max-width: 340px;
+    margin-top: 0;
+    background: var(--panel-strong); border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    transition: max-height .32s ease, opacity .25s ease, margin-top .32s ease;
+  }
+  .activity-detail.open{ max-height: 240px; opacity: 1; margin-top: 8px; }
+  .activity-detail-inner{ display:flex; gap:12px; padding: 12px 14px; }
+  .activity-detail-inner img{
+    width: 54px; height: 54px; border-radius: 12px; flex-shrink:0;
+    object-fit: cover; background: rgba(255,255,255,0.08);
+  }
+  .activity-detail-text{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .activity-detail-name{ font-size: 13.5px; font-weight: 700; }
+  .activity-detail-line{
+    font-size: 12px; color: var(--text-dim); font-weight: 600;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .activity-line span b{ font-weight:700; }
+  .activity-detail-time{ font-size: 11px; color: var(--text-faint); font-weight:600; margin-top: 4px; }
 
   .identity{ display:flex; align-items:flex-start; gap: 22px; }
 
@@ -284,7 +316,7 @@
     .identity{ flex-direction:column; align-items:flex-start; gap:14px; }
     .id-text h1{ font-size: 28px; }
     .content{ padding-top: 32px; gap: 18px; }
-    .activity-line{ max-width: 260px; }
+    .activity-line, .activity-detail{ max-width: 280px; }
   }
   @media (prefers-reduced-motion: reduce){ .link-card{ transition:none; } }
 </style>
@@ -315,8 +347,10 @@
 /* =========================================================================
    BIO CONFIG — CHỈNH SỬA MỌI THỨ Ở ĐÂY, PHẦN CODE BÊN DƯỚI TỰ RENDER
    =========================================================================
-   - Muốn thêm bài hát / album mới: thêm 1 object vào mảng music.tracks.
-     Nút "danh sách" trên player sẽ tự hiện thêm bài đó, bấm để phát.
+   - Muốn thêm bài hát mới: thêm 1 object vào mảng music.tracks, chỉ cần
+     3 trường gọn: title ("Tên bài - Ca sĩ"), cover (ảnh bìa), music (file
+     nhạc thật — trình phát sẽ phát y như 1 music player thật, kéo được
+     thanh tiến trình, thời lượng tự lấy từ file, không phải giả lập nữa).
    - Muốn đổi avatar / background: xem ghi chú ở avatar.image và phần .bg
      trong CSS (tìm class ".bg").
    - Muốn thêm link mạng xã hội mới: thêm object vào mảng "socials" và
@@ -325,8 +359,8 @@
      không cần API key). Nếu người dùng từ chối chia sẻ vị trí, trang sẽ
      dùng toạ độ dự phòng trong weather.fallback.
    - Badge "Đang chơi / Đang nghe" cạnh avatar lấy tự động từ Discord thật
-     qua Lanyard (xem phần discord bên dưới) — không cần chỉnh gì thêm,
-     chỉ cần discord.useActivity: true.
+     qua Lanyard (xem phần discord bên dưới) — bấm vào badge để mở rộng
+     xem chi tiết (ảnh lớn hơn, mô tả đầy đủ, đã chơi/nghe bao lâu).
    ========================================================================= */
 const BIO_CONFIG = {
 
@@ -360,22 +394,20 @@ const BIO_CONFIG = {
     // { key: "tiktok", name: "TikTok", url: "#" },  // nhớ thêm icon "tiktok" vào ICONS.social
   ],
 
-  /* ---- NHẠC / ALBUM — thêm bao nhiêu bài / album tuỳ thích ---- */
+  /* ---- NHẠC — gọn còn 3 trường mỗi bài, thêm bao nhiêu bài tuỳ thích ----
+     title: "Tên bài hát - Ca sĩ"   (trình phát tự tách ra 2 dòng)
+     cover: URL ảnh bìa hoặc tên file, ví dụ "cover.jpg"  (để null nếu chưa có)
+     music: URL file nhạc hoặc tên file, ví dụ "song.mp3" / "song.mp4"
+            — đây là file phát thật, không phải giả lập; thời lượng và
+            thanh tiến trình tự lấy từ chính file này.                     */
   music: {
     startIndex: 0,      // bài phát mặc định khi mở trang (index trong mảng tracks)
-    autoAdvance: true,  // hết bài thì tự chuyển bài kế (giả lập, không phát âm thật)
+    autoAdvance: true,  // hết bài thì tự chuyển bài kế
     tracks: [
-      {
-        title: "Good Days",
-        artist: "SZA",
-        album: "Good Days - Single",
-        cover: null,           // link ảnh bìa, để null dùng nền mặc định
-        durationSec: 279,      // 4:39
-        url: "#"               // link mở trên Spotify/YouTube...
-      },
-      // ví dụ thêm 1 album gồm nhiều bài:
-      // { title: "Kill Bill",  artist: "SZA", album: "SOS", cover: "https://.../sos.jpg", durationSec: 153, url: "https://open.spotify.com/..." },
-      // { title: "Snooze",     artist: "SZA", album: "SOS", cover: "https://.../sos.jpg", durationSec: 201, url: "https://open.spotify.com/..." },
+      { title: "Good Days - SZA", cover: null, music: "#" },
+      // thêm bài khác, ví dụ:
+      // { title: "Kill Bill - SZA", cover: "https://.../kill-bill.jpg", music: "https://.../kill-bill.mp3" },
+      // { title: "Snooze - SZA",    cover: "snooze.jpg",                 music: "snooze.mp4" },
     ]
   },
 
@@ -391,7 +423,7 @@ const BIO_CONFIG = {
     useAvatar: true,          // avatar tự lấy từ Discord
     useAvatarDecoration: true,// hiện khung trang trí (Nitro decoration) nếu có đang trang bị
     useIdentity: true,        // tên hiển thị (h1) + @handle tự lấy theo Discord (global name + username)
-    useActivity: true,        // hiện badge "Đang chơi / Đang nghe / Đang xem" ngay dưới @handle (kế bên avatar)
+    useActivity: true,        // hiện badge "Đang chơi / Đang nghe / Đang xem" — bấm để xem chi tiết
     useStatus: true,          // chữ Online/Idle/... + viền màu trạng thái tự đổi theo Discord
     pollIntervalMs: 20000     // tần suất kiểm tra lại (mili giây)
   },
@@ -411,6 +443,7 @@ const BIO_CONFIG = {
 const ICONS = {
   clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
   arrow: `<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M7 7h10v10"/></svg>`,
+  chevron: `<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
   pin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
   cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 12.5 4 4 0 0 0 6 20h11.5"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`,
@@ -437,7 +470,18 @@ const ICONS = {
 
 /* ------------------------------ HELPERS ---------------------------------- */
 const $ = (sel) => document.querySelector(sel);
-const fmtTime = (s) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const fmtTime = (s) => {
+  if (!isFinite(s) || s < 0) s = 0;
+  return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+};
+
+// Tách "Tên bài - Ca sĩ" thành 2 phần để hiển thị 2 dòng như player cũ.
+// Nếu không có " - " thì coi cả chuỗi là tên bài, ca sĩ để trống.
+function parseTrackTitle(raw){
+  const idx = raw.indexOf(' - ');
+  if (idx === -1) return { songTitle: raw, artist: '' };
+  return { songTitle: raw.slice(0, idx), artist: raw.slice(idx + 3) };
+}
 
 /* ------------------------------ RENDER NAV -------------------------------- */
 function renderNav(){
@@ -483,7 +527,10 @@ function renderProfile(){
     <div class="id-text">
       <h1>${profile.name}</h1>
       <div class="handle">${profile.handle}</div>
-      <div class="activity-line" id="discordActivity"></div>
+      <div class="activity-wrap">
+        <div class="activity-line" id="discordActivity"></div>
+        <div class="activity-detail" id="activityDetail"></div>
+      </div>
     </div>
   `;
 
@@ -511,12 +558,19 @@ function renderFooter(){
 }
 
 /* ------------------------------- MUSIC PLAYER ------------------------------ */
+/* Phát nhạc THẬT qua thẻ <audio> ẩn (đọc được cả .mp3 và file âm thanh
+   trong .mp4) — không còn đếm giờ giả lập. Thời lượng bài hát tự lấy từ
+   chính file nhạc khi tải xong metadata. */
 const Player = {
-  tracks: BIO_CONFIG.music.tracks,
+  tracks: BIO_CONFIG.music.tracks.map(t => ({
+    ...parseTrackTitle(t.title),
+    cover: t.cover || null,
+    music: t.music
+  })),
   index: BIO_CONFIG.music.startIndex || 0,
   playing: false,
-  elapsed: 0,
-  timer: null,
+  audio: null,
+  durations: {}, // index -> số giây, lấy từ file nhạc thật (lazy load)
   listOpen: false,
 
   currentTrack(){ return this.tracks[this.index]; },
@@ -524,6 +578,7 @@ const Player = {
   mount(){
     const el = $('#player');
     el.innerHTML = `
+      <audio id="pAudio" preload="metadata"></audio>
       <div class="player-top">
         <div class="player-art" id="pArt"></div>
         <div class="player-info">
@@ -549,45 +604,69 @@ const Player = {
       <div class="playlist-panel" id="pList"></div>
     `;
 
+    this.audio = $('#pAudio');
+
+    this.audio.addEventListener('loadedmetadata', () => {
+      this.durations[this.index] = this.audio.duration;
+      $('#pDuration').textContent = fmtTime(this.audio.duration);
+      this.renderList();
+    });
+    this.audio.addEventListener('timeupdate', () => {
+      $('#pElapsed').textContent = fmtTime(this.audio.currentTime);
+      this.updateFill();
+    });
+    this.audio.addEventListener('ended', () => {
+      if (BIO_CONFIG.music.autoAdvance){ this.next(); }
+      else { this.pause(); }
+    });
+    this.audio.addEventListener('play', () => { this.playing = true; $('#pPlay').innerHTML = ICONS.pause; });
+    this.audio.addEventListener('pause', () => { this.playing = false; $('#pPlay').innerHTML = ICONS.play; });
+
     $('#pPrev').addEventListener('click', () => this.prev());
     $('#pNext').addEventListener('click', () => this.next());
     $('#pPlay').addEventListener('click', () => this.toggle());
     $('#pTrack').addEventListener('click', (e) => this.seek(e));
     $('#pListBtn').addEventListener('click', () => this.toggleList());
 
-    this.renderTrack();
+    this.loadTrack(this.index, false);
     this.renderList();
+    this.preloadDurations();
   },
 
-  renderTrack(){
+  loadTrack(i, autoplay){
+    this.index = i;
     const t = this.currentTrack();
     if (!t) return;
-    $('#pTitle').textContent = t.title;
+
+    this.audio.pause();
+    this.audio.src = t.music || '';
+    this.audio.load();
+
+    $('#pTitle').textContent = t.songTitle;
     $('#pArtist').textContent = t.artist;
-    $('#pDuration').textContent = fmtTime(t.durationSec);
-    $('#pElapsed').textContent = fmtTime(this.elapsed);
-    $('#pLink').href = t.url || '#';
     $('#pArt').style.backgroundImage = t.cover ? `url('${t.cover}')` : '';
-    this.updateFill();
+    $('#pLink').href = t.music || '#';
+    $('#pElapsed').textContent = '0:00';
+    $('#pDuration').textContent = this.durations[i] ? fmtTime(this.durations[i]) : '0:00';
+    $('#pFill').style.width = '0%';
+
+    if (autoplay) this.play();
   },
 
   renderList(){
     $('#pList').innerHTML = this.tracks.map((t, i) => `
       <div class="playlist-item ${i === this.index ? 'active' : ''}" data-index="${i}">
-        <span class="pi-name"><b>${t.title}</b> — ${t.artist}</span>
-        <span class="pi-dur">${fmtTime(t.durationSec)}</span>
+        <span class="pi-name"><b>${t.songTitle}</b>${t.artist ? ' — ' + t.artist : ''}</span>
+        <span class="pi-dur">${this.durations[i] ? fmtTime(this.durations[i]) : '--:--'}</span>
       </div>
     `).join('');
 
     $('#pList').querySelectorAll('.playlist-item').forEach(item => {
       item.addEventListener('click', () => {
         const i = Number(item.dataset.index);
-        if (i === this.index) return;
-        this.index = i;
-        this.elapsed = 0;
-        this.renderTrack();
+        if (i === this.index){ this.toggle(); return; }
+        this.loadTrack(i, true);
         this.renderList();
-        this.play();
       });
     });
   },
@@ -599,60 +678,46 @@ const Player = {
   },
 
   updateFill(){
-    const t = this.currentTrack();
-    const pct = t.durationSec ? Math.min(100, (this.elapsed / t.durationSec) * 100) : 0;
+    const dur = this.audio.duration || this.durations[this.index] || 0;
+    const pct = dur ? Math.min(100, (this.audio.currentTime / dur) * 100) : 0;
     $('#pFill').style.width = pct + '%';
   },
 
   toggle(){ this.playing ? this.pause() : this.play(); },
 
   play(){
-    this.playing = true;
-    $('#pPlay').innerHTML = ICONS.pause;
-    clearInterval(this.timer);
-    this.timer = setInterval(() => {
-      const t = this.currentTrack();
-      this.elapsed += 1;
-      if (this.elapsed >= t.durationSec){
-        if (BIO_CONFIG.music.autoAdvance){ this.next(); }
-        else { this.elapsed = t.durationSec; this.pause(); }
-        return;
-      }
-      $('#pElapsed').textContent = fmtTime(this.elapsed);
-      this.updateFill();
-    }, 1000);
+    const p = this.audio.play();
+    if (p && p.catch){ p.catch(() => { /* trình duyệt chặn autoplay hoặc thiếu file — giữ trạng thái tạm dừng */ }); }
   },
 
-  pause(){
-    this.playing = false;
-    $('#pPlay').innerHTML = ICONS.play;
-    clearInterval(this.timer);
-  },
+  pause(){ this.audio.pause(); },
 
-  next(){
-    this.index = (this.index + 1) % this.tracks.length;
-    this.elapsed = 0;
-    this.renderTrack();
-    this.renderList();
-    if (this.playing) this.play();
-  },
-
-  prev(){
-    this.index = (this.index - 1 + this.tracks.length) % this.tracks.length;
-    this.elapsed = 0;
-    this.renderTrack();
-    this.renderList();
-    if (this.playing) this.play();
-  },
+  next(){ this.loadTrack((this.index + 1) % this.tracks.length, this.playing); this.renderList(); },
+  prev(){ this.loadTrack((this.index - 1 + this.tracks.length) % this.tracks.length, this.playing); this.renderList(); },
 
   seek(e){
     const track = $('#pTrack');
     const rect = track.getBoundingClientRect();
     const pct = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-    const t = this.currentTrack();
-    this.elapsed = Math.floor(pct * t.durationSec);
-    $('#pElapsed').textContent = fmtTime(this.elapsed);
+    const dur = this.audio.duration || this.durations[this.index] || 0;
+    if (dur){ this.audio.currentTime = pct * dur; }
     this.updateFill();
+  },
+
+  // Lấy trước thời lượng của những bài chưa mở tới bằng 1 thẻ audio ẩn khác,
+  // để danh sách phát hiện sẵn thời lượng thay vì để trống "--:--".
+  preloadDurations(){
+    this.tracks.forEach((t, i) => {
+      if (i === this.index || this.durations[i] || !t.music) return;
+      const probe = new Audio();
+      probe.preload = 'metadata';
+      probe.src = t.music;
+      probe.addEventListener('loadedmetadata', () => {
+        this.durations[i] = probe.duration;
+        this.renderList();
+      });
+      probe.addEventListener('error', () => {}); // file lỗi/chưa có thì bỏ qua, giữ "--:--"
+    });
   }
 };
 
@@ -792,6 +857,11 @@ const Discord = {
     5: { verb: 'Đang thi đấu', icon: null }, // ICONS.game
   },
 
+  // Trạng thái mở/đóng của panel chi tiết + hoạt động đang được hiển thị,
+  // lưu lại để giữ nguyên khi Lanyard cập nhật lại (poll mỗi vài giây).
+  detailOpen: false,
+  currentActivity: null,
+
   avatarUrl(user){
     if (!user) return null;
     if (!user.avatar){
@@ -812,8 +882,7 @@ const Discord = {
   },
 
   // Ảnh nhỏ của game / app đang chạy (nếu Discord có gửi asset kèm activity),
-  // dùng làm icon cho badge thay vì icon SVG chung — để badge hiện đúng icon
-  // của game/app thật (ví dụ icon Valorant, icon Spotify...).
+  // dùng làm icon cho badge/panel chi tiết thay vì icon SVG chung.
   activityImageUrl(activity){
     const assets = activity && activity.assets;
     if (!assets || !assets.large_image) return null;
@@ -825,6 +894,17 @@ const Discord = {
       return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
     }
     return null;
+  },
+
+  // "5 phút", "2 giờ 10 phút", "3 ngày"... tính từ mốc timestamps.start Discord gửi
+  timeSince(startMs){
+    const diff = Math.max(0, Date.now() - startMs);
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'vài giây';
+    if (mins < 60) return `${mins} phút`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} giờ ${mins % 60} phút`;
+    return `${Math.floor(hrs / 24)} ngày`;
   },
 
   applyAvatar(discordUser){
@@ -859,42 +939,93 @@ const Discord = {
   },
 
   // Hiện badge "Đang chơi <game>" / "Đang nghe <nhạc>" / custom status ngay
-  // dưới @handle — tức là kế bên avatar trong cùng cột id-text, giống hệt vị
-  // trí custom status trên profile Discord thật. Ưu tiên hoạt động thật (chơi
-  // game, nghe Spotify, xem phim...) hơn custom status chữ nếu có cả hai.
+  // dưới @handle. Nếu là hoạt động thật (chơi game, nghe Spotify, xem...) thì
+  // badge có thể bấm vào để mở rộng ra panel chi tiết bên dưới nó.
   applyActivity(activities){
-    const el = document.querySelector('#discordActivity');
-    if (!el) return;
+    const badgeEl = document.querySelector('#discordActivity');
+    if (!badgeEl) return;
 
     const list = activities || [];
     const custom = list.find(a => a.type === 4);
-    // ưu tiên "đang chơi game" (type 0) nếu có nhiều hoạt động cùng lúc,
-    // ví dụ vừa chơi game vừa nghe Spotify.
+    // ưu tiên "đang chơi game" (type 0) nếu có nhiều hoạt động cùng lúc
     const real = list.find(a => a.type === 0) || list.find(a => a.type !== 4);
 
-    let html = '';
+    this.currentActivity = real || null;
 
+    let badgeHtml = '';
     if (real){
       const meta = this.activityMeta[real.type] || { verb: '', icon: ICONS.game };
       const imgUrl = this.activityImageUrl(real);
-      const iconHtml = imgUrl
-        ? `<img src="${imgUrl}" alt="">`
-        : (meta.icon || ICONS.game);
-
+      const iconHtml = imgUrl ? `<img src="${imgUrl}" alt="">` : (meta.icon || ICONS.game);
       const detailParts = [real.details, real.state].filter(Boolean).join(' • ');
-      html = `${iconHtml}<span><b>${meta.verb} ${real.name}</b>${detailParts ? ' — ' + detailParts : ''}</span>`;
+      badgeHtml = `${iconHtml}<span><b>${meta.verb} ${real.name}</b>${detailParts ? ' — ' + detailParts : ''}</span>${ICONS.chevron}`;
     } else if (custom && (custom.state || custom.emoji)){
       const emoji = custom.emoji && custom.emoji.name ? custom.emoji.name + ' ' : '';
-      html = `<span>${emoji}${custom.state || ''}</span>`;
+      badgeHtml = `<span>${emoji}${custom.state || ''}</span>`;
     }
 
-    if (html){
-      el.innerHTML = html;
-      el.style.display = 'flex';
+    if (badgeHtml){
+      badgeEl.innerHTML = badgeHtml;
+      badgeEl.style.display = 'flex';
+      badgeEl.classList.toggle('clickable', !!real);
     } else {
-      el.innerHTML = '';
-      el.style.display = 'none';
+      badgeEl.innerHTML = '';
+      badgeEl.style.display = 'none';
     }
+
+    if (!real){
+      this.setDetailOpen(false);
+    } else if (this.detailOpen){
+      this.renderDetail();
+    }
+
+    this.bindActivityClick();
+  },
+
+  // Panel mở rộng: ảnh lớn hơn + tên đầy đủ + details/state đầy đủ +
+  // "đã chơi/nghe được bao lâu" tính từ timestamps.start.
+  renderDetail(){
+    const detailEl = document.querySelector('#activityDetail');
+    if (!detailEl) return;
+    const a = this.currentActivity;
+    if (!a){ detailEl.innerHTML = ''; return; }
+
+    const meta = this.activityMeta[a.type] || { verb: '' };
+    const imgUrl = this.activityImageUrl(a);
+    const timeText = (a.timestamps && a.timestamps.start) ? this.timeSince(a.timestamps.start) : '';
+
+    detailEl.innerHTML = `
+      <div class="activity-detail-inner">
+        ${imgUrl ? `<img src="${imgUrl}" alt="">` : ''}
+        <div class="activity-detail-text">
+          <div class="activity-detail-name">${a.name}</div>
+          ${a.details ? `<div class="activity-detail-line">${a.details}</div>` : ''}
+          ${a.state ? `<div class="activity-detail-line">${a.state}</div>` : ''}
+          ${timeText ? `<div class="activity-detail-time">${meta.verb} được ${timeText}</div>` : ''}
+        </div>
+      </div>
+    `;
+  },
+
+  setDetailOpen(open){
+    this.detailOpen = open;
+    const badgeEl = document.querySelector('#discordActivity');
+    const detailEl = document.querySelector('#activityDetail');
+    if (badgeEl) badgeEl.classList.toggle('open', open);
+    if (detailEl) detailEl.classList.toggle('open', open);
+    if (open) this.renderDetail();
+  },
+
+  // Gắn sự kiện click 1 lần duy nhất (badge được cập nhật innerHTML liên tục
+  // qua các lần poll, nhưng bản thân phần tử #discordActivity không đổi).
+  bindActivityClick(){
+    const badgeEl = document.querySelector('#discordActivity');
+    if (!badgeEl || badgeEl.dataset.bound) return;
+    badgeEl.dataset.bound = '1';
+    badgeEl.addEventListener('click', () => {
+      if (!this.currentActivity) return;
+      this.setDetailOpen(!this.detailOpen);
+    });
   },
 
   applyStatus(status){
