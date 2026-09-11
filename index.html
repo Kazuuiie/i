@@ -99,11 +99,27 @@
     100% { box-shadow: 0 0 0 0 rgba(var(--status-rgb), 0); }
   }
 
+  /* Badge hoạt động (đang chơi game / đang nghe nhạc / custom status) —
+     nằm ngay dưới @handle, tức là kế bên avatar trong cùng cột id-text. */
   .activity-line{
-    display:none; align-items:center; gap:6px;
-    font-size: 12.5px; color: var(--text-dim); font-weight: 600;
-    margin-top: 2px;
+    display:none; align-items:center; gap:8px;
+    font-size: 12.5px; color: var(--text); font-weight: 600;
+    margin-top: 8px;
+    width: fit-content; max-width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--panel-border);
+    padding: 5px 12px 5px 5px;
+    border-radius: 999px;
   }
+  .activity-line img{
+    width: 20px; height: 20px; border-radius: 6px; flex-shrink:0;
+    object-fit: cover; background: rgba(255,255,255,0.08);
+  }
+  .activity-line svg{ width:15px; height:15px; flex-shrink:0; opacity:.9; color: var(--accent); }
+  .activity-line span{
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .activity-line span b{ font-weight:700; }
 
   .identity{ display:flex; align-items:flex-start; gap: 22px; }
 
@@ -155,6 +171,7 @@
   }
   .avatar-deco.show{ display: block; }
 
+  .id-text{ min-width: 0; }
   .id-text h1{ font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height:1.1; }
   .id-text .handle{ margin-top: 6px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
 
@@ -267,6 +284,7 @@
     .identity{ flex-direction:column; align-items:flex-start; gap:14px; }
     .id-text h1{ font-size: 28px; }
     .content{ padding-top: 32px; gap: 18px; }
+    .activity-line{ max-width: 260px; }
   }
   @media (prefers-reduced-motion: reduce){ .link-card{ transition:none; } }
 </style>
@@ -306,6 +324,9 @@
    - Thời tiết lấy TỰ ĐỘNG theo vị trí trình duyệt (Open-Meteo, miễn phí,
      không cần API key). Nếu người dùng từ chối chia sẻ vị trí, trang sẽ
      dùng toạ độ dự phòng trong weather.fallback.
+   - Badge "Đang chơi / Đang nghe" cạnh avatar lấy tự động từ Discord thật
+     qua Lanyard (xem phần discord bên dưới) — không cần chỉnh gì thêm,
+     chỉ cần discord.useActivity: true.
    ========================================================================= */
 const BIO_CONFIG = {
 
@@ -370,7 +391,7 @@ const BIO_CONFIG = {
     useAvatar: true,          // avatar tự lấy từ Discord
     useAvatarDecoration: true,// hiện khung trang trí (Nitro decoration) nếu có đang trang bị
     useIdentity: true,        // tên hiển thị (h1) + @handle tự lấy theo Discord (global name + username)
-    useActivity: true,        // hiện dòng trạng thái tuỳ chỉnh / đang chơi gì bên dưới @handle
+    useActivity: true,        // hiện badge "Đang chơi / Đang nghe / Đang xem" ngay dưới @handle (kế bên avatar)
     useStatus: true,          // chữ Online/Idle/... + viền màu trạng thái tự đổi theo Discord
     pollIntervalMs: 20000     // tần suất kiểm tra lại (mili giây)
   },
@@ -400,6 +421,12 @@ const ICONS = {
   next: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l9 6-9 6z"/></svg>`,
   play: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`,
   pause: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>`,
+  /* Icon cho badge activity: game (controller), music_activity (nốt nhạc,
+     dùng khi đang nghe Spotify), eye (đang xem), stream (đang stream). */
+  game: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4M15.5 13h.01M18 10.5h.01M17.32 8H6.68a4 4 0 0 0-3.978 4.393l.404 4.06A2.5 2.5 0 0 0 5.59 18.7c.605 0 1.183-.24 1.61-.668L9 16.25a2 2 0 0 1 1.414-.586h3.172a2 2 0 0 1 1.414.586l1.8 1.782a2.28 2.28 0 0 0 1.61.668 2.5 2.5 0 0 0 2.485-2.247l.404-4.06A4 4 0 0 0 17.32 8Z"/></svg>`,
+  music_activity: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+  eye: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  stream: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="10" rx="2"/><path d="M22 8.5v7L16 13z"/></svg>`,
   social: {
     discord: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3a13.6 13.6 0 0 0-.617 1.25 18.27 18.27 0 0 0-5.536 0A13.6 13.6 0 0 0 9.115 3a19.74 19.74 0 0 0-4.435 1.372C1.933 8.52 1.203 12.573 1.568 16.57a19.9 19.9 0 0 0 5.993 3.03 14.6 14.6 0 0 0 1.283-2.084 12.9 12.9 0 0 1-2.02-.968c.17-.123.336-.252.497-.384a14.24 14.24 0 0 0 12.15 0c.163.132.328.26.497.384-.638.377-1.32.699-2.02.968.372.73.8 1.424 1.283 2.084a19.86 19.86 0 0 0 5.994-3.03c.43-4.63-.734-8.647-3.908-12.201ZM8.02 14.243c-1.183 0-2.157-1.084-2.157-2.418 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.947 2.418-2.157 2.418Zm7.96 0c-1.183 0-2.157-1.084-2.157-2.418 0-1.333.955-2.418 2.157-2.418 1.21 0 2.175 1.094 2.157 2.418 0 1.334-.938 2.418-2.157 2.418Z"/></svg>`,
     github: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.014c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.238-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.622.069-.61.069-.61 1.004.071 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.833.091-.647.35-1.089.636-1.339-2.221-.253-4.556-1.113-4.556-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.269 2.75 1.026A9.6 9.6 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.026 2.747-1.026.546 1.378.203 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.31.679.921.679 1.856 0 1.339-.012 2.419-.012 2.749 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.014C22 6.484 17.522 2 12 2Z"/></svg>`,
@@ -755,6 +782,16 @@ const Discord = {
     offline: { rgb: '128,132,142', label: 'Offline' }
   },
 
+  // Nhãn tiếng Việt + icon riêng cho từng loại activity Discord trả về.
+  // type: 0 Playing, 1 Streaming, 2 Listening, 3 Watching, 5 Competing.
+  activityMeta: {
+    0: { verb: 'Đang chơi',    icon: null }, // gán ICONS.game lúc init()
+    1: { verb: 'Đang stream',  icon: null }, // ICONS.stream
+    2: { verb: 'Đang nghe',    icon: null }, // ICONS.music_activity
+    3: { verb: 'Đang xem',     icon: null }, // ICONS.eye
+    5: { verb: 'Đang thi đấu', icon: null }, // ICONS.game
+  },
+
   avatarUrl(user){
     if (!user) return null;
     if (!user.avatar){
@@ -772,6 +809,22 @@ const Discord = {
     const deco = discordUser && discordUser.avatar_decoration_data;
     if (!deco || !deco.asset) return null;
     return `https://cdn.discordapp.com/avatar-decoration-presets/${deco.asset}.png?size=160`;
+  },
+
+  // Ảnh nhỏ của game / app đang chạy (nếu Discord có gửi asset kèm activity),
+  // dùng làm icon cho badge thay vì icon SVG chung — để badge hiện đúng icon
+  // của game/app thật (ví dụ icon Valorant, icon Spotify...).
+  activityImageUrl(activity){
+    const assets = activity && activity.assets;
+    if (!assets || !assets.large_image) return null;
+    const img = assets.large_image;
+    if (img.startsWith('mp:')){
+      return `https://media.discordapp.net/${img.replace('mp:', '')}`;
+    }
+    if (activity.application_id){
+      return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
+    }
+    return null;
   },
 
   applyAvatar(discordUser){
@@ -805,27 +858,41 @@ const Discord = {
     if (handleEl) handleEl.textContent = '@' + discordUser.username;
   },
 
-  // Hiện trạng thái tuỳ chỉnh (custom status) hoặc hoạt động đang làm (chơi game / xem / stream...)
+  // Hiện badge "Đang chơi <game>" / "Đang nghe <nhạc>" / custom status ngay
+  // dưới @handle — tức là kế bên avatar trong cùng cột id-text, giống hệt vị
+  // trí custom status trên profile Discord thật. Ưu tiên hoạt động thật (chơi
+  // game, nghe Spotify, xem phim...) hơn custom status chữ nếu có cả hai.
   applyActivity(activities){
     const el = document.querySelector('#discordActivity');
     if (!el) return;
 
-    const verbMap = { 0: 'Đang chơi', 1: 'Đang stream', 2: 'Đang nghe', 3: 'Đang xem', 5: 'Đang thi đấu' };
-    const custom = (activities || []).find(a => a.type === 4);
-    const other = (activities || []).find(a => a.type !== 4);
+    const list = activities || [];
+    const custom = list.find(a => a.type === 4);
+    // ưu tiên "đang chơi game" (type 0) nếu có nhiều hoạt động cùng lúc,
+    // ví dụ vừa chơi game vừa nghe Spotify.
+    const real = list.find(a => a.type === 0) || list.find(a => a.type !== 4);
 
-    let text = '';
-    if (custom && custom.state){
-      text = (custom.emoji ? custom.emoji.name + ' ' : '') + custom.state;
-    } else if (other){
-      text = `${verbMap[other.type] || ''} ${other.name}`.trim();
+    let html = '';
+
+    if (real){
+      const meta = this.activityMeta[real.type] || { verb: '', icon: ICONS.game };
+      const imgUrl = this.activityImageUrl(real);
+      const iconHtml = imgUrl
+        ? `<img src="${imgUrl}" alt="">`
+        : (meta.icon || ICONS.game);
+
+      const detailParts = [real.details, real.state].filter(Boolean).join(' • ');
+      html = `${iconHtml}<span><b>${meta.verb} ${real.name}</b>${detailParts ? ' — ' + detailParts : ''}</span>`;
+    } else if (custom && (custom.state || custom.emoji)){
+      const emoji = custom.emoji && custom.emoji.name ? custom.emoji.name + ' ' : '';
+      html = `<span>${emoji}${custom.state || ''}</span>`;
     }
 
-    if (text){
-      el.textContent = text;
+    if (html){
+      el.innerHTML = html;
       el.style.display = 'flex';
     } else {
-      el.textContent = '';
+      el.innerHTML = '';
       el.style.display = 'none';
     }
   },
@@ -862,6 +929,13 @@ const Discord = {
   },
 
   init(){
+    // gán icon SVG vào activityMeta ở đây (ICONS đã có sẵn khi init() chạy)
+    this.activityMeta[0].icon = ICONS.game;
+    this.activityMeta[1].icon = ICONS.stream;
+    this.activityMeta[2].icon = ICONS.music_activity;
+    this.activityMeta[3].icon = ICONS.eye;
+    this.activityMeta[5].icon = ICONS.game;
+
     const cfg = BIO_CONFIG.discord;
     if (!cfg.enabled || !cfg.userId) return; // chưa bật hoặc chưa điền userId thì bỏ qua, giữ avatar/tên tĩnh
     this.fetchPresence();
