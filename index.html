@@ -1671,10 +1671,27 @@ const Background = (() => {
     uniform float u_threshold;
     uniform float u_softness;
     uniform float u_strength;
+    uniform float u_videoAspect;
+    uniform float u_viewAspect;
     varying vec2 v_uv;
 
     void main(){
-      vec4 c = texture2D(u_video, v_uv);
+      vec2 uv = v_uv;
+      float va = max(u_videoAspect, 0.0001);
+      float ba = max(u_viewAspect, 0.0001);
+
+      // Match the video element's object-fit: cover crop exactly.
+      if (va > ba) {
+        float visible = ba / va;
+        float crop = (1.0 - visible) * 0.5;
+        uv.x = crop + uv.x * visible;
+      } else {
+        float visible = va / ba;
+        float crop = (1.0 - visible) * 0.5;
+        uv.y = crop + uv.y * visible;
+      }
+
+      vec4 c = texture2D(u_video, uv);
       float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
       float edge = max(u_softness, 0.001);
       float mask = smoothstep(u_threshold, min(1.0, u_threshold + edge), lum);
@@ -1751,7 +1768,16 @@ const Background = (() => {
   function resizeCanvas(){
     if (!lightCanvas) return;
     const rect = lightCanvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const rawDpr = window.devicePixelRatio || 1;
+    const mobile = Math.min(window.innerWidth, window.innerHeight) <= 700;
+    const dprCap = mobile ? 1.15 : 1.5;
+    let dpr = Math.min(rawDpr, dprCap);
+
+    // Keep the shader lightweight on unusually large screens/high-DPR devices.
+    const maxPixels = mobile ? 900000 : 1600000;
+    const estimated = Math.max(1, rect.width * rect.height * dpr * dpr);
+    if (estimated > maxPixels) dpr *= Math.sqrt(maxPixels / estimated);
+
     const w = Math.max(2, Math.floor(rect.width * dpr));
     const h = Math.max(2, Math.floor(rect.height * dpr));
     if (lightCanvas.width !== w || lightCanvas.height !== h) {
@@ -1759,6 +1785,7 @@ const Background = (() => {
       lightCanvas.height = h;
       if (gl) gl.viewport(0, 0, w, h);
     }
+    return { width: rect.width, height: rect.height };
   }
 
   function renderLight(){
@@ -1768,7 +1795,7 @@ const Background = (() => {
     }
 
     const cfg = BIO_CONFIG.background?.lightMask || {};
-    resizeCanvas();
+    const view = resizeCanvas() || { width: lightCanvas.clientWidth, height: lightCanvas.clientHeight };
     gl.viewport(0, 0, lightCanvas.width, lightCanvas.height);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -1780,6 +1807,8 @@ const Background = (() => {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_video'), 0);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_videoAspect'), video.videoWidth / Math.max(1, video.videoHeight));
+    gl.uniform1f(gl.getUniformLocation(program, 'u_viewAspect'), Math.max(1, view.width) / Math.max(1, view.height));
     gl.uniform1f(gl.getUniformLocation(program, 'u_threshold'), clamp01(cfg.threshold ?? 0.48));
     gl.uniform1f(gl.getUniformLocation(program, 'u_softness'), clamp01(cfg.softness ?? 0.20));
     gl.uniform1f(gl.getUniformLocation(program, 'u_strength'), Math.max(0, Number(cfg.strength ?? 1)));
@@ -1858,7 +1887,11 @@ const Background = (() => {
     }
   }
 
-  window.addEventListener('resize', resizeCanvas);
+  const resizeObserver = new ResizeObserver(() => resizeCanvas());
+  if (root && 'ResizeObserver' in window) resizeObserver.observe(root);
+
+  window.addEventListener('resize', resizeCanvas, { passive: true });
+  window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 120), { passive: true });
   return { apply };
 })();
 
