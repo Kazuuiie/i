@@ -38,7 +38,6 @@
   }
 
   ::selection{ background: rgba(125,211,168,0.28); color: #fff; }
-
   .bg{
     position: fixed; inset: 0; z-index: 0; overflow: hidden;
     background:
@@ -49,18 +48,16 @@
   }
   .bg-media{
     position:absolute; inset:0; width:100%; height:100%;
-    object-fit:cover; object-position:center;
-    display:block; pointer-events:none;
+    object-fit:cover; object-position:center center;
+    display:none; pointer-events:none;
   }
   .bg-fog{
-    position:absolute; inset:-18px;
-    background: rgba(220,230,235,0.09);
-    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    pointer-events:none;
-    opacity:0; transition:opacity .25s ease;
+    position:absolute; inset:0; pointer-events:none;
+    display:none;
   }
   .bg-overlay{
-    position:absolute; inset:0; background:#000; opacity:0; pointer-events:none;
+    position:absolute; inset:0; pointer-events:none;
+    display:none;
   }
   @keyframes auroraDrift{
     0%, 100% { transform: translate3d(0,0,0) scale(1); }
@@ -391,6 +388,7 @@
   .icon-btn:hover{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.08); }
   .icon-btn:active{ transform:scale(.94); }
   .icon-btn svg{ width:13px; height:13px; }
+  .icon-btn.spotify svg{ width:14px; height:14px; color:#1ed760; }
   .icon-btn.list-open{ background:rgba(143,214,176,.10); color:var(--accent); border-color:rgba(143,214,176,.10); }
 
   .progress-row{
@@ -578,24 +576,6 @@
 <script>
 const BIO_CONFIG = {
 
-  /* ========================= BACKGROUND =========================
-     type: "video" | "image" | "gradient"
-     Với video, cứ đặt file cạnh index.html rồi ghi tên file ở source.
-     Video dùng thiết lập tự nhiên: autoplay + loop + muted + playsInline.
-     Fog là lớp sương rất nhẹ phía trên nền, không làm mờ nội dung.
-  */
-  background: {
-    enabled: true,
-    type: "video",
-    source: "bg.mp4",
-    position: "center center",
-    size: "cover",
-    overlay: {
-    enabled: true,
-    color: "rgba(5, 6, 10, 0.35)"
-  },
-  },
-
   nav: [
     { label: "HOME",     href: "#", active: true },
     { label: "PROJECTS", href: "#" },
@@ -604,6 +584,28 @@ const BIO_CONFIG = {
   ],
 
   clock: { enabled: true, format24h: true },
+
+  /* ---- BACKGROUND ----
+     type: "video" | "image" | "gradient"
+     source: tên file / URL, ví dụ "bg.mp4" hoặc "bg.jpg"
+  */
+  background: {
+    enabled: true,
+    type: "video",
+    source: "bg.mp4",
+    position: "center center",
+    size: "cover",
+    overlay: {
+      enabled: true,
+      color: "rgba(5, 6, 10, 0.35)"
+    },
+    fog: {
+      enabled: true,
+      blur: 4,
+      opacity: 0.08,
+      color: "rgba(220, 230, 235, 0.10)"
+    }
+  },
 
   profile: {
     status: "Online",
@@ -680,6 +682,7 @@ const ICONS = {
   cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 12.5 4 4 0 0 0 6 20h11.5"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`,
   rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 16a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 9.5 4 4 0 0 0 6 17.5h11.5"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>`,
+  spotify: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Zm4.586 14.424a.622.622 0 0 1-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 1 1-.277-1.215c3.809-.87 7.077-.496 9.712 1.115a.623.623 0 0 1 .207.857Zm1.223-2.722a.78.78 0 0 1-1.072.257c-2.688-1.652-6.786-2.131-9.966-1.166a.78.78 0 1 1-.454-1.494c3.63-1.102 8.147-.568 11.235 1.332a.78.78 0 0 1 .257 1.071Zm.105-2.835C14.692 9.03 9.375 8.854 6.297 9.798a.936.936 0 1 1-.545-1.79c3.533-1.073 9.402-.865 13.115 1.338a.936.936 0 0 1-.953 1.612Z"/></svg>`,
   list: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
   prev: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 9 6V6z"/></svg>`,
   next: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l9 6-9 6z"/></svg>`,
@@ -1617,52 +1620,67 @@ function initSpotlight(){
   });
 }
 
-/* ---------------------------- BACKGROUND ENGINE ---------------------------- */
-const Background = {
-  apply(){
-    const cfg = BIO_CONFIG.background || {};
-    const root = document.getElementById('bg');
-    const video = document.getElementById('bgVideo');
-    const fog = document.getElementById('bgFog');
-    const overlay = document.getElementById('bgOverlay');
-    if(!root || !video || !fog || !overlay) return;
+/* ------------------------------- BACKGROUND -------------------------------- */
+const Background = (() => {
+  const root = document.getElementById('bg');
+  const video = document.getElementById('bgVideo');
+  const fog = document.getElementById('bgFog');
+  const overlay = document.getElementById('bgOverlay');
 
+  function apply(){
+    if (!root) return;
+    const cfg = BIO_CONFIG.background || {};
+    const type = cfg.type || 'gradient';
+
+    root.style.background = getComputedStyle(root).background || '';
     video.pause();
     video.removeAttribute('src');
     video.load();
     video.style.display = 'none';
-    video.style.objectPosition = cfg.position || 'center center';
-    video.style.objectFit = cfg.size || 'cover';
-    fog.style.opacity = '0';
-    overlay.style.opacity = String(Math.max(0, Math.min(1, Number(cfg.overlay || 0))));
+    fog.style.display = 'none';
+    overlay.style.display = 'none';
 
-    if(cfg.enabled === false) return;
+    if (cfg.enabled === false) return;
 
-    if(cfg.type === 'video' && cfg.source){
+    if (type === 'video' && cfg.source) {
       video.src = cfg.source;
       video.muted = true;
       video.autoplay = true;
       video.loop = true;
       video.playsInline = true;
+      video.style.objectPosition = cfg.position || 'center center';
+      video.style.objectFit = cfg.size || 'cover';
       video.style.display = 'block';
-      video.addEventListener('error', () => { video.style.display = 'none'; }, { once:true });
-      const tryPlay = () => video.play().catch(() => {});
-      if(video.readyState >= 2) tryPlay();
-      else video.addEventListener('loadeddata', tryPlay, { once:true });
-    } else if(cfg.type === 'image' && cfg.source){
-      root.style.background = `url("${cfg.source}") ${cfg.position || 'center center'} / ${cfg.size || 'cover'} no-repeat`;
-    } else {
-      root.style.background = '';
+      video.setAttribute('muted', '');
+      video.setAttribute('autoplay', '');
+      video.setAttribute('loop', '');
+      video.setAttribute('playsinline', '');
+      video.play().catch(() => {});
+    } else if (type === 'image' && cfg.source) {
+      root.style.backgroundImage = `url("${String(cfg.source).replace(/"/g, '\\"')}")`;
+      root.style.backgroundPosition = cfg.position || 'center center';
+      root.style.backgroundSize = cfg.size || 'cover';
+      root.style.backgroundRepeat = 'no-repeat';
     }
 
-    if(cfg.fog && cfg.fog.enabled){
-      fog.style.opacity = Math.max(0, Math.min(1, Number(cfg.fog.opacity ?? 0.09)));
-      const blur = Math.max(0, Number(cfg.fog.blur ?? 4));
-      fog.style.backdropFilter = `blur(${blur}px)`;
-      fog.style.webkitBackdropFilter = `blur(${blur}px)`;
+    const ov = cfg.overlay || {};
+    if (ov.enabled !== false && ov.color) {
+      overlay.style.background = ov.color;
+      overlay.style.display = 'block';
+    }
+
+    const fg = cfg.fog || {};
+    if (fg.enabled) {
+      fog.style.background = fg.color || 'rgba(220,230,235,0.10)';
+      fog.style.backdropFilter = `blur(${Number(fg.blur || 0)}px)`;
+      fog.style.webkitBackdropFilter = `blur(${Number(fg.blur || 0)}px)`;
+      fog.style.opacity = String(Math.max(0, Math.min(1, Number(fg.opacity ?? 0.08))));
+      fog.style.display = 'block';
     }
   }
-};
+
+  return { apply };
+})();
 
 /* --------------------------------- INIT ------------------------------------ */
 Background.apply();
