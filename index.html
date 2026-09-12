@@ -62,15 +62,17 @@
   .bg-light{
     position:absolute; inset:-2%; width:104%; height:104%;
     display:none; pointer-events:none; z-index:3;
-    filter:blur(26px) saturate(1.28);
+    filter:blur(18px) saturate(1.05);
     mix-blend-mode:screen;
-    opacity:.92;
+    opacity:.88;
     transform:scale(1.02);
   }
 
   .bg-fog{
-    position:absolute; inset:-18px; pointer-events:none;
+    position:absolute; inset:0; pointer-events:none;
     display:none; z-index:4;
+    /* Full-screen backdrop-filter is expensive; keep it subtle. */
+    transform:translateZ(0);
   }
   @keyframes auroraDrift{
     0%, 100% { transform: translate3d(0,0,0) scale(1); }
@@ -325,6 +327,10 @@
     gap: 18px; transition: transform .22s var(--ease), background .18s ease, border-color .18s ease;
     min-height: 78px;
   }
+  button.link-card{
+    appearance:none; -webkit-appearance:none; width:100%; font:inherit; text-align:left; cursor:pointer;
+  }
+
   .link-card::after{
     content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
     background: radial-gradient(120px circle at var(--mx,50%) var(--my,50%), rgba(125,211,168,.16), transparent 70%);
@@ -591,10 +597,7 @@
 const BIO_CONFIG = {
 
   nav: [
-    { label: "HOME",     href: "#", active: true },
-    { label: "PROJECTS", href: "#" },
-    { label: "ABOUT",    href: "#" },
-    { label: "CONTACT",  href: "#" },
+    { label: "HOME", href: "#", active: true },
   ],
 
   clock: { enabled: true, format24h: true },
@@ -611,24 +614,24 @@ const BIO_CONFIG = {
     size: "cover",
     overlay: {
       enabled: true,
-      color: "rgba(108, 114, 120, 0.69)"
+      color: "rgba(115, 120, 125, 0.93)"
     },
     lightMask: {
       enabled: true,
-      threshold: 0.34,
-      softness: 0.28,
-      strength: 1.18,
+      threshold: 0.48,
+      softness: 0.20,
+      strength: 1.00,
       coreThreshold: 0.70,
       coreStrength: 0.72,
-      chroma: 1.20,
-      blur: 26,
-      opacity: 0.92
+      chroma: 1.15,
+      blur: 14,
+      opacity: 0.84
     },
     fog: {
       enabled: true,
-      blur: 4,
-      opacity: 0.5,
-      color: "rgba(215, 220, 225, 0.24)"
+      blur: 2,
+      opacity: 0.10,
+      color: "rgba(215, 220, 225, 0.22)"
     }
   },
 
@@ -645,12 +648,11 @@ const BIO_CONFIG = {
   },
 
   socials: [
-    { key: "discord", name: "Discord",     url: "#" },
-    { key: "github",  name: "GitHub",      url: "#" },
-    { key: "youtube", name: "YouTube",     url: "#" },
-    { key: "x",       name: "X (Twitter)", url: "#" },
-    // Thêm mạng xã hội mới, ví dụ:
-    // { key: "tiktok", name: "TikTok", url: "#" },  // nhớ thêm icon "tiktok" vào ICONS.social
+    { key: "discord", name: "Discord", url: null },
+    { key: "roblox",  name: "Roblox",  url: null },
+    { key: "youtube", name: "YouTube", url: null },
+    { key: "github",  name: "GitHub",  url: null },
+    // Sau này chỉ cần điền URL, ví dụ: url: "https://..."
   ],
 
   /* ---- NHẠC — gọn còn 3 trường mỗi bài, thêm bao nhiêu bài tuỳ thích ----
@@ -728,6 +730,7 @@ const ICONS = {
     github: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.014c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.238-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.622.069-.61.069-.61 1.004.071 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.833.091-.647.35-1.089.636-1.339-2.221-.253-4.556-1.113-4.556-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.269 2.75 1.026A9.6 9.6 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.026 2.747-1.026.546 1.378.203 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.31.679.921.679 1.856 0 1.339-.012 2.419-.012 2.749 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.014C22 6.484 17.522 2 12 2Z"/></svg>`,
     youtube: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.02 3.02 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.02 3.02 0 0 0 .502 6.186 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .502 5.814 3.02 3.02 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.02 3.02 0 0 0 2.122-2.136A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.502-5.814ZM9.545 15.568V8.432L15.818 12l-6.273 3.568Z"/></svg>`,
     x: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231ZM17.083 19.77h1.833L7.084 4.126H5.117Z"/></svg>`,
+    roblox: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m6.21 2.5 13.29 4.64-4.71 14.36-13.29-4.64L6.21 2.5Zm1.9 6.21-1.36 4.16 4.05 1.42 1.36-4.16-4.05-1.42Z"/></svg>`,
   }
 };
 
@@ -804,15 +807,29 @@ function renderProfile(){
 /* ---------------------------- RENDER SOCIALS ------------------------------ */
 function renderSocials(){
   const { socials } = BIO_CONFIG;
-  $('#links').innerHTML = socials.map(s => `
-    <a class="link-card" href="${s.url}" target="_blank" rel="noopener">
-      <div class="top">
-        ${ICONS.social[s.key] || ''}
-        ${ICONS.arrow}
-      </div>
-      <span class="label">${s.name}</span>
-    </a>
-  `).join('');
+  $('#links').innerHTML = socials.map(s => {
+    const icon = ICONS.social[s.key] || '';
+    const arrow = ICONS.arrow;
+    if (s.url) {
+      return `
+        <a class="link-card" href="${s.url}" rel="noopener" data-social="${s.key}">
+          <div class="top">${icon}${arrow}</div>
+          <span class="label">${s.name}</span>
+        </a>`;
+    }
+    return `
+      <button class="link-card" type="button" data-social="${s.key}" aria-label="${s.name}">
+        <span class="top">${icon}${arrow}</span>
+        <span class="label">${s.name}</span>
+      </button>`;
+  }).join('');
+
+  $('#links').querySelectorAll('.link-card[data-social]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const item = BIO_CONFIG.socials.find(x => x.key === el.dataset.social);
+      if (!item?.url) e.preventDefault();
+    });
+  });
 }
 
 /* ------------------------------ RENDER FOOTER ------------------------------ */
@@ -1615,7 +1632,8 @@ const Discord = {
 function initSpotlight(){
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
-  if (reduceMotion || !hasFinePointer) return;
+  const lowPower = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+  if (reduceMotion || !hasFinePointer || lowPower) return;
 
   const spot = document.getElementById('spotlight');
   if (!spot) return;
@@ -1658,6 +1676,12 @@ const Background = (() => {
   let texture = null;
   let raf = 0;
   let ready = false;
+  let renderRunning = false;
+  let lastRenderMs = 0;
+  let frameHandle = 0;
+  const TARGET_FPS = 24;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS;
+  let uniforms = null;
 
   const vertexSource = `
     attribute vec2 a_position;
@@ -1683,7 +1707,7 @@ const Background = (() => {
     varying vec2 v_uv;
 
     vec4 sampleBright(vec2 uv){
-      vec4 c = texture2D(u_video, uv);
+      vec4 c = texture2D(u_video, clamp(uv, 0.0, 1.0));
       float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
       float soft = max(u_softness, 0.001);
       float mask = smoothstep(u_threshold, min(1.0, u_threshold + soft), lum);
@@ -1695,7 +1719,6 @@ const Background = (() => {
       float va = max(u_videoAspect, 0.0001);
       float ba = max(u_viewAspect, 0.0001);
 
-      // Same crop as object-fit: cover.
       if (va > ba) {
         float visible = ba / va;
         float crop = (1.0 - visible) * 0.5;
@@ -1706,30 +1729,16 @@ const Background = (() => {
         uv.y = crop + uv.y * visible;
       }
 
-      // Small bright-pass blur. This makes each bright object in the video
-      // generate its own colored light field with different intensity.
-      vec2 t = u_texel;
+      vec2 t = u_texel * 2.0;
       vec4 s0 = sampleBright(uv);
-      vec4 s1 = sampleBright(uv + vec2( 2.0, 0.0) * t);
-      vec4 s2 = sampleBright(uv + vec2(-2.0, 0.0) * t);
-      vec4 s3 = sampleBright(uv + vec2( 0.0, 2.0) * t);
-      vec4 s4 = sampleBright(uv + vec2( 0.0,-2.0) * t);
-      vec4 s5 = sampleBright(uv + vec2( 1.6, 1.6) * t);
-      vec4 s6 = sampleBright(uv + vec2(-1.6, 1.6) * t);
-      vec4 s7 = sampleBright(uv + vec2( 1.6,-1.6) * t);
-      vec4 s8 = sampleBright(uv + vec2(-1.6,-1.6) * t);
+      vec4 sx = sampleBright(uv + vec2(t.x, 0.0));
+      vec4 sy = sampleBright(uv + vec2(0.0, t.y));
+      vec4 sd = sampleBright(uv + vec2(t.x, t.y));
 
-      vec3 rgb =
-          s0.rgb * 0.24 +
-          (s1.rgb + s2.rgb + s3.rgb + s4.rgb) * 0.12 +
-          (s5.rgb + s6.rgb + s7.rgb + s8.rgb) * 0.07;
-      float mask =
-          s0.a * 0.24 +
-          (s1.a + s2.a + s3.a + s4.a) * 0.12 +
-          (s5.a + s6.a + s7.a + s8.a) * 0.07;
+      vec3 rgb = s0.rgb * 0.42 + (sx.rgb + sy.rgb) * 0.18 + sd.rgb * 0.10;
+      float mask = s0.a * 0.42 + (sx.a + sy.a) * 0.18 + sd.a * 0.10;
 
-      // Second, tighter pass preserves hot cores inside bright signs/lights.
-      vec4 hot = texture2D(u_video, uv);
+      vec4 hot = texture2D(u_video, clamp(uv, 0.0, 1.0));
       float hotLum = dot(hot.rgb, vec3(0.2126, 0.7152, 0.0722));
       float hotMask = smoothstep(
         u_coreThreshold,
@@ -1737,20 +1746,18 @@ const Background = (() => {
         hotLum
       ) * u_coreStrength;
 
-      // Keep chroma from the source so green / cyan / red / warm signs
-      // remain visibly different after the gray glass layer.
       float lum = max(dot(rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0001);
       vec3 chroma = rgb / lum;
       chroma = mix(vec3(1.0), chroma, u_chroma);
 
       vec3 broad = rgb * chroma * u_strength;
-      vec3 core  = hot.rgb * hotMask * (0.55 + 0.45 * u_chroma);
+      vec3 core = hot.rgb * hotMask * (0.55 + 0.45 * u_chroma);
       vec3 light = broad + core;
-      float alpha = clamp(mask * u_strength + hotMask * 0.55, 0.0, 1.0);
+      float alpha = clamp(mask * u_strength + hotMask * 0.50, 0.0, 1.0);
 
       gl_FragColor = vec4(light, alpha);
     }
-  `;
+  `
 
   function clamp01(v){
     return Math.max(0, Math.min(1, Number(v) || 0));
@@ -1807,6 +1814,18 @@ const Background = (() => {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     gl.useProgram(program);
+    uniforms = {
+      video: gl.getUniformLocation(program, 'u_video'),
+      threshold: gl.getUniformLocation(program, 'u_threshold'),
+      softness: gl.getUniformLocation(program, 'u_softness'),
+      strength: gl.getUniformLocation(program, 'u_strength'),
+      coreThreshold: gl.getUniformLocation(program, 'u_coreThreshold'),
+      coreStrength: gl.getUniformLocation(program, 'u_coreStrength'),
+      chroma: gl.getUniformLocation(program, 'u_chroma'),
+      videoAspect: gl.getUniformLocation(program, 'u_videoAspect'),
+      viewAspect: gl.getUniformLocation(program, 'u_viewAspect'),
+      texel: gl.getUniformLocation(program, 'u_texel')
+    };
     const pos = gl.getAttribLocation(program, 'a_position');
     gl.enableVertexAttribArray(pos);
     gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
@@ -1820,11 +1839,11 @@ const Background = (() => {
     const rect = lightCanvas.getBoundingClientRect();
     const rawDpr = window.devicePixelRatio || 1;
     const mobile = Math.min(window.innerWidth, window.innerHeight) <= 700;
-    const dprCap = mobile ? 1.15 : 1.5;
+    const dprCap = mobile ? 1.0 : 1.2;
     let dpr = Math.min(rawDpr, dprCap);
 
     // Keep the shader lightweight on unusually large screens/high-DPR devices.
-    const maxPixels = mobile ? 900000 : 1600000;
+    const maxPixels = mobile ? 520000 : 980000;
     const estimated = Math.max(1, rect.width * rect.height * dpr * dpr);
     if (estimated > maxPixels) dpr *= Math.sqrt(maxPixels / estimated);
 
@@ -1838,16 +1857,31 @@ const Background = (() => {
     return { width: rect.width, height: rect.height };
   }
 
-  function renderLight(){
-    if (!ready || !gl || !texture || !video || video.readyState < 2 || video.videoWidth < 2) {
+  function scheduleNext(){
+    if (!renderRunning) return;
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      frameHandle = video.requestVideoFrameCallback(() => renderLight());
+    } else {
       raf = requestAnimationFrame(renderLight);
+    }
+  }
+
+  function renderLight(now = performance.now()){
+    if (!renderRunning) return;
+    if (!ready || !gl || !texture || !video || video.readyState < 2 || video.videoWidth < 2) {
+      scheduleNext();
       return;
     }
+
+    if (now - lastRenderMs < FRAME_INTERVAL) {
+      scheduleNext();
+      return;
+    }
+    lastRenderMs = now;
 
     const cfg = BIO_CONFIG.background?.lightMask || {};
     const view = resizeCanvas() || { width: lightCanvas.clientWidth, height: lightCanvas.clientHeight };
     gl.viewport(0, 0, lightCanvas.width, lightCanvas.height);
-    gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.useProgram(program);
@@ -1856,28 +1890,34 @@ const Background = (() => {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
 
-    gl.uniform1i(gl.getUniformLocation(program, 'u_video'), 0);
-    gl.uniform1f(gl.getUniformLocation(program, 'u_videoAspect'), video.videoWidth / Math.max(1, video.videoHeight));
-    gl.uniform1f(gl.getUniformLocation(program, 'u_viewAspect'), Math.max(1, view.width) / Math.max(1, view.height));
-    gl.uniform1f(gl.getUniformLocation(program, 'u_threshold'), clamp01(cfg.threshold ?? 0.48));
-    gl.uniform1f(gl.getUniformLocation(program, 'u_softness'), clamp01(cfg.softness ?? 0.20));
-    gl.uniform1f(gl.getUniformLocation(program, 'u_strength'), Math.max(0, Number(cfg.strength ?? 1)));
-    gl.uniform1f(gl.getUniformLocation(program, 'u_coreThreshold'), clamp01(cfg.coreThreshold ?? 0.70));
-    gl.uniform1f(gl.getUniformLocation(program, 'u_coreStrength'), Math.max(0, Number(cfg.coreStrength ?? 0.72)));
-    gl.uniform1f(gl.getUniformLocation(program, 'u_chroma'), Math.max(0, Number(cfg.chroma ?? 1.20)));
+    gl.uniform1i(uniforms.video, 0);
+    gl.uniform1f(uniforms.videoAspect, video.videoWidth / Math.max(1, video.videoHeight));
+    gl.uniform1f(uniforms.viewAspect, Math.max(1, view.width) / Math.max(1, view.height));
+    gl.uniform1f(uniforms.threshold, clamp01(cfg.threshold ?? 0.48));
+    gl.uniform1f(uniforms.softness, clamp01(cfg.softness ?? 0.20));
+    gl.uniform1f(uniforms.strength, Math.max(0, Number(cfg.strength ?? 1)));
+    gl.uniform1f(uniforms.coreThreshold, clamp01(cfg.coreThreshold ?? 0.70));
+    gl.uniform1f(uniforms.coreStrength, Math.max(0, Number(cfg.coreStrength ?? 0.72)));
+    gl.uniform1f(uniforms.chroma, Math.max(0, Number(cfg.chroma ?? 1.20)));
     gl.uniform2f(
-      gl.getUniformLocation(program, 'u_texel'),
+      uniforms.texel,
       1 / Math.max(1, video.videoWidth),
       1 / Math.max(1, video.videoHeight)
     );
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    raf = requestAnimationFrame(renderLight);
+    scheduleNext();
   }
 
   function stopLight(){
-    cancelAnimationFrame(raf);
+    renderRunning = false;
+    if (raf) cancelAnimationFrame(raf);
     raf = 0;
+    if (frameHandle && typeof video.cancelVideoFrameCallback === 'function') {
+      try { video.cancelVideoFrameCallback(frameHandle); } catch (_) {}
+    }
+    frameHandle = 0;
+    lastRenderMs = 0;
     if (gl) gl.clear(gl.COLOR_BUFFER_BIT);
   }
 
@@ -1914,10 +1954,11 @@ const Background = (() => {
         video.play().catch(() => {});
         const lm = cfg.lightMask || {};
         if (lm.enabled !== false && initGL()) {
-          const blur = Math.max(0, Number(lm.blur ?? 18));
+          const blur = Math.max(0, Number(lm.blur ?? 14));
           lightCanvas.style.filter = `blur(${blur}px) saturate(1.05)`;
-          lightCanvas.style.opacity = String(clamp01(lm.opacity ?? 0.88));
+          lightCanvas.style.opacity = String(clamp01(lm.opacity ?? 0.84));
           lightCanvas.style.display = 'block';
+          renderRunning = true;
           resizeCanvas();
           renderLight();
         }
@@ -1937,9 +1978,10 @@ const Background = (() => {
 
     const fg = cfg.fog || {};
     if (fg.enabled) {
+      const fogBlur = Math.min(3, Math.max(0, Number(fg.blur || 0)));
       fog.style.background = fg.color || 'rgba(220,230,235,0.10)';
-      fog.style.backdropFilter = `blur(${Number(fg.blur || 0)}px)`;
-      fog.style.webkitBackdropFilter = `blur(${Number(fg.blur || 0)}px)`;
+      fog.style.backdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
+      fog.style.webkitBackdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
       fog.style.opacity = String(clamp01(fg.opacity ?? 0.08));
       fog.style.display = 'block';
     }
