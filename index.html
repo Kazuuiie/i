@@ -6,21 +6,23 @@
 <title>khanz — bio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #0a0b0e;
-    --panel: rgba(20,21,26,0.55);
+    --bg: #08090d;
+    --panel: rgba(22,23,29,0.55);
     --panel-border: rgba(255,255,255,0.08);
-    --panel-strong: rgba(15,16,20,0.72);
-    --text: #f3f3f5;
-    --text-dim: #9a9aa3;
-    --text-faint: #6b6b74;
+    --panel-strong: rgba(14,15,19,0.74);
+    --text: #f4f4f6;
+    --text-dim: #9b9ba5;
+    --text-faint: #6c6c76;
     --accent: #7dd3a8;
+    --accent-2: #d8b787;
     --music-accent: #8fd6b0;
     --music-accent-soft: #c9b79d;
     --radius: 18px;
     --radius-sm: 12px;
+    --ease: cubic-bezier(.16,.9,.3,1);
   }
 
   *{ box-sizing: border-box; margin:0; padding:0; }
@@ -29,34 +31,66 @@
   body{
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     color: var(--text);
-    background: #05060a;
+    background: #050609;
     min-height: 100vh;
     overflow-x: hidden;
+    cursor: default;
   }
 
+  ::selection{ background: rgba(125,211,168,0.28); color: #fff; }
+
   .bg{
-    position: fixed; inset: 0; z-index: 0;
+    position: fixed; inset: -10%; z-index: 0;
     background:
-      radial-gradient(1200px 700px at 78% 38%, rgba(255,150,90,0.10), transparent 60%),
+      radial-gradient(1100px 650px at 80% 30%, rgba(255,150,90,0.11), transparent 60%),
+      radial-gradient(900px 600px at 15% 82%, rgba(125,211,168,0.09), transparent 62%),
+      radial-gradient(700px 500px at 55% 100%, rgba(216,183,135,0.06), transparent 65%),
       linear-gradient(180deg, #0c1320 0%, #090c14 45%, #05060a 100%);
+    animation: auroraDrift 26s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes auroraDrift{
+    0%, 100% { transform: translate3d(0,0,0) scale(1); }
+    50%      { transform: translate3d(-1.5%, 1%, 0) scale(1.035); }
   }
   .bg::after{
     content: "BACKGROUND — thay ảnh sau";
-    position:absolute; right: 6%; bottom: 4%;
+    position:absolute; right: 6%; bottom: 14%;
     font-size: 12px; letter-spacing: .04em;
-    color: rgba(255,255,255,0.18); font-weight:600;
+    color: rgba(255,255,255,0.12); font-weight:600;
   }
 
+  /* Hạt film-grain rất mảnh phủ toàn trang để nền không bị "phẳng" như
+     một gradient CSS thông thường — tăng cảm giác chất liệu, cao cấp. */
+  .grain{
+    position: fixed; inset: -10%; z-index: 1; pointer-events:none;
+    opacity: .035; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Quầng sáng mềm bám theo con trỏ chuột — chỉ bật trên thiết bị có
+     chuột thật và khi người dùng không yêu cầu giảm hiệu ứng chuyển động. */
+  .spotlight{
+    position: fixed; z-index: 1; inset: 0; pointer-events:none;
+    opacity: 0; transition: opacity .4s ease;
+    background: radial-gradient(480px circle at var(--sx,50%) var(--sy,50%), rgba(125,211,168,0.06), transparent 72%);
+  }
+  .spotlight.show{ opacity: 1; }
+
   .scrim-left{
-    position: fixed; inset: 0; z-index: 1;
+    position: fixed; inset: 0; z-index: 2;
     background: linear-gradient(90deg,
       rgba(5,6,10,0.92) 0%, rgba(5,6,10,0.86) 30%,
       rgba(5,6,10,0.35) 48%, rgba(5,6,10,0) 60%);
     pointer-events: none;
   }
 
+  @media (prefers-reduced-motion: reduce){
+    .bg{ animation: none; }
+  }
+
   .page{
-    position: relative; z-index: 2; min-height: 100vh;
+    position: relative; z-index: 3; min-height: 100vh;
     padding: 40px clamp(24px, 5vw, 64px);
     display: flex; flex-direction: column;
   }
@@ -67,11 +101,17 @@
     font-weight: 600; letter-spacing: .03em; position: relative;
     padding-bottom: 10px; transition: color .2s ease;
   }
+  nav a::before{
+    content:""; position:absolute; left:0; bottom:0; width:100%; height:2px;
+    background: var(--text); border-radius: 2px; transform: scaleX(0);
+    transform-origin: left; transition: transform .28s var(--ease);
+  }
   nav a:hover{ color: var(--text); }
+  nav a:hover::before{ transform: scaleX(1); }
   nav a.active{ color: var(--text); }
   nav a.active::after{
     content:""; position:absolute; left:0; bottom:0;
-    width: 16px; height: 2px; background: var(--text); border-radius: 2px;
+    width: 16px; height: 2px; background: var(--accent); border-radius: 2px;
   }
 
   .clock-pill{
@@ -80,8 +120,30 @@
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     padding: 10px 16px; border-radius: 999px;
     font-size: 13px; font-weight: 600; color: var(--text);
+    transition: border-color .25s ease;
   }
+  .clock-pill:hover{ border-color: rgba(125,211,168,0.28); }
   .clock-pill svg{ width:14px; height:14px; opacity:.75; }
+
+  /* Reveal tuần tự một lần khi trang mở — không lặp lại, không chạy trên hover. */
+  .reveal{ opacity:0; transform: translateY(14px); }
+  .ready .reveal{
+    animation: revealUp .7s var(--ease) forwards;
+  }
+  .ready nav.reveal{ animation-delay: .05s; }
+  .ready .status.reveal{ animation-delay: .16s; }
+  .ready .identity.reveal{ animation-delay: .24s; }
+  .ready .bio-text.reveal{ animation-delay: .34s; }
+  .ready .tags.reveal{ animation-delay: .42s; }
+  .ready .links.reveal{ animation-delay: .5s; }
+  .ready .player.reveal{ animation-delay: .6s; }
+  .ready .weather.reveal{ animation-delay: .72s; }
+  @keyframes revealUp{
+    to{ opacity:1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1; transform:none; animation:none !important; }
+  }
 
   .content{
     margin-top: auto; padding-top: 60px; max-width: 560px;
@@ -159,6 +221,18 @@
 
   .avatar-wrap{ position: relative; width: 88px; height: 88px; flex-shrink:0; }
 
+  /* Vành xoay rất chậm quanh avatar, dùng conic-gradient — chỉ hiện như
+     một viền sáng mảnh phía sau, không lấn vào ảnh đại diện. */
+  .avatar-wrap::before{
+    content:""; position:absolute; inset:-4px; border-radius:50%;
+    background: conic-gradient(from 0deg, rgba(125,211,168,.55), rgba(216,183,135,.35), transparent 40%, transparent 60%, rgba(125,211,168,.55));
+    animation: ringSpin 9s linear infinite;
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  }
+  @keyframes ringSpin{ to{ transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){ .avatar-wrap::before{ animation: none; } }
+
   .avatar{
     --status-rgb: 125,211,168;
     width: 88px; height: 88px; border-radius: 50%; flex-shrink:0;
@@ -206,8 +280,13 @@
   .avatar-deco.show{ display: block; }
 
   .id-text{ min-width: 0; }
-  .id-text h1{ font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height:1.1; }
-  .id-text .handle{ margin-top: 6px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
+  .id-text h1{
+    font-family: 'Space Grotesk', 'Manrope', sans-serif;
+    font-size: 36px; font-weight: 700; letter-spacing: -0.02em; line-height:1.1;
+    background: linear-gradient(120deg, #ffffff 45%, #cfd6d1 75%, var(--accent) 130%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .id-text .handle{ margin-top: 7px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
 
   .bio-text{ font-size: 14.5px; line-height: 1.65; color: var(--text-dim); max-width: 400px; }
 
@@ -215,22 +294,34 @@
   .tag{
     padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,0.04);
     border: 1px solid var(--panel-border); font-size: 12.5px; font-weight: 600; color: var(--text);
+    transition: border-color .2s ease, background .2s ease;
   }
+  .tag:hover{ border-color: rgba(125,211,168,0.3); background: rgba(125,211,168,0.06); }
 
   .links{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 500px; }
   .link-card{
+    position: relative; overflow: hidden;
     background: var(--panel); border: 1px solid var(--panel-border);
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     border-radius: var(--radius-sm); padding: 14px 14px 12px; text-decoration:none;
     color: var(--text); display:flex; flex-direction:column; justify-content:space-between;
-    gap: 18px; transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    gap: 18px; transition: transform .22s var(--ease), background .18s ease, border-color .18s ease;
     min-height: 78px;
   }
+  .link-card::after{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background: radial-gradient(120px circle at var(--mx,50%) var(--my,50%), rgba(125,211,168,.16), transparent 70%);
+    opacity:0; transition: opacity .25s ease;
+  }
   .link-card:hover{ transform: translateY(-2px); background: rgba(30,31,38,0.7); border-color: rgba(255,255,255,0.16); }
-  .link-card .top{ display:flex; align-items:center; justify-content:space-between; }
-  .link-card svg.icon{ width:18px; height:18px; }
-  .link-card svg.arrow{ width:12px; height:12px; opacity:.55; }
-  .link-card .label{ font-size: 12.5px; font-weight: 600; }
+  .link-card:hover::after{ opacity:1; }
+  .link-card .top{ display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
+  .link-card svg.icon{ width:18px; height:18px; transition: transform .25s var(--ease); }
+  .link-card:hover svg.icon{ transform: translateY(-1px); }
+  .link-card svg.arrow{ width:12px; height:12px; opacity:.55; transition: transform .22s var(--ease); }
+  .link-card:hover svg.arrow{ transform: translate(1px,-1px); opacity:.85; }
+  .link-card .label{ font-size: 12.5px; font-weight: 600; position:relative; z-index:1; }
+  @media (prefers-reduced-motion: reduce){ .link-card, .link-card svg.icon, .link-card svg.arrow{ transition:none; } }
 
   /* ========================= PREMIUM MUSIC PLAYER ========================= */
   .player{
@@ -273,7 +364,10 @@
   .player.is-playing .player-art{
     transform:scale(1.025);
     box-shadow: 0 9px 28px rgba(0,0,0,.34), 0 0 18px rgba(143,214,176,.08);
+    animation: vinylSpin 16s linear infinite;
   }
+  @keyframes vinylSpin{ to{ transform: scale(1.025) rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){ .player.is-playing .player-art{ animation:none; } }
   .player-art-eq{
     position:absolute; left:8px; bottom:7px;
     display:flex; align-items:flex-end; gap:2px;
@@ -489,24 +583,26 @@
 <body>
 
   <div class="bg"></div>
+  <div class="grain"></div>
+  <div class="spotlight" id="spotlight"></div>
   <div class="scrim-left"></div>
 
   <div class="page">
-    <nav id="nav"></nav>
+    <nav id="nav" class="reveal"></nav>
 
     <div class="content">
-      <div class="status" id="status"></div>
-      <div class="identity" id="identity"></div>
-      <p class="bio-text" id="bioText"></p>
-      <div class="tags" id="tags"></div>
-      <div class="links" id="links"></div>
-      <div class="player" id="player"></div>
+      <div class="status reveal" id="status"></div>
+      <div class="identity reveal" id="identity"></div>
+      <p class="bio-text reveal" id="bioText"></p>
+      <div class="tags reveal" id="tags"></div>
+      <div class="links reveal" id="links"></div>
+      <div class="player reveal" id="player"></div>
     </div>
 
     <footer id="footer"></footer>
   </div>
 
-  <div class="weather" id="weather"></div>
+  <div class="weather reveal" id="weather"></div>
 
 <script>
 /* =========================================================================
@@ -1497,6 +1593,43 @@ const Discord = {
   }
 };
 
+/* ------------------------- CURSOR SPOTLIGHT + CARD GLOW --------------------- */
+/* Quầng sáng nhỏ bám theo con trỏ chuột (chỉ trên thiết bị có chuột thật,
+   tắt hẳn nếu người dùng bật "giảm hiệu ứng chuyển động"). Toạ độ được
+   throttle qua requestAnimationFrame để không ảnh hưởng hiệu năng cuộn/gõ. */
+function initSpotlight(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if (reduceMotion || !hasFinePointer) return;
+
+  const spot = document.getElementById('spotlight');
+  if (!spot) return;
+
+  let raf = null, px = 0, py = 0;
+  const apply = () => {
+    spot.style.setProperty('--sx', px + 'px');
+    spot.style.setProperty('--sy', py + 'px');
+    raf = null;
+  };
+
+  window.addEventListener('pointermove', (e) => {
+    px = e.clientX; py = e.clientY;
+    spot.classList.add('show');
+    if (!raf) raf = requestAnimationFrame(apply);
+  }, { passive: true });
+
+  window.addEventListener('pointerleave', () => spot.classList.remove('show'));
+
+  // Glow cục bộ theo con trỏ trên từng link-card (biến --mx/--my dùng ở CSS ::after)
+  document.querySelectorAll('.link-card').forEach(card => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      card.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
+  });
+}
+
 /* --------------------------------- INIT ------------------------------------ */
 renderNav();
 renderProfile();
@@ -1505,6 +1638,10 @@ renderFooter();
 Player.mount();
 Weather.init();
 Discord.init();
+initSpotlight();
+
+// Kích hoạt hiệu ứng mở trang tuần tự đúng một lần (xem class .reveal / .ready)
+requestAnimationFrame(() => document.body.classList.add('ready'));
 </script>
 
 </body>
