@@ -51,13 +51,26 @@
     object-fit:cover; object-position:center center;
     display:none; pointer-events:none;
   }
-  .bg-fog{
-    position:absolute; inset:0; pointer-events:none;
-    display:none;
-  }
+
+  /* Lớp kính mờ/giọt sương: chỉ tác động lên background */
   .bg-overlay{
     position:absolute; inset:0; pointer-events:none;
-    display:none;
+    display:none; z-index:2;
+  }
+
+  /* Light mask lấy trực tiếp từ các vùng sáng của video */
+  .bg-light{
+    position:absolute; inset:-2%; width:104%; height:104%;
+    display:none; pointer-events:none; z-index:3;
+    filter:blur(18px) saturate(1.05);
+    mix-blend-mode:screen;
+    opacity:.88;
+    transform:scale(1.02);
+  }
+
+  .bg-fog{
+    position:absolute; inset:-18px; pointer-events:none;
+    display:none; z-index:4;
   }
   @keyframes auroraDrift{
     0%, 100% { transform: translate3d(0,0,0) scale(1); }
@@ -549,6 +562,7 @@
 
   <div class="bg" id="bg">
     <video class="bg-media" id="bgVideo" aria-hidden="true" playsinline autoplay muted loop></video>
+  <canvas class="bg-light" id="bgLight" aria-hidden="true"></canvas>
     <div class="bg-fog" id="bgFog"></div>
     <div class="bg-overlay" id="bgOverlay"></div>
   </div>
@@ -589,24 +603,30 @@ const BIO_CONFIG = {
      type: "video" | "image" | "gradient"
      source: tên file / URL, ví dụ "bg.mp4" hoặc "bg.jpg"
   */
-
-background: {
-  enabled: true,
-  type: "video",
-  source: "bg.mp4",
-  position: "center center",
-  size: "cover",
-
-overlay: {
-  enabled: true,
-  color: "rgba(120, 125, 130, 0.48)"
-},
-fog: {
-  enabled: true,
-  blur: 10,
-  opacity: 0.30,
-  color: "rgba(180, 185, 190, 0.55)"
-}
+  background: {
+    enabled: true,
+    type: "video",
+    source: "bg.mp4",
+    position: "center center",
+    size: "cover",
+    overlay: {
+      enabled: true,
+      color: "rgba(115, 120, 125, 0.93)"
+    },
+    lightMask: {
+      enabled: true,
+      threshold: 0.48,
+      softness: 0.20,
+      strength: 1.00,
+      blur: 18,
+      opacity: 0.88
+    },
+    fog: {
+      enabled: true,
+      blur: 8,
+      opacity: 0.12,
+      color: "rgba(215, 220, 225, 0.28)"
+    }
   },
 
   profile: {
@@ -1626,19 +1646,165 @@ function initSpotlight(){
 const Background = (() => {
   const root = document.getElementById('bg');
   const video = document.getElementById('bgVideo');
+  const lightCanvas = document.getElementById('bgLight');
   const fog = document.getElementById('bgFog');
   const overlay = document.getElementById('bgOverlay');
+
+  let gl = null;
+  let program = null;
+  let texture = null;
+  let raf = 0;
+  let ready = false;
+
+  const vertexSource = `
+    attribute vec2 a_position;
+    varying vec2 v_uv;
+    void main(){
+      v_uv = vec2((a_position.x + 1.0) * 0.5, 1.0 - (a_position.y + 1.0) * 0.5);
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }
+  `;
+
+  const fragmentSource = `
+    precision mediump float;
+    uniform sampler2D u_video;
+    uniform float u_threshold;
+    uniform float u_softness;
+    uniform float u_strength;
+    varying vec2 v_uv;
+
+    void main(){
+      vec4 c = texture2D(u_video, v_uv);
+      float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+      float edge = max(u_softness, 0.001);
+      float mask = smoothstep(u_threshold, min(1.0, u_threshold + edge), lum);
+      mask *= u_strength;
+      // giữ màu ánh sáng nhưng bớt saturation để giống ánh sáng xuyên qua kính mờ
+      vec3 light = mix(vec3(lum), c.rgb, 0.72);
+      gl_FragColor = vec4(light * mask, mask);
+    }
+  `;
+
+  function clamp01(v){
+    return Math.max(0, Math.min(1, Number(v) || 0));
+  }
+
+  function createShader(type, source){
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, source);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      console.warn('Background light shader:', gl.getShaderInfoLog(sh));
+      gl.deleteShader(sh);
+      return null;
+    }
+    return sh;
+  }
+
+  function initGL(){
+    if (!lightCanvas || !video) return false;
+    gl = lightCanvas.getContext('webgl', {
+      alpha: true,
+      premultipliedAlpha: false,
+      antialias: false,
+      preserveDrawingBuffer: false
+    });
+    if (!gl) return false;
+
+    const vs = createShader(gl.VERTEX_SHADER, vertexSource);
+    const fs = createShader(gl.FRAGMENT_SHADER, fragmentSource);
+    if (!vs || !fs) return false;
+
+    program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.warn('Background light program:', gl.getProgramInfoLog(program));
+      return false;
+    }
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),
+      gl.STATIC_DRAW
+    );
+
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.useProgram(program);
+    const pos = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(pos);
+    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+    ready = true;
+    return true;
+  }
+
+  function resizeCanvas(){
+    if (!lightCanvas) return;
+    const rect = lightCanvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const w = Math.max(2, Math.floor(rect.width * dpr));
+    const h = Math.max(2, Math.floor(rect.height * dpr));
+    if (lightCanvas.width !== w || lightCanvas.height !== h) {
+      lightCanvas.width = w;
+      lightCanvas.height = h;
+      if (gl) gl.viewport(0, 0, w, h);
+    }
+  }
+
+  function renderLight(){
+    if (!ready || !gl || !texture || !video || video.readyState < 2 || video.videoWidth < 2) {
+      raf = requestAnimationFrame(renderLight);
+      return;
+    }
+
+    const cfg = BIO_CONFIG.background?.lightMask || {};
+    resizeCanvas();
+    gl.viewport(0, 0, lightCanvas.width, lightCanvas.height);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.useProgram(program);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+
+    gl.uniform1i(gl.getUniformLocation(program, 'u_video'), 0);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_threshold'), clamp01(cfg.threshold ?? 0.48));
+    gl.uniform1f(gl.getUniformLocation(program, 'u_softness'), clamp01(cfg.softness ?? 0.20));
+    gl.uniform1f(gl.getUniformLocation(program, 'u_strength'), Math.max(0, Number(cfg.strength ?? 1)));
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    raf = requestAnimationFrame(renderLight);
+  }
+
+  function stopLight(){
+    cancelAnimationFrame(raf);
+    raf = 0;
+    if (gl) gl.clear(gl.COLOR_BUFFER_BIT);
+  }
 
   function apply(){
     if (!root) return;
     const cfg = BIO_CONFIG.background || {};
     const type = cfg.type || 'gradient';
 
-    root.style.background = getComputedStyle(root).background || '';
+    stopLight();
     video.pause();
     video.removeAttribute('src');
     video.load();
     video.style.display = 'none';
+    lightCanvas.style.display = 'none';
     fog.style.display = 'none';
     overlay.style.display = 'none';
 
@@ -1657,7 +1823,18 @@ const Background = (() => {
       video.setAttribute('autoplay', '');
       video.setAttribute('loop', '');
       video.setAttribute('playsinline', '');
-      video.play().catch(() => {});
+      video.addEventListener('loadeddata', () => {
+        video.play().catch(() => {});
+        const lm = cfg.lightMask || {};
+        if (lm.enabled !== false && initGL()) {
+          const blur = Math.max(0, Number(lm.blur ?? 18));
+          lightCanvas.style.filter = `blur(${blur}px) saturate(1.05)`;
+          lightCanvas.style.opacity = String(clamp01(lm.opacity ?? 0.88));
+          lightCanvas.style.display = 'block';
+          resizeCanvas();
+          renderLight();
+        }
+      }, { once:true });
     } else if (type === 'image' && cfg.source) {
       root.style.backgroundImage = `url("${String(cfg.source).replace(/"/g, '\\"')}")`;
       root.style.backgroundPosition = cfg.position || 'center center';
@@ -1676,11 +1853,12 @@ const Background = (() => {
       fog.style.background = fg.color || 'rgba(220,230,235,0.10)';
       fog.style.backdropFilter = `blur(${Number(fg.blur || 0)}px)`;
       fog.style.webkitBackdropFilter = `blur(${Number(fg.blur || 0)}px)`;
-      fog.style.opacity = String(Math.max(0, Math.min(1, Number(fg.opacity ?? 0.08))));
+      fog.style.opacity = String(clamp01(fg.opacity ?? 0.08));
       fog.style.display = 'block';
     }
   }
 
+  window.addEventListener('resize', resizeCanvas);
   return { apply };
 })();
 
