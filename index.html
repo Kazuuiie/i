@@ -384,7 +384,6 @@
   .icon-btn:hover{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.08); }
   .icon-btn:active{ transform:scale(.94); }
   .icon-btn svg{ width:13px; height:13px; }
-  .icon-btn.spotify svg{ width:14px; height:14px; color:#1ed760; }
   .icon-btn.list-open{ background:rgba(143,214,176,.10); color:var(--accent); border-color:rgba(143,214,176,.10); }
 
   .progress-row{
@@ -652,7 +651,6 @@ const ICONS = {
   cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 12.5 4 4 0 0 0 6 20h11.5"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`,
   rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 16a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 9.5 4 4 0 0 0 6 17.5h11.5"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>`,
-  spotify: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Zm4.586 14.424a.622.622 0 0 1-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 1 1-.277-1.215c3.809-.87 7.077-.496 9.712 1.115a.623.623 0 0 1 .207.857Zm1.223-2.722a.78.78 0 0 1-1.072.257c-2.688-1.652-6.786-2.131-9.966-1.166a.78.78 0 1 1-.454-1.494c3.63-1.102 8.147-.568 11.235 1.332a.78.78 0 0 1 .257 1.071Zm.105-2.835C14.692 9.03 9.375 8.854 6.297 9.798a.936.936 0 1 1-.545-1.79c3.533-1.073 9.402-.865 13.115 1.338a.936.936 0 0 1-.953 1.612Z"/></svg>`,
   list: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
   prev: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 9 6V6z"/></svg>`,
   next: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l9 6-9 6z"/></svg>`,
@@ -1021,7 +1019,6 @@ const Player = {
     $('#pTitle').textContent = t.songTitle;
     $('#pArtist').textContent = t.artist || 'Unknown artist';
     $('#pArt').style.backgroundImage = t.cover ? `url('${t.cover}')` : '';
-    $('#pLink').href = t.music || '#';
     $('#pElapsed').textContent = '0:00';
     $('#pDuration').textContent = this.durations[this.index] ? fmtTime(this.durations[this.index]) : '0:00';
     $('#pFill').style.width = '0%';
