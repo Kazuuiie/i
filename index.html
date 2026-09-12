@@ -62,9 +62,9 @@
   .bg-light{
     position:absolute; inset:-2%; width:104%; height:104%;
     display:none; pointer-events:none; z-index:3;
-    filter:blur(18px) saturate(1.05);
+    filter:blur(26px) saturate(1.28);
     mix-blend-mode:screen;
-    opacity:.88;
+    opacity:.92;
     transform:scale(1.02);
   }
 
@@ -611,21 +611,24 @@ const BIO_CONFIG = {
     size: "cover",
     overlay: {
       enabled: true,
-      color: "rgba(115, 120, 125, 0.93)"
+      color: "rgba(108, 114, 120, 0.94)"
     },
     lightMask: {
       enabled: true,
-      threshold: 0.48,
-      softness: 0.20,
-      strength: 1.00,
-      blur: 18,
-      opacity: 0.88
+      threshold: 0.34,
+      softness: 0.28,
+      strength: 1.18,
+      coreThreshold: 0.70,
+      coreStrength: 0.72,
+      chroma: 1.20,
+      blur: 26,
+      opacity: 0.92
     },
     fog: {
       enabled: true,
       blur: 8,
-      opacity: 0.12,
-      color: "rgba(215, 220, 225, 0.28)"
+      opacity: 0.08,
+      color: "rgba(215, 220, 225, 0.24)"
     }
   },
 
@@ -1671,16 +1674,28 @@ const Background = (() => {
     uniform float u_threshold;
     uniform float u_softness;
     uniform float u_strength;
+    uniform float u_coreThreshold;
+    uniform float u_coreStrength;
+    uniform float u_chroma;
     uniform float u_videoAspect;
     uniform float u_viewAspect;
+    uniform vec2  u_texel;
     varying vec2 v_uv;
+
+    vec4 sampleBright(vec2 uv){
+      vec4 c = texture2D(u_video, uv);
+      float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+      float soft = max(u_softness, 0.001);
+      float mask = smoothstep(u_threshold, min(1.0, u_threshold + soft), lum);
+      return vec4(c.rgb * mask, mask);
+    }
 
     void main(){
       vec2 uv = v_uv;
       float va = max(u_videoAspect, 0.0001);
       float ba = max(u_viewAspect, 0.0001);
 
-      // Match the video element's object-fit: cover crop exactly.
+      // Same crop as object-fit: cover.
       if (va > ba) {
         float visible = ba / va;
         float crop = (1.0 - visible) * 0.5;
@@ -1691,14 +1706,49 @@ const Background = (() => {
         uv.y = crop + uv.y * visible;
       }
 
-      vec4 c = texture2D(u_video, uv);
-      float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
-      float edge = max(u_softness, 0.001);
-      float mask = smoothstep(u_threshold, min(1.0, u_threshold + edge), lum);
-      mask *= u_strength;
-      // giữ màu ánh sáng nhưng bớt saturation để giống ánh sáng xuyên qua kính mờ
-      vec3 light = mix(vec3(lum), c.rgb, 0.72);
-      gl_FragColor = vec4(light * mask, mask);
+      // Small bright-pass blur. This makes each bright object in the video
+      // generate its own colored light field with different intensity.
+      vec2 t = u_texel;
+      vec4 s0 = sampleBright(uv);
+      vec4 s1 = sampleBright(uv + vec2( 2.0, 0.0) * t);
+      vec4 s2 = sampleBright(uv + vec2(-2.0, 0.0) * t);
+      vec4 s3 = sampleBright(uv + vec2( 0.0, 2.0) * t);
+      vec4 s4 = sampleBright(uv + vec2( 0.0,-2.0) * t);
+      vec4 s5 = sampleBright(uv + vec2( 1.6, 1.6) * t);
+      vec4 s6 = sampleBright(uv + vec2(-1.6, 1.6) * t);
+      vec4 s7 = sampleBright(uv + vec2( 1.6,-1.6) * t);
+      vec4 s8 = sampleBright(uv + vec2(-1.6,-1.6) * t);
+
+      vec3 rgb =
+          s0.rgb * 0.24 +
+          (s1.rgb + s2.rgb + s3.rgb + s4.rgb) * 0.12 +
+          (s5.rgb + s6.rgb + s7.rgb + s8.rgb) * 0.07;
+      float mask =
+          s0.a * 0.24 +
+          (s1.a + s2.a + s3.a + s4.a) * 0.12 +
+          (s5.a + s6.a + s7.a + s8.a) * 0.07;
+
+      // Second, tighter pass preserves hot cores inside bright signs/lights.
+      vec4 hot = texture2D(u_video, uv);
+      float hotLum = dot(hot.rgb, vec3(0.2126, 0.7152, 0.0722));
+      float hotMask = smoothstep(
+        u_coreThreshold,
+        min(1.0, u_coreThreshold + 0.10),
+        hotLum
+      ) * u_coreStrength;
+
+      // Keep chroma from the source so green / cyan / red / warm signs
+      // remain visibly different after the gray glass layer.
+      float lum = max(dot(rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0001);
+      vec3 chroma = rgb / lum;
+      chroma = mix(vec3(1.0), chroma, u_chroma);
+
+      vec3 broad = rgb * chroma * u_strength;
+      vec3 core  = hot.rgb * hotMask * (0.55 + 0.45 * u_chroma);
+      vec3 light = broad + core;
+      float alpha = clamp(mask * u_strength + hotMask * 0.55, 0.0, 1.0);
+
+      gl_FragColor = vec4(light, alpha);
     }
   `;
 
@@ -1812,6 +1862,14 @@ const Background = (() => {
     gl.uniform1f(gl.getUniformLocation(program, 'u_threshold'), clamp01(cfg.threshold ?? 0.48));
     gl.uniform1f(gl.getUniformLocation(program, 'u_softness'), clamp01(cfg.softness ?? 0.20));
     gl.uniform1f(gl.getUniformLocation(program, 'u_strength'), Math.max(0, Number(cfg.strength ?? 1)));
+    gl.uniform1f(gl.getUniformLocation(program, 'u_coreThreshold'), clamp01(cfg.coreThreshold ?? 0.70));
+    gl.uniform1f(gl.getUniformLocation(program, 'u_coreStrength'), Math.max(0, Number(cfg.coreStrength ?? 0.72)));
+    gl.uniform1f(gl.getUniformLocation(program, 'u_chroma'), Math.max(0, Number(cfg.chroma ?? 1.20)));
+    gl.uniform2f(
+      gl.getUniformLocation(program, 'u_texel'),
+      1 / Math.max(1, video.videoWidth),
+      1 / Math.max(1, video.videoHeight)
+    );
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     raf = requestAnimationFrame(renderLight);
