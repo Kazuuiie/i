@@ -41,6 +41,7 @@
 
   .bg{
     position: fixed; inset: -10%; z-index: 0;
+    overflow: hidden;
     background:
       radial-gradient(1100px 650px at 80% 30%, rgba(255,150,90,0.11), transparent 60%),
       radial-gradient(900px 600px at 15% 82%, rgba(125,211,168,0.09), transparent 62%),
@@ -52,6 +53,30 @@
     animation: auroraDrift 26s ease-in-out infinite;
     will-change: transform;
   }
+
+  .bg-media{
+    position:absolute; inset:0; width:100%; height:100%;
+    display:block;
+    object-fit:cover;
+    object-position:center;
+    opacity:0;
+    transition:opacity .35s ease;
+    pointer-events:none;
+  }
+  .bg-media.show{ opacity:1; }
+  .bg-media.image-media{
+    background-repeat:no-repeat;
+    background-size:cover;
+    background-position:center;
+  }
+  .bg::after{
+    content:"";
+    position:absolute; inset:0;
+    background: var(--bg-overlay, transparent);
+    pointer-events:none;
+    z-index:2;
+  }
+
   @keyframes auroraDrift{
     0%, 100% { transform: translate3d(0,0,0) scale(1); }
     50%      { transform: translate3d(-1.5%, 1%, 0) scale(1.035); }
@@ -577,12 +602,32 @@ const BIO_CONFIG = {
   */
   background: {
     enabled: true,
-    image: "background.jpg",
+
+    // "image" = ảnh tĩnh, "video" = video, "gradient" = chỉ dùng nền CSS
+    type: "video",
+
+    // Đường dẫn local: đặt file cùng thư mục với index.html
+    // Ví dụ: "background.jpg", "background.webp", "background.png", "background.mp4"
+    source: "bg.mp4",
+
+    // Nếu source không tải được, giao diện vẫn giữ gradient CSS mặc định, không bị đen/trống.
     position: "center center",
     size: "cover",
     repeat: "no-repeat",
+
+    // Lớp phủ tối: 0 = không phủ, 0.15 = hơi tối, 0.35 = tối hơn
     overlay: 0,
-    blur: 0
+
+    // Blur nền tính bằng px, nên để 0 nếu muốn ảnh/video nét
+    blur: 0,
+
+    video: {
+      autoplay: true,
+      loop: true,
+      muted: true,
+      playsInline: true,
+      playbackRate: 1
+    }
   },
 
   nav: [
@@ -1613,25 +1658,83 @@ function applyBackground(){
   if (!bgEl) return;
 
   const cfg = BIO_CONFIG.background || {};
-  if (cfg.enabled === false || !cfg.image){
-    bgEl.style.backgroundImage = '';
-    bgEl.style.backgroundPosition = '';
-    bgEl.style.backgroundSize = '';
-    bgEl.style.backgroundRepeat = '';
-    bgEl.style.filter = '';
-    bgEl.style.removeProperty('--bg-overlay');
+  const existing = bgEl.querySelector('.bg-media');
+  if (existing) existing.remove();
+
+  const base = {
+    position: cfg.position || 'center center',
+    size: cfg.size || 'cover',
+    repeat: cfg.repeat || 'no-repeat'
+  };
+
+  bgEl.style.backgroundPosition = base.position;
+  bgEl.style.backgroundSize = base.size;
+  bgEl.style.backgroundRepeat = base.repeat;
+  bgEl.style.filter = cfg.blur ? `blur(${Math.max(0, Number(cfg.blur) || 0)}px)` : '';
+
+  const overlayAlpha = Math.max(0, Math.min(1, Number(cfg.overlay) || 0));
+  bgEl.style.setProperty(
+    '--bg-overlay',
+    overlayAlpha > 0 ? `rgba(5,6,10,${overlayAlpha})` : 'transparent'
+  );
+
+  // Tắt background media nếu config không bật.
+  if (cfg.enabled === false) return;
+
+  const type = String(cfg.type || 'image').toLowerCase();
+  const source = String(cfg.source || '').trim();
+  if (!source || type === 'gradient') return;
+
+  // Ảnh tĩnh: dùng <img> để nếu file lỗi thì gradient CSS vẫn còn nguyên.
+  if (type === 'image'){
+    const img = document.createElement('img');
+    img.className = 'bg-media image-media';
+    img.alt = '';
+    img.decoding = 'async';
+    img.style.objectPosition = base.position;
+    img.style.objectFit = base.size;
+    img.addEventListener('load', () => img.classList.add('show'), { once:true });
+    img.addEventListener('error', () => {
+      console.warn('[Background] Không thể tải ảnh:', source);
+      img.remove();
+    }, { once:true });
+    img.src = source;
+    bgEl.appendChild(img);
     return;
   }
 
-  const safeUrl = String(cfg.image).replace(/\\/g, '\\').replace(/'/g, "\\'");
-  bgEl.style.backgroundImage = `url('${safeUrl}')`;
-  bgEl.style.backgroundPosition = cfg.position || 'center center';
-  bgEl.style.backgroundSize = cfg.size || 'cover';
-  bgEl.style.backgroundRepeat = cfg.repeat || 'no-repeat';
-  bgEl.style.filter = cfg.blur ? `blur(${Number(cfg.blur)}px)` : '';
+  // Video nền: tự động mute + loop + playsInline để trình duyệt cho autoplay.
+  if (type === 'video'){
+    const video = document.createElement('video');
+    const vcfg = cfg.video || {};
+    video.className = 'bg-media';
+    video.setAttribute('aria-hidden', 'true');
+    video.autoplay = vcfg.autoplay !== false;
+    video.loop = vcfg.loop !== false;
+    video.muted = vcfg.muted !== false;
+    video.defaultMuted = true;
+    video.playsInline = vcfg.playsInline !== false;
+    video.preload = 'auto';
+    video.playbackRate = Number(vcfg.playbackRate) > 0 ? Number(vcfg.playbackRate) : 1;
+    video.style.objectPosition = base.position;
+    video.style.objectFit = base.size;
 
-  const overlayAlpha = Math.max(0, Math.min(1, Number(cfg.overlay) || 0));
-  bgEl.style.setProperty('--bg-overlay', overlayAlpha > 0 ? `rgba(5,6,10,${overlayAlpha})` : 'transparent');
+    const show = () => video.classList.add('show');
+    video.addEventListener('loadeddata', show, { once:true });
+    video.addEventListener('canplay', show, { once:true });
+    video.addEventListener('error', () => {
+      console.warn('[Background] Không thể tải video:', source);
+      video.remove();
+    }, { once:true });
+
+    video.src = source;
+    bgEl.appendChild(video);
+
+    if (video.autoplay){
+      const promise = video.play();
+      if (promise && promise.catch) promise.catch(() => {});
+    }
+  }
 }
 
 /* --------------------------------- INIT ------------------------------------ */
