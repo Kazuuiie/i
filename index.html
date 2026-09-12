@@ -46,6 +46,9 @@
       radial-gradient(900px 600px at 15% 82%, rgba(125,211,168,0.09), transparent 62%),
       radial-gradient(700px 500px at 55% 100%, rgba(216,183,135,0.06), transparent 65%),
       linear-gradient(180deg, #0c1320 0%, #090c14 45%, #05060a 100%);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     animation: auroraDrift 26s ease-in-out infinite;
     will-change: transform;
   }
@@ -54,10 +57,10 @@
     50%      { transform: translate3d(-1.5%, 1%, 0) scale(1.035); }
   }
   .bg::after{
-    content: "BACKGROUND — thay ảnh sau";
-    position:absolute; right: 6%; bottom: 14%;
-    font-size: 12px; letter-spacing: .04em;
-    color: rgba(255,255,255,0.12); font-weight:600;
+    content: "";
+    position:absolute; inset:0;
+    background: var(--bg-overlay, transparent);
+    pointer-events:none;
   }
 
   /* Hạt film-grain rất mảnh phủ toàn trang để nền không bị "phẳng" như
@@ -567,6 +570,21 @@
 <script>
 const BIO_CONFIG = {
 
+  /* ---- BACKGROUND -------------------------------------------------------
+     Đặt file background cùng thư mục với index.html, ví dụ:
+     background.jpg / background.webp / background.png
+     Có thể dùng URL online thay cho đường dẫn local.
+  */
+  background: {
+    enabled: true,
+    image: "background.jpg",
+    position: "center center",
+    size: "cover",
+    repeat: "no-repeat",
+    overlay: 0,
+    blur: 0
+  },
+
   nav: [
     { label: "HOME",     href: "#", active: true },
     { label: "PROJECTS", href: "#" },
@@ -1019,6 +1037,7 @@ const Player = {
     $('#pTitle').textContent = t.songTitle;
     $('#pArtist').textContent = t.artist || 'Unknown artist';
     $('#pArt').style.backgroundImage = t.cover ? `url('${t.cover}')` : '';
+    $('#pLink').href = t.music || '#';
     $('#pElapsed').textContent = '0:00';
     $('#pDuration').textContent = this.durations[this.index] ? fmtTime(this.durations[this.index]) : '0:00';
     $('#pFill').style.width = '0%';
@@ -1588,7 +1607,35 @@ function initSpotlight(){
   });
 }
 
+/* ------------------------------ BACKGROUND -------------------------------- */
+function applyBackground(){
+  const bgEl = document.querySelector('.bg');
+  if (!bgEl) return;
+
+  const cfg = BIO_CONFIG.background || {};
+  if (cfg.enabled === false || !cfg.image){
+    bgEl.style.backgroundImage = '';
+    bgEl.style.backgroundPosition = '';
+    bgEl.style.backgroundSize = '';
+    bgEl.style.backgroundRepeat = '';
+    bgEl.style.filter = '';
+    bgEl.style.removeProperty('--bg-overlay');
+    return;
+  }
+
+  const safeUrl = String(cfg.image).replace(/\\/g, '\\').replace(/'/g, "\\'");
+  bgEl.style.backgroundImage = `url('${safeUrl}')`;
+  bgEl.style.backgroundPosition = cfg.position || 'center center';
+  bgEl.style.backgroundSize = cfg.size || 'cover';
+  bgEl.style.backgroundRepeat = cfg.repeat || 'no-repeat';
+  bgEl.style.filter = cfg.blur ? `blur(${Number(cfg.blur)}px)` : '';
+
+  const overlayAlpha = Math.max(0, Math.min(1, Number(cfg.overlay) || 0));
+  bgEl.style.setProperty('--bg-overlay', overlayAlpha > 0 ? `rgba(5,6,10,${overlayAlpha})` : 'transparent');
+}
+
 /* --------------------------------- INIT ------------------------------------ */
+applyBackground();
 renderNav();
 renderProfile();
 renderSocials();
