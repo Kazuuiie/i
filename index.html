@@ -589,22 +589,25 @@ const BIO_CONFIG = {
      type: "video" | "image" | "gradient"
      source: tên file / URL, ví dụ "bg.mp4" hoặc "bg.jpg"
   */
-  background: {
+
+background: {
+  enabled: true,
+  type: "video",
+  source: "bg.mp4",
+  position: "center center",
+  size: "cover",
+
+  overlay: {
     enabled: true,
-    type: "video",
-    source: "bg.mp4",
-    position: "center center",
-    size: "cover",
-    overlay: {
-      enabled: true,
-      color: "rgba(5, 6, 10, 0.35)"
-    },
-    fog: {
-      enabled: true,
-      blur: 4,
-      opacity: 0.08,
-      color: "rgba(220, 230, 235, 0.10)"
-    }
+    color: "rgba(190, 195, 200, 0.22)"
+  },
+
+  fog: {
+    enabled: true,
+    blur: 6,
+    opacity: 0.16,
+    color: "rgba(210, 215, 220, 0.38)"
+  }
   },
 
   profile: {
