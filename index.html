@@ -68,26 +68,6 @@
     transform:scale(1.02);
   }
 
-  .bg-fx{
-    position:absolute; inset:0; width:100%; height:100%; pointer-events:none;
-    display:none; z-index:5; opacity:.72; mix-blend-mode:screen;
-    transform:translateZ(0);
-  }
-
-  /* GPU-friendly defaults: only promote layers that actually animate. */
-  .bg-media, .bg-light, .bg-fx, .spotlight, .grain{
-    contain: paint;
-  }
-
-  .performance-lite .grain{ opacity:.018; }
-  .performance-lite .bg-fog{ display:none !important; }
-  .performance-lite .spotlight{ display:none !important; }
-  .performance-lite .avatar::before{ animation-duration:10s; }
-
-  @media (max-width: 700px){
-    .bg-fx{ opacity:.56; }
-  }
-
   .bg-fog{
     position:absolute; inset:0; pointer-events:none;
     display:none; z-index:4;
@@ -582,6 +562,112 @@
     .activity-line, .activity-detail{ max-width: 280px; }
   }
   @media (prefers-reduced-motion: reduce){ .link-card{ transition:none; } }
+
+
+/* ================= ULTIMATE COLOR + FX UPGRADE ================= */
+:root{
+  --bg:#05060a;
+  --panel:rgba(14,16,23,.46);
+  --panel-strong:rgba(10,12,17,.66);
+  --panel-border:rgba(255,255,255,.095);
+  --text:#f7faf8;
+  --text-dim:#a7b0ad;
+  --text-faint:#68716e;
+  --accent:#8df0bd;
+  --accent-2:#c7a9ff;
+  --music-accent:#73e6b5;
+  --music-accent-soft:#bda9e9;
+  --glow-green:rgba(112,240,184,.18);
+  --glow-violet:rgba(152,123,255,.14);
+  --glow-amber:rgba(255,190,112,.10);
+}
+body{
+  background:#040509;
+  color:var(--text);
+}
+.bg{
+  background:
+    radial-gradient(900px 620px at 76% 18%, rgba(118,255,205,.13), transparent 66%),
+    radial-gradient(820px 620px at 14% 74%, rgba(143,113,255,.11), transparent 68%),
+    radial-gradient(680px 480px at 55% 100%, rgba(255,185,112,.07), transparent 72%),
+    linear-gradient(180deg,#0a1014 0%,#080b11 48%,#040509 100%);
+}
+.bg::before{
+  content:"";position:absolute;inset:-18%;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(28% 22% at 72% 25%, rgba(130,255,210,.12), transparent 75%),
+    radial-gradient(24% 20% at 22% 78%, rgba(146,119,255,.10), transparent 76%);
+  filter:blur(40px);opacity:.9;transform:translate3d(0,0,0);
+  animation:ambientDrift 18s ease-in-out infinite alternate;
+}
+@keyframes ambientDrift{0%{transform:translate3d(-1.5%,-1%,0) scale(1)}100%{transform:translate3d(2%,1.5%,0) scale(1.045)}}
+.bg::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+  background:linear-gradient(180deg,rgba(255,255,255,.018),transparent 18%,transparent 78%,rgba(0,0,0,.18));
+}
+.bg-light{mix-blend-mode:screen;filter:blur(20px) saturate(1.18) contrast(1.04);opacity:.9!important;}
+.bg-fog{background:radial-gradient(circle at 35% 40%,rgba(165,255,219,.04),transparent 42%),radial-gradient(circle at 75% 65%,rgba(160,135,255,.035),transparent 38%)!important;}
+.grain{opacity:.028;mix-blend-mode:soft-light;}
+.spotlight{background:radial-gradient(430px circle at var(--sx,50%) var(--sy,50%),rgba(141,240,189,.105),rgba(120,132,255,.045) 34%,transparent 72%);}
+.scrim-left{background:linear-gradient(90deg,rgba(3,5,8,.88) 0%,rgba(3,5,8,.72) 28%,rgba(3,5,8,.26) 48%,rgba(3,5,8,0) 62%);}
+
+.clock-pill,.link-card,.player,.weather,.activity-line,.activity-detail,.tag{
+  box-shadow:0 12px 34px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.035);
+}
+.clock-pill,.link-card,.player,.weather{
+  border-color:rgba(255,255,255,.10);
+  background:linear-gradient(145deg,rgba(18,21,28,.57),rgba(8,10,15,.48));
+}
+.clock-pill:hover,.link-card:hover,.weather:hover{border-color:rgba(141,240,189,.28);box-shadow:0 18px 44px rgba(0,0,0,.22),0 0 0 1px rgba(141,240,189,.035) inset;}
+
+.id-text h1{
+  background:linear-gradient(100deg,#fff 12%,#e8fff4 48%,#9af1c6 74%,#c0b0ff 108%);
+  -webkit-background-clip:text;background-clip:text;
+  text-shadow:0 0 28px rgba(141,240,189,.06);
+}
+.status .dot{box-shadow:0 0 14px rgba(var(--status-rgb),.55)!important;}
+.avatar-wrap::before{background:conic-gradient(from 20deg,rgba(132,255,207,.9),rgba(182,157,255,.55),transparent 34%,transparent 62%,rgba(132,255,207,.9));}
+.avatar{
+  box-shadow:0 0 24px 4px rgba(var(--status-rgb),.19),0 0 70px 16px rgba(128,245,203,.08)!important;
+}
+.tag{background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(141,240,189,.025));}
+.tag:hover{border-color:rgba(141,240,189,.34)!important;background:rgba(141,240,189,.065)!important;box-shadow:0 0 22px rgba(141,240,189,.06);}
+.link-card::after{background:radial-gradient(180px circle at var(--mx,50%) var(--my,50%),rgba(141,240,189,.17),rgba(158,130,255,.045) 36%,transparent 72%);}
+.link-card::before{
+  content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:.0;
+  background:linear-gradient(115deg,transparent 15%,rgba(255,255,255,.12) 50%,transparent 82%);
+  transform:translateX(-120%);transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .25s ease;
+}
+.link-card:hover::before{opacity:.45;transform:translateX(120%);}
+
+.player{background:linear-gradient(145deg,rgba(13,17,21,.7),rgba(8,10,14,.58));box-shadow:0 20px 48px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04);}
+.player.is-playing{box-shadow:0 20px 52px rgba(0,0,0,.26),0 0 32px rgba(115,230,181,.065),inset 0 1px 0 rgba(255,255,255,.04);border-color:rgba(115,230,181,.24)}
+.player-art-wrap::before{background:conic-gradient(from 0deg,var(--accent),var(--accent-2),var(--accent));filter:blur(12px);opacity:.25}
+.progress-track{background:linear-gradient(90deg,rgba(255,255,255,.08),rgba(141,240,189,.08));}
+.progress-fill{background:linear-gradient(90deg,#7ceab3,#9ef0c9 56%,#baa5ff);box-shadow:0 0 12px rgba(141,240,189,.24);}
+.icon-btn.list-open,.control-btn.active{color:#9deec7!important;}
+.playlist-item.active{background:linear-gradient(90deg,rgba(141,240,189,.10),rgba(158,130,255,.035));}
+.playlist-thumb{box-shadow:0 6px 18px rgba(0,0,0,.24);}
+
+.weather{background:linear-gradient(145deg,rgba(16,20,26,.62),rgba(9,11,16,.48));}
+.weather-pin{background:radial-gradient(circle at 35% 30%,rgba(141,240,189,.16),rgba(255,255,255,.035));box-shadow:inset 0 1px 0 rgba(255,255,255,.05);}
+.weather-temp{color:#eafff4;text-shadow:0 0 18px rgba(141,240,189,.08)}
+
+/* Subtle edge light on the whole interactive surface */
+.content{position:relative;}
+.content::before{
+  content:"";position:absolute;left:-28px;top:-28px;width:260px;height:220px;pointer-events:none;z-index:-1;
+  background:radial-gradient(circle,rgba(141,240,189,.05),transparent 68%);filter:blur(24px);
+}
+
+@media (max-width:900px){
+  .bg::before{animation-duration:24s;}
+  .bg-light{filter:blur(16px) saturate(1.1)!important;}
+}
+@media (prefers-reduced-motion:reduce){
+  .bg::before{animation:none!important}.link-card::before{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -589,7 +675,6 @@
   <div class="bg" id="bg">
     <video class="bg-media" id="bgVideo" aria-hidden="true" playsinline autoplay muted loop></video>
   <canvas class="bg-light" id="bgLight" aria-hidden="true"></canvas>
-    <canvas class="bg-fx" id="bgFX" aria-hidden="true"></canvas>
     <div class="bg-fog" id="bgFog"></div>
     <div class="bg-overlay" id="bgOverlay"></div>
   </div>
@@ -650,15 +735,9 @@ const BIO_CONFIG = {
     },
     fog: {
       enabled: true,
-      blur: 1.5,
-      opacity: 0.07,
-      color: "rgba(215, 220, 225, 0.16)"
-    },
-    fx: {
-      enabled: true,
-      opacity: 0.26,
-      density: 0.56,
-      rain: { enabled: true }
+      blur: 2,
+      opacity: 0.10,
+      color: "rgba(215, 220, 225, 0.22)"
     }
   },
 
@@ -887,8 +966,6 @@ const Player = {
   analyser: null,
   analyserData: null,
   vizFrame: 0,
-  lastVizMs: 0,
-  vizInterval: 1000 / 20,
 
   currentTrack(){ return this.tracks[this.index]; },
 
@@ -1039,17 +1116,12 @@ const Player = {
     }
   },
 
-  updatePlaylistVisualizer(now = performance.now()){
+  updatePlaylistVisualizer(){
     if (!this.analyser || !this.analyserData || !this.playing){
       this.stopPlaylistVisualizer(true);
       return;
     }
 
-    if (now - this.lastVizMs < this.vizInterval){
-      this.vizFrame = requestAnimationFrame((t) => this.updatePlaylistVisualizer(t));
-      return;
-    }
-    this.lastVizMs = now;
     this.analyser.getByteFrequencyData(this.analyserData);
 
     const item = document.querySelector(`.playlist-item[data-index="${this.index}"]`);
@@ -1074,7 +1146,7 @@ const Player = {
       bars[i].style.opacity = `${0.62 + level * 0.38}`;
     }
 
-    this.vizFrame = requestAnimationFrame((t) => this.updatePlaylistVisualizer(t));
+    this.vizFrame = requestAnimationFrame(() => this.updatePlaylistVisualizer());
   },
 
   startPlaylistVisualizer(){
@@ -1087,7 +1159,6 @@ const Player = {
       cancelAnimationFrame(this.vizFrame);
       this.vizFrame = 0;
     }
-    this.lastVizMs = 0;
 
     const bars = document.querySelectorAll('.playlist-playing i');
     bars.forEach(bar => {
@@ -1293,29 +1364,17 @@ const Player = {
   },
 
   preloadDurations(){
-    /* One probe at a time, scheduled while idle: avoids creating many network/audio
-       decoders during first paint. */
-    const queue = this.tracks.map((_, i) => i).filter(i => i !== this.index && !this.durations[i] && this.tracks[i]?.music);
-    const pump = () => {
-      const i = queue.shift();
-      if (i == null) return;
-      const t = this.tracks[i];
+    this.tracks.forEach((t, i) => {
+      if (i === this.index || this.durations[i] || !t.music) return;
       const probe = new Audio();
       probe.preload = 'metadata';
       probe.src = t.music;
-      const done = () => {
-        this.durations[i] = isFinite(probe.duration) ? probe.duration : 0;
+      probe.addEventListener('loadedmetadata', () => {
+        this.durations[i] = probe.duration;
         this.renderList();
-        probe.removeAttribute('src');
-        probe.load();
-        const next = () => pump();
-        if ('requestIdleCallback' in window) requestIdleCallback(next, {timeout:1200}); else setTimeout(next,180);
-      };
-      probe.addEventListener('loadedmetadata', done, {once:true});
-      probe.addEventListener('error', done, {once:true});
-    };
-    const first = () => pump();
-    if ('requestIdleCallback' in window) requestIdleCallback(first, {timeout:1500}); else setTimeout(first,350);
+      });
+      probe.addEventListener('error', () => {});
+    });
   }
 };
 
@@ -1679,362 +1738,368 @@ const Discord = {
 function initSpotlight(){
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
-  const cores = navigator.hardwareConcurrency || 4;
-  if (reduceMotion || !hasFinePointer || cores <= 4) return;
+  const lowPower = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+  if (reduceMotion || !hasFinePointer || lowPower) return;
 
   const spot = document.getElementById('spotlight');
   if (!spot) return;
 
-  let raf = 0;
-  let px = innerWidth * .5;
-  let py = innerHeight * .45;
-  let visible = false;
-
+  let raf = null, px = 0, py = 0;
   const apply = () => {
-    raf = 0;
     spot.style.setProperty('--sx', px + 'px');
     spot.style.setProperty('--sy', py + 'px');
+    raf = null;
   };
 
   window.addEventListener('pointermove', (e) => {
-    px = e.clientX;
-    py = e.clientY;
-    if (!visible){
-      visible = true;
-      spot.classList.add('show');
-    }
+    px = e.clientX; py = e.clientY;
+    spot.classList.add('show');
     if (!raf) raf = requestAnimationFrame(apply);
-  }, { passive:true });
+  }, { passive: true });
 
-  window.addEventListener('pointerleave', () => {
-    visible = false;
-    spot.classList.remove('show');
-  }, { passive:true });
+  window.addEventListener('pointerleave', () => spot.classList.remove('show'));
+
+  // Glow cục bộ theo con trỏ trên từng link-card (biến --mx/--my dùng ở CSS ::after)
+  document.querySelectorAll('.link-card').forEach(card => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      card.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
+  });
 }
-
 
 /* ------------------------------- BACKGROUND -------------------------------- */
 const Background = (() => {
   const root = document.getElementById('bg');
   const video = document.getElementById('bgVideo');
   const lightCanvas = document.getElementById('bgLight');
-  const fxCanvas = document.getElementById('bgFX');
   const fog = document.getElementById('bgFog');
   const overlay = document.getElementById('bgOverlay');
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const mobile = Math.min(window.innerWidth, window.innerHeight) <= 700;
-  const cores = navigator.hardwareConcurrency || 4;
-  const memory = navigator.deviceMemory || 4;
-  const coarse = window.matchMedia('(pointer: coarse)').matches;
-  const lowPower = reduceMotion || mobile || coarse || cores <= 4 || memory <= 4;
-
-  if (lowPower) document.documentElement.classList.add('performance-lite');
-
-  let lightGL = null, lightProgram = null, lightTexture = null, lightReady = false;
-  let fxGL = null, fxProgram = null, fxReady = false;
-  let quad = null;
-  let lightUniforms = null, fxUniforms = null;
-  let renderRunning = false;
+  let gl = null;
+  let program = null;
+  let texture = null;
   let raf = 0;
-  let frameHandle = 0;
+  let ready = false;
+  let renderRunning = false;
   let lastRenderMs = 0;
-  let lastFxMs = 0;
-  let currentFPS = lowPower ? 15 : 24;
-  let interval = 1000 / currentFPS;
-  let dprScale = lowPower ? 0.72 : 0.95;
-  let slowFrames = 0;
-  let resizeQueued = false;
+  let frameHandle = 0;
+  const TARGET_FPS = 24;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS;
+  let uniforms = null;
 
-  const VERTEX = `
+  const vertexSource = `
     attribute vec2 a_position;
     varying vec2 v_uv;
     void main(){
-      v_uv = (a_position + 1.0) * 0.5;
+      v_uv = vec2((a_position.x + 1.0) * 0.5, 1.0 - (a_position.y + 1.0) * 0.5);
       gl_Position = vec4(a_position, 0.0, 1.0);
     }
   `;
 
-  /* One cheap pass: 4 video taps + procedural atmosphere. */
-  const LIGHT_FRAG = `
+  const fragmentSource = `
     precision mediump float;
     uniform sampler2D u_video;
-    uniform float u_threshold, u_softness, u_strength;
-    uniform float u_coreThreshold, u_coreStrength, u_chroma;
-    uniform float u_videoAspect, u_viewAspect, u_time;
-    uniform vec2 u_texel, u_pointer;
+    uniform float u_threshold;
+    uniform float u_softness;
+    uniform float u_strength;
+    uniform float u_coreThreshold;
+    uniform float u_coreStrength;
+    uniform float u_chroma;
+    uniform float u_videoAspect;
+    uniform float u_viewAspect;
+    uniform vec2  u_texel;
     varying vec2 v_uv;
 
-    float lum(vec3 c){ return dot(c, vec3(0.2126,0.7152,0.0722)); }
-
-    vec2 coverUV(vec2 uv){
-      float va=max(u_videoAspect,0.0001), ba=max(u_viewAspect,0.0001);
-      if(va>ba){ float visible=ba/va; float crop=(1.0-visible)*0.5; uv.x=crop+uv.x*visible; }
-      else { float visible=va/ba; float crop=(1.0-visible)*0.5; uv.y=crop+uv.y*visible; }
-      return clamp(uv,0.0,1.0);
+    vec4 sampleBright(vec2 uv){
+      vec4 c = texture2D(u_video, clamp(uv, 0.0, 1.0));
+      float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+      float soft = max(u_softness, 0.001);
+      float mask = smoothstep(u_threshold, min(1.0, u_threshold + soft), lum);
+      return vec4(c.rgb * mask, mask);
     }
 
     void main(){
-      vec2 uv=coverUV(v_uv);
-      vec2 t=u_texel*2.2;
-      vec3 c0=texture2D(u_video,uv).rgb;
-      vec3 cx=texture2D(u_video,clamp(uv+vec2(t.x,0.0),0.0,1.0)).rgb;
-      vec3 cy=texture2D(u_video,clamp(uv+vec2(0.0,t.y),0.0,1.0)).rgb;
-      vec3 cd=texture2D(u_video,clamp(uv+vec2(t.x,t.y),0.0,1.0)).rgb;
+      vec2 uv = v_uv;
+      float va = max(u_videoAspect, 0.0001);
+      float ba = max(u_viewAspect, 0.0001);
 
-      float m0=smoothstep(u_threshold,min(0.99,u_threshold+u_softness),lum(c0));
-      float mx=smoothstep(u_threshold,min(0.99,u_threshold+u_softness),lum(cx));
-      float my=smoothstep(u_threshold,min(0.99,u_threshold+u_softness),lum(cy));
-      float md=smoothstep(u_threshold,min(0.99,u_threshold+u_softness),lum(cd));
-      vec3 broad=(c0*m0*.46 + (cx*mx+cy*my)*.18 + cd*md*.08);
+      if (va > ba) {
+        float visible = ba / va;
+        float crop = (1.0 - visible) * 0.5;
+        uv.x = crop + uv.x * visible;
+      } else {
+        float visible = va / ba;
+        float crop = (1.0 - visible) * 0.5;
+        uv.y = crop + uv.y * visible;
+      }
 
-      float hot=smoothstep(u_coreThreshold,min(0.99,u_coreThreshold+.09),lum(c0))*u_coreStrength;
-      float L=max(lum(broad),0.0001);
-      vec3 chroma=mix(vec3(1.0),broad/L,u_chroma);
-      vec3 light=broad*chroma*u_strength + c0*hot*(0.5+0.35*u_chroma);
+      vec2 t = u_texel * 2.0;
+      vec4 s0 = sampleBright(uv);
+      vec4 sx = sampleBright(uv + vec2(t.x, 0.0));
+      vec4 sy = sampleBright(uv + vec2(0.0, t.y));
+      vec4 sd = sampleBright(uv + vec2(t.x, t.y));
 
-      /* Ultra-cheap moving haze: no noise texture, no extra render target. */
-      float wave=sin((uv.x*5.5+u_time*.08))*.5+0.5;
-      float vign=1.0-smoothstep(.42,.92,distance(v_uv,vec2(.52,.45)));
-      float cursorGlow=1.0-smoothstep(.0,.36,distance(v_uv,u_pointer));
-      light += vec3(.08,.13,.10)*(wave*.10 + vign*.05 + cursorGlow*.045);
+      vec3 rgb = s0.rgb * 0.42 + (sx.rgb + sy.rgb) * 0.18 + sd.rgb * 0.10;
+      float mask = s0.a * 0.42 + (sx.a + sy.a) * 0.18 + sd.a * 0.10;
 
-      float alpha=clamp(m0*.48+(mx+my)*.12+md*.08+hot*.48,0.0,1.0);
-      gl_FragColor=vec4(light,alpha);
+      vec4 hot = texture2D(u_video, clamp(uv, 0.0, 1.0));
+      float hotLum = dot(hot.rgb, vec3(0.2126, 0.7152, 0.0722));
+      float hotMask = smoothstep(
+        u_coreThreshold,
+        min(1.0, u_coreThreshold + 0.10),
+        hotLum
+      ) * u_coreStrength;
+
+      float lum = max(dot(rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0001);
+      vec3 chroma = rgb / lum;
+      chroma = mix(vec3(1.0), chroma, u_chroma);
+
+      vec3 broad = rgb * chroma * u_strength;
+      vec3 core = hot.rgb * hotMask * (0.55 + 0.45 * u_chroma);
+      vec3 light = broad + core;
+      float alpha = clamp(mask * u_strength + hotMask * 0.50, 0.0, 1.0);
+
+      gl_FragColor = vec4(light, alpha);
     }
-  `;
+  `
 
-  /* Procedural dust/rain/glass shimmer layer. No texture uploads. */
-  const FX_FRAG = `
-    precision mediump float;
-    uniform float u_time;
-    uniform float u_rain, u_density, u_opacity;
-    varying vec2 v_uv;
+  function clamp01(v){
+    return Math.max(0, Math.min(1, Number(v) || 0));
+  }
 
-    float hash21(vec2 p){
-      p=fract(p*vec2(123.34,456.21));
-      p+=dot(p,p+45.32);
-      return fract(p.x*p.y);
+  function createShader(type, source){
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, source);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      console.warn('Background light shader:', gl.getShaderInfoLog(sh));
+      gl.deleteShader(sh);
+      return null;
+    }
+    return sh;
+  }
+
+  function initGL(){
+    if (!lightCanvas || !video) return false;
+    gl = lightCanvas.getContext('webgl', {
+      alpha: true,
+      premultipliedAlpha: false,
+      antialias: false,
+      preserveDrawingBuffer: false
+    });
+    if (!gl) return false;
+
+    const vs = createShader(gl.VERTEX_SHADER, vertexSource);
+    const fs = createShader(gl.FRAGMENT_SHADER, fragmentSource);
+    if (!vs || !fs) return false;
+
+    program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.warn('Background light program:', gl.getProgramInfoLog(program));
+      return false;
     }
 
-    float streak(vec2 uv,float cell,float speed,float width,float seed){
-      vec2 p=uv*cell;
-      float id=floor(p.x+seed);
-      float h=hash21(vec2(id,seed));
-      float y=fract(p.y + u_time*speed*(0.55+h*.9));
-      float x=fract(p.x);
-      float lane=abs(x-(.18+h*.64));
-      float head=smoothstep(width,0.0,lane);
-      float tail=smoothstep(.35,.0,fract(y+h*.55));
-      return head*tail*(0.25+0.75*h);
-    }
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),
+      gl.STATIC_DRAW
+    );
 
-    void main(){
-      vec2 uv=v_uv;
-      float dust=0.0;
-      dust += smoothstep(.996,1.0,hash21(floor(uv*vec2(140.0,90.0))));
-      float rain=0.0;
-      rain += streak(uv,42.0,.32,.012,1.7)*.65;
-      rain += streak(uv,78.0,.48,.008,7.1)*.36;
-      rain += streak(uv,118.0,.62,.005,15.2)*.20;
-      rain *= u_rain * u_density;
-      float edge=pow(max(0.0,1.0-distance(uv,vec2(.5))/.72),2.0);
-      float a=(dust*.12 + rain + edge*.012)*u_opacity;
-      gl_FragColor=vec4(vec3(.82,.93,.88)*(dust*.22+rain*.72),a);
-    }
-  `;
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-  function clamp01(v){ return Math.max(0,Math.min(1,Number(v)||0)); }
-  function shader(gl,type,src){
-    const s=gl.createShader(type);
-    gl.shaderSource(s,src); gl.compileShader(s);
-    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){
-      console.warn('[WebGL] shader compile:',gl.getShaderInfoLog(s));
-      gl.deleteShader(s); return null;
-    }
-    return s;
-  }
-  function program(gl,vsSrc,fsSrc){
-    const vs=shader(gl,gl.VERTEX_SHADER,vsSrc), fs=shader(gl,gl.FRAGMENT_SHADER,fsSrc);
-    if(!vs||!fs) return null;
-    const p=gl.createProgram(); gl.attachShader(p,vs); gl.attachShader(p,fs); gl.linkProgram(p);
-    if(!gl.getProgramParameter(p,gl.LINK_STATUS)){ console.warn('[WebGL] link:',gl.getProgramInfoLog(p)); return null; }
-    return p;
-  }
-  function makeGL(canvas){
-    if(!canvas) return null;
-    return canvas.getContext('webgl2',{alpha:true,antialias:false,preserveDrawingBuffer:false,premultipliedAlpha:false})
-      || canvas.getContext('webgl',{alpha:true,antialias:false,preserveDrawingBuffer:false,premultipliedAlpha:false});
-  }
-  function makeQuad(gl){
-    if(quad) return;
-    quad=gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER,quad);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  }
-  function fitCanvas(canvas,maxPixels){
-    if(!canvas) return null;
-    const rect=canvas.getBoundingClientRect();
-    const raw=Math.min(window.devicePixelRatio||1,1.35)*dprScale;
-    let dpr=raw;
-    const est=Math.max(1,rect.width*rect.height*dpr*dpr);
-    if(est>maxPixels) dpr*=Math.sqrt(maxPixels/est);
-    const w=Math.max(2,Math.floor(rect.width*dpr));
-    const h=Math.max(2,Math.floor(rect.height*dpr));
-    if(canvas.width!==w||canvas.height!==h){ canvas.width=w; canvas.height=h; }
-    return {w,h,vw:rect.width,vh:rect.height};
-  }
-  function initLight(){
-    if(lightReady||!lightCanvas||!video) return false;
-    lightGL=makeGL(lightCanvas); if(!lightGL) return false;
-    lightProgram=program(lightGL,VERTEX,LIGHT_FRAG); if(!lightProgram) return false;
-    makeQuad(lightGL);
-    lightTexture=lightGL.createTexture();
-    lightGL.bindTexture(lightGL.TEXTURE_2D,lightTexture);
-    lightGL.texParameteri(lightGL.TEXTURE_2D,lightGL.TEXTURE_MIN_FILTER,lightGL.LINEAR);
-    lightGL.texParameteri(lightGL.TEXTURE_2D,lightGL.TEXTURE_MAG_FILTER,lightGL.LINEAR);
-    lightGL.texParameteri(lightGL.TEXTURE_2D,lightGL.TEXTURE_WRAP_S,lightGL.CLAMP_TO_EDGE);
-    lightGL.texParameteri(lightGL.TEXTURE_2D,lightGL.TEXTURE_WRAP_T,lightGL.CLAMP_TO_EDGE);
-    lightUniforms={};
-    ['u_video','u_threshold','u_softness','u_strength','u_coreThreshold','u_coreStrength','u_chroma','u_videoAspect','u_viewAspect','u_time','u_texel','u_pointer']
-      .forEach(k=>lightUniforms[k]=lightGL.getUniformLocation(lightProgram,k));
-    lightReady=true; return true;
-  }
-  function initFX(){
-    if(fxReady||!fxCanvas) return false;
-    fxGL=makeGL(fxCanvas); if(!fxGL) return false;
-    fxProgram=program(fxGL,VERTEX,FX_FRAG); if(!fxProgram) return false;
-    makeQuad(fxGL);
-    fxUniforms={};
-    ['u_time','u_rain','u_density','u_opacity'].forEach(k=>fxUniforms[k]=fxGL.getUniformLocation(fxProgram,k));
-    fxReady=true; return true;
-  }
-  function beginPass(gl,p,canvas){
-    gl.viewport(0,0,canvas.width,canvas.height);
-    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.useProgram(p);
-    gl.bindBuffer(gl.ARRAY_BUFFER,quad);
-    const a=gl.getAttribLocation(p,'a_position');
-    gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  }
-  function renderLight(now){
-    if(!renderRunning||!lightReady||!video||video.readyState<2||video.videoWidth<2) return;
-    if(now-lastRenderMs<interval) return;
-    lastRenderMs=now;
-    const view=fitCanvas(lightCanvas,lowPower?420000:860000); if(!view) return;
-    const cfg=BIO_CONFIG.background?.lightMask||{};
-    const t0=performance.now();
-    beginPass(lightGL,lightProgram,lightCanvas);
-    lightGL.activeTexture(lightGL.TEXTURE0);
-    lightGL.bindTexture(lightGL.TEXTURE_2D,lightTexture);
-    try{ lightGL.texImage2D(lightGL.TEXTURE_2D,0,lightGL.RGBA,lightGL.RGBA,lightGL.UNSIGNED_BYTE,video); }catch(_){ return; }
-    lightGL.uniform1i(lightUniforms.u_video,0);
-    lightGL.uniform1f(lightUniforms.u_videoAspect,video.videoWidth/Math.max(1,video.videoHeight));
-    lightGL.uniform1f(lightUniforms.u_viewAspect,view.vw/Math.max(1,view.vh));
-    lightGL.uniform1f(lightUniforms.u_threshold,clamp01(cfg.threshold??.48));
-    lightGL.uniform1f(lightUniforms.u_softness,clamp01(cfg.softness??.20));
-    lightGL.uniform1f(lightUniforms.u_strength,Math.max(0,Number(cfg.strength??.9)));
-    lightGL.uniform1f(lightUniforms.u_coreThreshold,clamp01(cfg.coreThreshold??.70));
-    lightGL.uniform1f(lightUniforms.u_coreStrength,Math.max(0,Number(cfg.coreStrength??.68)));
-    lightGL.uniform1f(lightUniforms.u_chroma,Math.max(0,Number(cfg.chroma??1.1)));
-    lightGL.uniform1f(lightUniforms.u_time,now*.001);
-    lightGL.uniform2f(lightUniforms.u_texel,1/Math.max(1,video.videoWidth),1/Math.max(1,video.videoHeight));
-    lightGL.uniform2f(lightUniforms.u_pointer,.52,.45);
-    lightGL.drawArrays(lightGL.TRIANGLE_STRIP,0,4);
+    gl.useProgram(program);
+    uniforms = {
+      video: gl.getUniformLocation(program, 'u_video'),
+      threshold: gl.getUniformLocation(program, 'u_threshold'),
+      softness: gl.getUniformLocation(program, 'u_softness'),
+      strength: gl.getUniformLocation(program, 'u_strength'),
+      coreThreshold: gl.getUniformLocation(program, 'u_coreThreshold'),
+      coreStrength: gl.getUniformLocation(program, 'u_coreStrength'),
+      chroma: gl.getUniformLocation(program, 'u_chroma'),
+      videoAspect: gl.getUniformLocation(program, 'u_videoAspect'),
+      viewAspect: gl.getUniformLocation(program, 'u_viewAspect'),
+      texel: gl.getUniformLocation(program, 'u_texel')
+    };
+    const pos = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(pos);
+    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
 
-    const cost=performance.now()-t0;
-    if(cost>22) slowFrames++; else slowFrames=Math.max(0,slowFrames-2);
-    if(slowFrames>18){
-      dprScale=Math.max(.58,dprScale*.86);
-      currentFPS=Math.max(12,currentFPS-3); interval=1000/currentFPS; slowFrames=0;
+    ready = true;
+    return true;
+  }
+
+  function resizeCanvas(){
+    if (!lightCanvas) return;
+    const rect = lightCanvas.getBoundingClientRect();
+    const rawDpr = window.devicePixelRatio || 1;
+    const mobile = Math.min(window.innerWidth, window.innerHeight) <= 700;
+    const dprCap = mobile ? 1.0 : 1.2;
+    let dpr = Math.min(rawDpr, dprCap);
+
+    // Keep the shader lightweight on unusually large screens/high-DPR devices.
+    const maxPixels = mobile ? 520000 : 980000;
+    const estimated = Math.max(1, rect.width * rect.height * dpr * dpr);
+    if (estimated > maxPixels) dpr *= Math.sqrt(maxPixels / estimated);
+
+    const w = Math.max(2, Math.floor(rect.width * dpr));
+    const h = Math.max(2, Math.floor(rect.height * dpr));
+    if (lightCanvas.width !== w || lightCanvas.height !== h) {
+      lightCanvas.width = w;
+      lightCanvas.height = h;
+      if (gl) gl.viewport(0, 0, w, h);
+    }
+    return { width: rect.width, height: rect.height };
+  }
+
+  function scheduleNext(){
+    if (!renderRunning) return;
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      frameHandle = video.requestVideoFrameCallback(() => renderLight());
+    } else {
+      raf = requestAnimationFrame(renderLight);
     }
   }
-  function renderFX(now){
-    if(!renderRunning||!fxReady) return;
-    if(now-lastFxMs < Math.max(interval,1000/(lowPower?12:20))) return;
-    lastFxMs=now;
-    const view=fitCanvas(fxCanvas,lowPower?220000:520000); if(!view) return;
-    const cfg=BIO_CONFIG.background?.fx||{};
-    beginPass(fxGL,fxProgram,fxCanvas);
-    fxGL.uniform1f(fxUniforms.u_time,now*.001);
-    fxGL.uniform1f(fxUniforms.u_rain,cfg.rain?.enabled===false?0:1);
-    fxGL.uniform1f(fxUniforms.u_density,clamp01(cfg.density??.62));
-    fxGL.uniform1f(fxUniforms.u_opacity,clamp01(cfg.opacity??.30));
-    fxGL.drawArrays(fxGL.TRIANGLE_STRIP,0,4);
+
+  function renderLight(now = performance.now()){
+    if (!renderRunning) return;
+    if (!ready || !gl || !texture || !video || video.readyState < 2 || video.videoWidth < 2) {
+      scheduleNext();
+      return;
+    }
+
+    if (now - lastRenderMs < FRAME_INTERVAL) {
+      scheduleNext();
+      return;
+    }
+    lastRenderMs = now;
+
+    const cfg = BIO_CONFIG.background?.lightMask || {};
+    const view = resizeCanvas() || { width: lightCanvas.clientWidth, height: lightCanvas.clientHeight };
+    gl.viewport(0, 0, lightCanvas.width, lightCanvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.useProgram(program);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+
+    gl.uniform1i(uniforms.video, 0);
+    gl.uniform1f(uniforms.videoAspect, video.videoWidth / Math.max(1, video.videoHeight));
+    gl.uniform1f(uniforms.viewAspect, Math.max(1, view.width) / Math.max(1, view.height));
+    gl.uniform1f(uniforms.threshold, clamp01(cfg.threshold ?? 0.48));
+    gl.uniform1f(uniforms.softness, clamp01(cfg.softness ?? 0.20));
+    gl.uniform1f(uniforms.strength, Math.max(0, Number(cfg.strength ?? 1)));
+    gl.uniform1f(uniforms.coreThreshold, clamp01(cfg.coreThreshold ?? 0.70));
+    gl.uniform1f(uniforms.coreStrength, Math.max(0, Number(cfg.coreStrength ?? 0.72)));
+    gl.uniform1f(uniforms.chroma, Math.max(0, Number(cfg.chroma ?? 1.20)));
+    gl.uniform2f(
+      uniforms.texel,
+      1 / Math.max(1, video.videoWidth),
+      1 / Math.max(1, video.videoHeight)
+    );
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    scheduleNext();
   }
-  function tick(now=performance.now()){
-    if(!renderRunning) return;
-    renderLight(now); renderFX(now);
-    raf=requestAnimationFrame(tick);
+
+  function stopLight(){
+    renderRunning = false;
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    if (frameHandle && typeof video.cancelVideoFrameCallback === 'function') {
+      try { video.cancelVideoFrameCallback(frameHandle); } catch (_) {}
+    }
+    frameHandle = 0;
+    lastRenderMs = 0;
+    if (gl) gl.clear(gl.COLOR_BUFFER_BIT);
   }
-  function stop(){
-    renderRunning=false;
-    if(raf) cancelAnimationFrame(raf);
-    raf=0; frameHandle=0; lastRenderMs=0; lastFxMs=0;
-    [lightGL,fxGL].forEach(gl=>{ if(gl){ gl.clear(gl.COLOR_BUFFER_BIT); } });
-  }
-  function onVisibility(){
-    if(document.hidden){ stop(); return; }
-    if(video && video.readyState>=2) start();
-  }
-  function start(){
-    if(renderRunning) return;
-    renderRunning=true;
-    cancelAnimationFrame(raf);
-    raf=requestAnimationFrame(tick);
-  }
-  function scheduleResize(){
-    if(resizeQueued) return; resizeQueued=true;
-    requestAnimationFrame(()=>{ resizeQueued=false; fitCanvas(lightCanvas,lowPower?420000:860000); fitCanvas(fxCanvas,lowPower?220000:520000); });
-  }
+
   function apply(){
-    const cfg=BIO_CONFIG.background||{};
-    stop();
-    video.pause(); video.removeAttribute('src'); video.load();
-    video.style.display='none'; lightCanvas.style.display='none'; fxCanvas.style.display='none';
-    fog.style.display='none'; overlay.style.display='none';
-    root.style.backgroundImage='';
-    if(cfg.enabled===false) return;
+    if (!root) return;
+    const cfg = BIO_CONFIG.background || {};
+    const type = cfg.type || 'gradient';
 
-    if(cfg.type==='video'&&cfg.source){
-      video.src=cfg.source; video.muted=true; video.autoplay=true; video.loop=true; video.playsInline=true;
-      video.style.objectPosition=cfg.position||'center center'; video.style.objectFit=cfg.size||'cover'; video.style.display='block';
-      video.addEventListener('loadeddata',()=>{
-        video.play().catch(()=>{});
-        const lm=cfg.lightMask||{};
-        if(lm.enabled!==false && initLight()){
-          lightCanvas.style.filter=`blur(${Math.max(0,Number(lm.blur??10))}px) saturate(1.04)`;
-          lightCanvas.style.opacity=String(clamp01(lm.opacity??.72)); lightCanvas.style.display='block';
+    stopLight();
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    video.style.display = 'none';
+    lightCanvas.style.display = 'none';
+    fog.style.display = 'none';
+    overlay.style.display = 'none';
+
+    if (cfg.enabled === false) return;
+
+    if (type === 'video' && cfg.source) {
+      video.src = cfg.source;
+      video.muted = true;
+      video.autoplay = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.style.objectPosition = cfg.position || 'center center';
+      video.style.objectFit = cfg.size || 'cover';
+      video.style.display = 'block';
+      video.setAttribute('muted', '');
+      video.setAttribute('autoplay', '');
+      video.setAttribute('loop', '');
+      video.setAttribute('playsinline', '');
+      video.addEventListener('loadeddata', () => {
+        video.play().catch(() => {});
+        const lm = cfg.lightMask || {};
+        if (lm.enabled !== false && initGL()) {
+          const blur = Math.max(0, Number(lm.blur ?? 14));
+          lightCanvas.style.filter = `blur(${blur}px) saturate(1.05)`;
+          lightCanvas.style.opacity = String(clamp01(lm.opacity ?? 0.84));
+          lightCanvas.style.display = 'block';
+          renderRunning = true;
+          resizeCanvas();
+          renderLight();
         }
-        if((cfg.fx?.enabled??true) && initFX()){
-          fxCanvas.style.opacity=String(clamp01(cfg.fx?.opacity??.30)); fxCanvas.style.display='block';
-        }
-        fitCanvas(lightCanvas,lowPower?420000:860000); fitCanvas(fxCanvas,lowPower?220000:520000); start();
-      },{once:true});
-    }else if(cfg.type==='image'&&cfg.source){
-      root.style.backgroundImage=`url("${String(cfg.source).replace(/"/g,'\\"')}")`;
-      root.style.backgroundPosition=cfg.position||'center center'; root.style.backgroundSize=cfg.size||'cover'; root.style.backgroundRepeat='no-repeat';
+      }, { once:true });
+    } else if (type === 'image' && cfg.source) {
+      root.style.backgroundImage = `url("${String(cfg.source).replace(/"/g, '\\"')}")`;
+      root.style.backgroundPosition = cfg.position || 'center center';
+      root.style.backgroundSize = cfg.size || 'cover';
+      root.style.backgroundRepeat = 'no-repeat';
     }
 
-    const ov=cfg.overlay||{};
-    if(ov.enabled!==false&&ov.color){ overlay.style.background=ov.color; overlay.style.display='block'; }
-    const fg=cfg.fog||{};
-    if(fg.enabled&&!lowPower){
-      const blur=Math.min(2,Math.max(0,Number(fg.blur||0)));
-      fog.style.background=fg.color||'rgba(220,230,235,.08)';
-      fog.style.backdropFilter=blur?`blur(${blur}px)`:'none'; fog.style.webkitBackdropFilter=blur?`blur(${blur}px)`:'none';
-      fog.style.opacity=String(clamp01(fg.opacity??.06)); fog.style.display='block';
+    const ov = cfg.overlay || {};
+    if (ov.enabled !== false && ov.color) {
+      overlay.style.background = ov.color;
+      overlay.style.display = 'block';
+    }
+
+    const fg = cfg.fog || {};
+    if (fg.enabled) {
+      const fogBlur = Math.min(3, Math.max(0, Number(fg.blur || 0)));
+      fog.style.background = fg.color || 'rgba(220,230,235,0.10)';
+      fog.style.backdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
+      fog.style.webkitBackdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
+      fog.style.opacity = String(clamp01(fg.opacity ?? 0.08));
+      fog.style.display = 'block';
     }
   }
 
-  document.addEventListener('visibilitychange',onVisibility,{passive:true});
-  window.addEventListener('resize',scheduleResize,{passive:true});
-  window.addEventListener('orientationchange',()=>setTimeout(scheduleResize,120),{passive:true});
-  if('ResizeObserver' in window) new ResizeObserver(scheduleResize).observe(root);
+  const resizeObserver = new ResizeObserver(() => resizeCanvas());
+  if (root && 'ResizeObserver' in window) resizeObserver.observe(root);
 
-  return {apply};
+  window.addEventListener('resize', resizeCanvas, { passive: true });
+  window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 120), { passive: true });
+  return { apply };
 })();
-
 
 /* --------------------------------- INIT ------------------------------------ */
 Background.apply();
@@ -2049,8 +2114,65 @@ initSpotlight();
 
 // Kích hoạt hiệu ứng mở trang tuần tự đúng một lần (xem class .reveal / .ready)
 requestAnimationFrame(() => document.body.classList.add('ready'));
+
+
+/* ================= SMART FX CONTROLLER ================= */
+(function(){
+  const fine=matchMedia('(pointer:fine)').matches;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const low=(navigator.hardwareConcurrency||8)<=4 || /Mobi|Android/i.test(navigator.userAgent);
+  if(!fine || reduced) return;
+  const root=document.documentElement;
+  let tx=50,ty=50,cx=50,cy=50,raf=0;
+  function frame(){
+    cx += (tx-cx)*0.12; cy += (ty-cy)*0.12;
+    root.style.setProperty('--sx',cx+'%'); root.style.setProperty('--sy',cy+'%');
+    raf=requestAnimationFrame(frame);
+  }
+  addEventListener('pointermove',e=>{
+    tx=(e.clientX/innerWidth)*100; ty=(e.clientY/innerHeight)*100;
+    if(!raf) raf=requestAnimationFrame(frame);
+  },{passive:true});
+  addEventListener('pointerleave',()=>{tx=50;ty=50},{passive:true});
+  frame();
+
+  // Depth tilt chỉ cho desktop GPU tương đối tốt.
+  if(!low){
+    const cards=[...document.querySelectorAll('.link-card,.player,.weather,.clock-pill')];
+    cards.forEach(el=>{
+      let local=0;
+      el.addEventListener('pointermove',e=>{
+        const r=el.getBoundingClientRect();
+        const x=(e.clientX-r.left)/r.width-.5;
+        const y=(e.clientY-r.top)/r.height-.5;
+        el.style.setProperty('--rx',(-y*2.2).toFixed(2)+'deg');
+        el.style.setProperty('--ry',(x*2.2).toFixed(2)+'deg');
+        if(!local){ local=1; requestAnimationFrame(()=>{ el.style.transform=`perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-2px)`; local=0;}); }
+      });
+      el.addEventListener('pointerleave',()=>{
+        el.style.transform='';
+      });
+    });
+  }
+})();
+
+/* Extra WebGL quality tuning without touching the existing feature/API logic. */
+(function(){
+  const canvas=document.getElementById('bgLight');
+  if(!canvas) return;
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      canvas.style.opacity=e.isIntersecting?'':'0';
+    });
+  },{threshold:0.01});
+  observer.observe(canvas);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){ canvas.style.opacity='0'; }
+    else canvas.style.opacity='';
+  });
+})();
+
 </script>
 
-<!-- khanz ultra: adaptive WebGL compositor + performance-aware FX -->
 </body>
 </html>
