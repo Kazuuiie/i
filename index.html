@@ -39,24 +39,26 @@
 
   ::selection{ background: rgba(125,211,168,0.28); color: #fff; }
 
-  /* ===================== WEBGL RAIN-ON-GLASS BACKGROUND =====================
-     Toàn bộ nền giờ là một canvas WebGL (#glcanvas) chạy shader riêng: sinh
-     ra một "khung cảnh" ánh sáng nhoè (bokeh) phía sau tấm kính, rồi vẽ các
-     giọt nước có thật (heightfield) khúc xạ ánh sáng đó + highlight bóng —
-     xem toàn bộ logic trong thẻ <script id="rain-gl"> ở cuối trang.
-     Nếu trình duyệt không hỗ trợ WebGL, JS sẽ tự thêm class "no-webgl" vào
-     <body> để dùng nền gradient tĩnh dự phòng bên dưới. */
-  #glcanvas{
-    position: fixed; inset: 0; z-index: 0;
-    width: 100%; height: 100%; display:block;
+  .bg{
+    position: fixed; inset: -10%; z-index: 0;
+    background:
+      radial-gradient(1100px 650px at 80% 30%, rgba(255,150,90,0.11), transparent 60%),
+      radial-gradient(900px 600px at 15% 82%, rgba(125,211,168,0.09), transparent 62%),
+      radial-gradient(700px 500px at 55% 100%, rgba(216,183,135,0.06), transparent 65%),
+      linear-gradient(180deg, #0c1320 0%, #090c14 45%, #05060a 100%);
+    animation: auroraDrift 26s ease-in-out infinite;
+    will-change: transform;
   }
-  body.no-webgl #glcanvas{ display:none; }
-  .bg-fallback{
-    display:none;
-    position: fixed; inset: 0; z-index: 0;
-    background: linear-gradient(180deg, #0c1320 0%, #090c14 45%, #05060a 100%);
+  @keyframes auroraDrift{
+    0%, 100% { transform: translate3d(0,0,0) scale(1); }
+    50%      { transform: translate3d(-1.5%, 1%, 0) scale(1.035); }
   }
-  body.no-webgl .bg-fallback{ display:block; }
+  .bg::after{
+    content: "BACKGROUND — thay ảnh sau";
+    position:absolute; right: 6%; bottom: 14%;
+    font-size: 12px; letter-spacing: .04em;
+    color: rgba(255,255,255,0.12); font-weight:600;
+  }
 
   /* Hạt film-grain rất mảnh phủ toàn trang để nền không bị "phẳng" như
      một gradient CSS thông thường — tăng cảm giác chất liệu, cao cấp. */
@@ -382,6 +384,7 @@
   .icon-btn:hover{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.08); }
   .icon-btn:active{ transform:scale(.94); }
   .icon-btn svg{ width:13px; height:13px; }
+  .icon-btn.spotify svg{ width:14px; height:14px; color:#1ed760; }
   .icon-btn.list-open{ background:rgba(143,214,176,.10); color:var(--accent); border-color:rgba(143,214,176,.10); }
 
   .progress-row{
@@ -540,8 +543,7 @@
 </head>
 <body>
 
-  <div class="bg-fallback"></div>
-  <canvas id="glcanvas"></canvas>
+  <div class="bg"></div>
   <div class="grain"></div>
   <div class="spotlight" id="spotlight"></div>
   <div class="scrim-left"></div>
@@ -564,24 +566,6 @@
   <div class="weather reveal" id="weather"></div>
 
 <script>
-/* =========================================================================
-   BIO CONFIG — CHỈNH SỬA MỌI THỨ Ở ĐÂY, PHẦN CODE BÊN DƯỚI TỰ RENDER
-   =========================================================================
-   - Muốn thêm bài hát mới: thêm 1 object vào mảng music.tracks, chỉ cần
-     3 trường gọn: title ("Tên bài - Ca sĩ"), cover (ảnh bìa), music (file
-     nhạc thật — trình phát sẽ phát y như 1 music player thật, kéo được
-     thanh tiến trình, thời lượng tự lấy từ file, không phải giả lập nữa).
-   - Muốn đổi avatar / background: xem ghi chú ở avatar.image và phần .bg
-     trong CSS (tìm class ".bg").
-   - Muốn thêm link mạng xã hội mới: thêm object vào mảng "socials" và
-     thêm icon SVG tương ứng vào ICONS.social bên dưới.
-   - Thời tiết lấy TỰ ĐỘNG theo vị trí trình duyệt (Open-Meteo, miễn phí,
-     không cần API key). Nếu người dùng từ chối chia sẻ vị trí, trang sẽ
-     dùng toạ độ dự phòng trong weather.fallback.
-   - Badge "Đang chơi / Đang nghe" cạnh avatar lấy tự động từ Discord thật
-     qua Lanyard (xem phần discord bên dưới) — bấm vào badge để mở rộng
-     xem chi tiết (ảnh lớn hơn, mô tả đầy đủ, đã chơi/nghe bao lâu).
-   ========================================================================= */
 const BIO_CONFIG = {
 
   nav: [
@@ -668,6 +652,7 @@ const ICONS = {
   cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 12.5 4 4 0 0 0 6 20h11.5"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`,
   rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 16a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 9.5 4 4 0 0 0 6 17.5h11.5"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>`,
+  spotify: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Zm4.586 14.424a.622.622 0 0 1-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 1 1-.277-1.215c3.809-.87 7.077-.496 9.712 1.115a.623.623 0 0 1 .207.857Zm1.223-2.722a.78.78 0 0 1-1.072.257c-2.688-1.652-6.786-2.131-9.966-1.166a.78.78 0 1 1-.454-1.494c3.63-1.102 8.147-.568 11.235 1.332a.78.78 0 0 1 .257 1.071Zm.105-2.835C14.692 9.03 9.375 8.854 6.297 9.798a.936.936 0 1 1-.545-1.79c3.533-1.073 9.402-.865 13.115 1.338a.936.936 0 0 1-.953 1.612Z"/></svg>`,
   list: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
   prev: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 9 6V6z"/></svg>`,
   next: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l9 6-9 6z"/></svg>`,
@@ -1036,6 +1021,7 @@ const Player = {
     $('#pTitle').textContent = t.songTitle;
     $('#pArtist').textContent = t.artist || 'Unknown artist';
     $('#pArt').style.backgroundImage = t.cover ? `url('${t.cover}')` : '';
+    $('#pLink').href = t.music || '#';
     $('#pElapsed').textContent = '0:00';
     $('#pDuration').textContent = this.durations[this.index] ? fmtTime(this.durations[this.index]) : '0:00';
     $('#pFill').style.width = '0%';
@@ -1605,228 +1591,6 @@ function initSpotlight(){
   });
 }
 
-/* ============================ WEBGL RAIN ON GLASS ============================
-   Shader khúc xạ kiểu "ô lưới": chia màn hình thành các ô, mỗi ô có một giọt
-   nước bo tròn; bên trong bán kính giọt, UV bị kéo lệch về tâm giọt (tạo hiệu
-   ứng phồng/lensing như ánh sáng đi qua một giọt nước thật) trước khi lấy mẫu
-   từ ảnh nền (u_texture). 10 lớp random chồng lên nhau để trông tự nhiên,
-   cường độ mỗi giọt biến thiên theo thời gian để giọt "xuất hiện rồi mờ dần".
-   Ảnh nền là một texture bokeh mờ được vẽ một lần bằng canvas 2D. */
-function initRain(){
-  const canvas = document.getElementById('glcanvas');
-  if (!canvas) return;
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const gl = canvas.getContext('webgl', { antialias:false, alpha:false })
-          || canvas.getContext('experimental-webgl', { antialias:false, alpha:false });
-
-  if (!gl){
-    document.body.classList.add('no-webgl');
-    return;
-  }
-
-  // ---- Ảnh nền phía sau tấm kính: vài quầng sáng bokeh mờ, vẽ 1 lần bằng
-  // canvas 2D rồi tải lên làm texture (không cần ảnh/file ngoài nào cả). ----
-  function makeBackgroundCanvas(){
-    const off = document.createElement('canvas');
-    const aspect = window.innerHeight ? window.innerWidth / window.innerHeight : 1.6;
-    off.width = 720;
-    off.height = Math.max(360, Math.round(720 / Math.max(aspect, 0.9)));
-    const ctx = off.getContext('2d');
-
-    const grad = ctx.createLinearGradient(0, 0, 0, off.height);
-    grad.addColorStop(0, '#0c1320');
-    grad.addColorStop(0.5, '#0a0d16');
-    grad.addColorStop(1, '#05060a');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, off.width, off.height);
-
-    function blob(x, y, r, color){
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, color);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, off.width, off.height);
-    }
-    blob(off.width * 0.78, off.height * 0.30, off.width * 0.30, 'rgba(255,150,90,0.55)');
-    blob(off.width * 0.18, off.height * 0.72, off.width * 0.28, 'rgba(120,220,180,0.45)');
-    blob(off.width * 0.55, off.height * 0.58, off.width * 0.22, 'rgba(220,190,140,0.32)');
-    blob(off.width * 0.35, off.height * 0.16, off.width * 0.20, 'rgba(110,140,230,0.28)');
-
-    return off;
-  }
-
-  const texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, makeBackgroundCanvas());
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-  const vertSrc = `
-    attribute vec2 a_position;
-    varying vec2 uvInterpolator;
-    void main(){
-      uvInterpolator = a_position * 0.5 + 0.5;
-      gl_Position = vec4(a_position, 0.0, 1.0);
-    }
-  `;
-
-  const fragSrc = `
-    precision highp float;
-    varying vec2 uvInterpolator;
-    uniform float u_time;
-    uniform sampler2D u_texture;
-
-    // Generate a random float from a single input and seed.
-    float Random11(float inputValue, float seed) {
-      return fract(sin(inputValue * 345.456) * seed);
-    }
-
-    // Generate a random float from a 2d input and seed.
-    float Random21(vec2 inputValue, float seed) {
-      return fract(sin(dot(inputValue, vec2(123.456, 43.12))) * seed);
-    }
-
-    // Generate drops as distortions, that can be applied to UV coordinates
-    vec2 Drops(vec2 uv, float seed) {
-      // Randomly move everything
-      float shiftY = Random11(0.5, seed);
-      uv.y += shiftY;
-
-      // Split UV space into cells. Each cell will contain a drop.
-      float cellsResolution = 10.0;
-      uv *= cellsResolution;
-
-      // Move each row randomly.
-      float rowIndex = floor(uv.y);
-      float shiftX = Random11(rowIndex, seed);
-      uv.x += shiftX;
-
-      vec2 cellIndex = floor(uv);
-      vec2 cellUv = fract(uv);
-
-      vec2 cellCenter = vec2(0.5);
-      float distanceFromCenter = distance(cellUv, cellCenter);
-
-      // We don't want to show every drop. So randomly remove some of them.
-      float isDropShown = step(0.8, Random21(cellIndex, seed + 14244.324));
-
-      // Decrease each drop intensity with time. Then make it appear again.
-      float dropIntensity = 1.0 - fract(u_time * 0.1 + Random21(cellIndex, seed + 32132.432) * 2.0) * 2.0;
-      dropIntensity = sign(dropIntensity) * abs(dropIntensity * dropIntensity * dropIntensity * dropIntensity);
-      dropIntensity = clamp(dropIntensity, 0.0, 1.0);
-
-      // We only need results from inside a specific radius of a drop.
-      float isInsideDrop = 1.0 - step(0.1, distanceFromCenter);
-
-      vec2 vecToCenter = normalize(cellCenter - cellUv);
-
-      // Drop value is a vector to the center that increases with distance from it.
-      vec2 dropValue = vecToCenter * distanceFromCenter * distanceFromCenter * 40.0;
-
-      vec2 drop = dropValue * isInsideDrop * isDropShown * dropIntensity;
-      return drop;
-    }
-
-    void main() {
-      vec2 uv = uvInterpolator;
-
-      // Run the Drop function 10 times to create a seemingly random pattern.
-      vec2 drops = vec2(0.0);
-      for (int i = 0; i < 10; i++) {
-        drops += Drops(uv, 42424.43 + float(i) * 12313.432);
-      }
-
-      // Distort UV.
-      uv += drops * 0.01;
-
-      // Sample the texture after distorting the UV space.
-      vec4 color = texture2D(u_texture, uv);
-
-      gl_FragColor = color;
-    }
-  `;
-
-  function compile(type, src){
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
-      console.warn('[rain-gl] shader error:', gl.getShaderInfoLog(s));
-      gl.deleteShader(s);
-      return null;
-    }
-    return s;
-  }
-
-  const vs = compile(gl.VERTEX_SHADER, vertSrc);
-  const fs = compile(gl.FRAGMENT_SHADER, fragSrc);
-  if (!vs || !fs){ document.body.classList.add('no-webgl'); return; }
-
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)){
-    console.warn('[rain-gl] link error:', gl.getProgramInfoLog(program));
-    document.body.classList.add('no-webgl');
-    return;
-  }
-  gl.useProgram(program);
-
-  const quad = new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-  const posLoc = gl.getAttribLocation(program, 'a_position');
-  gl.enableVertexAttribArray(posLoc);
-  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-
-  const u_time = gl.getUniformLocation(program, 'u_time');
-  const u_texture = gl.getUniformLocation(program, 'u_texture');
-
-  function resize(){
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
-    const w = Math.floor(window.innerWidth * dpr);
-    const h = Math.floor(window.innerHeight * dpr);
-    if (canvas.width !== w || canvas.height !== h){
-      canvas.width = w; canvas.height = h;
-      gl.viewport(0,0,w,h);
-    }
-  }
-
-  let raf = 0;
-  let startTime = performance.now();
-
-  function frame(now){
-    resize();
-    const t = (now - startTime) * 0.001;
-    gl.uniform1f(u_time, t);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.uniform1i(u_texture, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    if (!reduceMotion) raf = requestAnimationFrame(frame);
-  }
-
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Nếu người dùng bật "giảm hiệu ứng chuyển động", vẫn vẽ đúng 1 khung hình
-  // tĩnh (kính mờ + giọt nước đứng yên) thay vì tắt hẳn nền.
-  requestAnimationFrame(frame);
-
-  // Tự tắt vòng lặp nếu context WebGL bị mất (vd. GPU driver reset) để
-  // tránh spam lỗi trong console.
-  canvas.addEventListener('webglcontextlost', (e) => {
-    e.preventDefault();
-    if (raf) cancelAnimationFrame(raf);
-  });
-}
-
 /* --------------------------------- INIT ------------------------------------ */
 renderNav();
 renderProfile();
@@ -1836,7 +1600,6 @@ Player.mount();
 Weather.init();
 Discord.init();
 initSpotlight();
-initRain();
 
 // Kích hoạt hiệu ứng mở trang tuần tự đúng một lần (xem class .reveal / .ready)
 requestAnimationFrame(() => document.body.classList.add('ready'));
