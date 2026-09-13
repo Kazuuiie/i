@@ -553,6 +553,13 @@
     .activity-line, .activity-detail{ max-width: 280px; }
   }
   @media (prefers-reduced-motion: reduce){ .link-card{ transition:none; } }
+
+  /* ===== PERFORMANCE SAFE OVERRIDES ===== */
+  /* Keep the original video, bg-overlay and scrim-left. Disable only unused FX. */
+  .bg-media{ will-change:auto; transform:translateZ(0); }
+  .bg-light, .bg-fog, .grain, .spotlight{ display:none !important; }
+  .scrim-left{ display:block !important; }
+  .bg-overlay{ pointer-events:none; }
 </style>
 </head>
 <body>
@@ -607,7 +614,7 @@ const BIO_CONFIG = {
       color: "rgba(115, 120, 125, 0.93)"
     },
     lightMask: {
-      enabled: true,
+      enabled: false,
       threshold: 0.48,
       softness: 0.20,
       strength: 1.00,
@@ -618,7 +625,7 @@ const BIO_CONFIG = {
       opacity: 0.84
     },
     fog: {
-      enabled: true,
+      enabled: false,
       blur: 2,
       opacity: 0.10,
       color: "rgba(215, 220, 225, 0.22)"
@@ -1957,7 +1964,7 @@ renderFooter();
 Player.mount();
 Weather.init();
 Discord.init();
-initSpotlight();
+// initSpotlight();
 
 // Kích hoạt hiệu ứng mở trang tuần tự đúng một lần (xem class .reveal / .ready)
 requestAnimationFrame(() => document.body.classList.add('ready'));
