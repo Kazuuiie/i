@@ -41,24 +41,117 @@
   .bg{
     position: fixed; inset: 0; z-index: 0; overflow: hidden;
     background:
-      radial-gradient(1100px 650px at 80% 30%, rgba(255,150,90,0.11), transparent 60%),
-      radial-gradient(900px 600px at 15% 82%, rgba(125,211,168,0.09), transparent 62%),
-      radial-gradient(700px 500px at 55% 100%, rgba(216,183,135,0.06), transparent 65%),
-      linear-gradient(180deg, #0c1320 0%, #090c14 45%, #05060a 100%);
+      radial-gradient(900px 620px at 90% 18%, rgba(90, 240, 220, .11), transparent 64%),
+      radial-gradient(760px 540px at 68% 8%, rgba(135, 240, 177, .10), transparent 62%),
+      radial-gradient(720px 520px at 78% 74%, rgba(255, 212, 150, .08), transparent 66%),
+      linear-gradient(180deg, #10171b 0%, #0a0f13 50%, #05070a 100%);
+  }
+
+  .bg-shader{
+    position:absolute; inset:0; width:100%; height:100%;
+    display:block; pointer-events:none; z-index:0;
+  }
+
+  /* Terminal field: to hơn, cho phép các khung chồng nhau nhẹ để tạo chiều sâu */
+  .terminal-field{
+    position:absolute; inset:-10% -8% -8% 30%; z-index:1; pointer-events:none;
+    overflow:hidden;
+    transform:skewY(-1.1deg);
+    opacity:.82;
+    filter:saturate(1.05);
+  }
+  .terminal{
+    position:absolute;
+    width:min(620px, 46vw);
+    min-height:210px;
+    padding:0 0 16px;
+    border:1px solid rgba(220,228,230,.09);
+    border-radius:18px;
+    background:linear-gradient(135deg, rgba(44,48,52,.36), rgba(18,21,24,.22));
+    box-shadow:0 28px 80px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter:blur(7px) saturate(115%);
+    -webkit-backdrop-filter:blur(7px) saturate(115%);
+    transform-origin:center;
+    overflow:hidden;
+  }
+  .terminal::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(112deg, rgba(210,215,216,.08), transparent 28%, rgba(127,223,193,.035) 58%, rgba(122,216,255,.05) 100%);
+    mix-blend-mode:screen;
+  }
+  .terminal-head{
+    display:flex; align-items:center; gap:9px; height:32px; padding:0 14px;
+    color:rgba(230,235,235,.49); font:600 11px/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing:.02em; border-bottom:1px solid rgba(255,255,255,.055);
+    background:rgba(150,155,158,.045);
+  }
+  .traffic{display:flex; gap:6px; margin-right:2px;}
+  .traffic i{display:block; width:6px; height:6px; border-radius:50%; background:rgba(210,216,218,.35);}
+  .traffic i:nth-child(2){background:rgba(171,214,190,.5);}
+  .terminal-state{margin-left:auto; opacity:.55;}
+  .terminal pre{
+    margin:0; padding:15px 17px 13px;
+    color:rgba(218,224,224,.47);
+    font:500 12.5px/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space:pre;
+    text-shadow:0 0 18px rgba(116,218,187,.12);
+  }
+  .terminal .c-dim{color:rgba(178,187,189,.42)}
+  .terminal .c-key{color:rgba(118,231,190,.62); text-shadow:0 0 14px rgba(118,231,190,.15)}
+  .terminal .c-fn{color:rgba(114,214,255,.68); text-shadow:0 0 16px rgba(114,214,255,.12)}
+  .terminal .c-type{color:rgba(224,194,126,.62);}
+  .terminal .c-var{color:rgba(235,240,241,.54)}
+  .terminal .c-num{color:rgba(255,215,147,.68)}
+  .terminal.t1{top:4%; left:4%; transform:rotate(-1.4deg) scale(1.1); z-index:3;}
+  .terminal.t2{top:30%; left:26%; transform:rotate(1.8deg) scale(1.0); z-index:2;}
+  .terminal.t3{top:60%; left:2%; transform:rotate(-1.9deg) scale(1.06); z-index:1;}
+  .terminal-glass{
+    position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:
+      linear-gradient(90deg, rgba(118,124,128,.21) 0%, rgba(126,132,135,.18) 48%, rgba(109,114,118,.27) 100%),
+      linear-gradient(180deg, rgba(190,194,197,.10), rgba(68,72,76,.16));
+    backdrop-filter:blur(18px) saturate(72%);
+    -webkit-backdrop-filter:blur(18px) saturate(72%);
+    mix-blend-mode:normal;
+  }
+
+  .bg::before{
+    content:""; position:absolute; inset:-8%; pointer-events:none; z-index:1;
+    background:
+      radial-gradient(32% 42% at 73% 14%, rgba(152,255,201,.18), transparent 68%),
+      radial-gradient(20% 55% at 94% 54%, rgba(100,240,255,.16), transparent 72%),
+      radial-gradient(22% 44% at 70% 78%, rgba(255,233,180,.10), transparent 70%),
+      linear-gradient(106deg, transparent 0 48%, rgba(255,255,255,.045) 52%, transparent 57%);
+    filter: blur(34px) saturate(115%);
+    transform: translate3d(0,0,0) scale(1.04);
+    animation: bgBloom 14s ease-in-out infinite alternate;
+  }
+
+  .bg::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:
+      linear-gradient(90deg, rgba(3,5,7,.93) 0%, rgba(4,6,8,.82) 24%, rgba(5,7,9,.34) 50%, rgba(5,7,9,.08) 100%),
+      radial-gradient(120% 90% at 82% 50%, transparent 42%, rgba(2,4,6,.20) 100%);
+  }
+
+  @keyframes bgBloom{
+    0%   { transform: translate3d(-1%,0,0) scale(1.04); opacity:.82; }
+    50%  { transform: translate3d(1.2%,-.6%,0) scale(1.07); opacity:1; }
+    100% { transform: translate3d(-.5%,1%,0) scale(1.05); opacity:.86; }
   }
   .bg-media{
     position:absolute; inset:0; width:100%; height:100%;
     object-fit:cover; object-position:center center;
-    display:none; pointer-events:none;
+    display:none; pointer-events:none; z-index:0;
+    filter: saturate(.92) contrast(1.03) brightness(.78);
+    transform:scale(1.025);
   }
 
-  /* Lớp kính mờ/giọt sương: chỉ tác động lên background */
   .bg-overlay{
     position:absolute; inset:0; pointer-events:none;
     display:none; z-index:2;
   }
 
-  /* Light mask lấy trực tiếp từ các vùng sáng của video */
   .bg-light{
     position:absolute; inset:-2%; width:104%; height:104%;
     display:none; pointer-events:none; z-index:3;
@@ -71,7 +164,6 @@
   .bg-fog{
     position:absolute; inset:0; pointer-events:none;
     display:none; z-index:4;
-    /* Full-screen backdrop-filter is expensive; keep it subtle. */
     transform:translateZ(0);
   }
   @keyframes auroraDrift{
@@ -79,20 +171,16 @@
     50%      { transform: translate3d(-1.5%, 1%, 0) scale(1.035); }
   }
 
-  /* Hạt film-grain rất mảnh phủ toàn trang để nền không bị "phẳng" như
-     một gradient CSS thông thường — tăng cảm giác chất liệu, cao cấp. */
   .grain{
     position: fixed; inset: -10%; z-index: 1; pointer-events:none;
     opacity: .035; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Quầng sáng mềm bám theo con trỏ chuột — chỉ bật trên thiết bị có
-     chuột thật và khi người dùng không yêu cầu giảm hiệu ứng chuyển động. */
   .spotlight{
     position: fixed; z-index: 1; inset: 0; pointer-events:none;
     opacity: 0; transition: opacity .4s ease;
-    background: radial-gradient(480px circle at var(--sx,50%) var(--sy,50%), rgba(125,211,168,0.06), transparent 72%);
+    background: radial-gradient(440px circle at var(--sx,50%) var(--sy,50%), rgba(255,255,255,.028), transparent 72%);
   }
   .spotlight.show{ opacity: 1; }
 
@@ -110,7 +198,7 @@
 
   .page{
     position: relative; z-index: 3; min-height: 100vh;
-    padding: 40px clamp(24px, 5vw, 64px);
+    padding: 40px clamp(24px, 4.2vw, 74px);
     display: flex; flex-direction: column;
   }
 
@@ -135,8 +223,8 @@
 
   .clock-pill{
     margin-left:auto; display:flex; align-items:center; gap:8px;
-    background: var(--panel); border: 1px solid var(--panel-border);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    background: rgba(12,14,18,.62); border: 1px solid rgba(255,255,255,.085);
+    backdrop-filter: blur(20px) saturate(125%); -webkit-backdrop-filter: blur(20px) saturate(125%);
     padding: 10px 16px; border-radius: 999px;
     font-size: 13px; font-weight: 600; color: var(--text);
     transition: border-color .25s ease;
@@ -144,7 +232,6 @@
   .clock-pill:hover{ border-color: rgba(125,211,168,0.28); }
   .clock-pill svg{ width:14px; height:14px; opacity:.75; }
 
-  /* Reveal tuần tự một lần khi trang mở — không lặp lại, không chạy trên hover. */
   .reveal{ opacity:0; transform: translateY(14px); }
   .ready .reveal{
     animation: revealUp .7s var(--ease) forwards;
@@ -182,9 +269,6 @@
     100% { box-shadow: 0 0 0 0 rgba(var(--status-rgb), 0); }
   }
 
-  /* Badge hoạt động (đang chơi game / đang nghe nhạc / custom status) —
-     nằm ngay dưới @handle, kế bên avatar. Bấm vào để mở rộng xem chi tiết
-     (khi có hoạt động thật, ví dụ đang chơi game) — xem .activity-detail. */
   .activity-wrap{ display:flex; flex-direction:column; }
 
   .activity-line{
@@ -213,7 +297,6 @@
   }
   .activity-line.open .chevron{ transform: rotate(180deg); }
 
-  /* Panel chi tiết — thu gọn bằng max-height/opacity nên có hiệu ứng mở rộng mượt */
   .activity-detail{
     max-height: 0; opacity: 0; overflow: hidden;
     width: fit-content; max-width: 340px;
@@ -240,8 +323,6 @@
 
   .avatar-wrap{ position: relative; width: 88px; height: 88px; flex-shrink:0; }
 
-  /* Vành xoay rất chậm quanh avatar, dùng conic-gradient — chỉ hiện như
-     một viền sáng mảnh phía sau, không lấn vào ảnh đại diện. */
   .avatar-wrap::before{
     content:""; position:absolute; inset:-4px; border-radius:50%;
     background: conic-gradient(from 0deg, rgba(125,211,168,.55), rgba(216,183,135,.35), transparent 40%, transparent 60%, rgba(125,211,168,.55));
@@ -266,8 +347,6 @@
     animation: cloudGlow 6s ease-in-out infinite;
   }
 
-  /* Quầng sáng mềm quanh avatar, nhiều lớp mờ chồng lên nhau như đám mây
-     thay vì một vòng viền cứng — màu lấy theo trạng thái Discord (--status-rgb). */
   @keyframes cloudGlow{
     0%, 100% {
       box-shadow:
@@ -287,9 +366,6 @@
     .avatar{ animation: none; box-shadow: 0 0 24px 8px rgba(var(--status-rgb), 0.22); }
   }
 
-  /* Lớp phủ viền trang trí Discord (avatar decoration / Nitro frame).
-     Ảnh trang trí của Discord vốn được thiết kế lớn hơn avatar một chút
-     nên cần phóng to ra ngoài viền avatar để khớp đúng tỉ lệ gốc. */
   .avatar-deco{
     position: absolute; inset: -15%;
     background-size: contain; background-position: center; background-repeat: no-repeat;
@@ -320,8 +396,8 @@
   .links{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 500px; }
   .link-card{
     position: relative; overflow: hidden;
-    background: var(--panel); border: 1px solid var(--panel-border);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    background: rgba(12,14,18,.62); border: 1px solid rgba(255,255,255,.085);
+    backdrop-filter: blur(20px) saturate(125%); -webkit-backdrop-filter: blur(20px) saturate(125%);
     border-radius: var(--radius-sm); padding: 14px 14px 12px; text-decoration:none;
     color: var(--text); display:flex; flex-direction:column; justify-content:space-between;
     gap: 18px; transition: transform .22s var(--ease), background .18s ease, border-color .18s ease;
@@ -331,13 +407,17 @@
     appearance:none; -webkit-appearance:none; width:100%; font:inherit; text-align:left; cursor:pointer;
   }
 
-  .link-card::after{
-    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-    background: radial-gradient(120px circle at var(--mx,50%) var(--my,50%), rgba(125,211,168,.16), transparent 70%);
-    opacity:0; transition: opacity .25s ease;
+  .link-card::after{ display:none !important; }
+  .link-card:hover{
+    transform: translateY(-2px);
+    background: rgba(255,255,255,.075);
+    border-color: rgba(255,255,255,.18);
+    box-shadow: 0 10px 28px rgba(0,0,0,.16);
   }
-  .link-card:hover{ transform: translateY(-2px); background: rgba(30,31,38,0.7); border-color: rgba(255,255,255,0.16); }
-  .link-card:hover::after{ opacity:1; }
+  .link-card:focus-visible{
+    outline: 2px solid rgba(255,255,255,.45);
+    outline-offset: 3px;
+  }
   .link-card .top{ display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
   .link-card svg.icon{ width:18px; height:18px; transition: transform .25s var(--ease); }
   .link-card:hover svg.icon{ transform: translateY(-1px); }
@@ -346,7 +426,6 @@
   .link-card .label{ font-size: 12.5px; font-weight: 600; position:relative; z-index:1; }
   @media (prefers-reduced-motion: reduce){ .link-card, .link-card svg.icon, .link-card svg.arrow{ transition:none; } }
 
-  /* ========================= MUSIC PLAYER (gọn, sạch) ========================= */
   .player{
     position:relative;
     background: var(--panel-strong);
@@ -361,8 +440,6 @@
 
   .player-top{ display:flex; align-items:center; gap:12px; }
   .player-art-wrap{ position:relative; width:52px; height:52px; flex:0 0 52px; }
-  /* Vòng "thở" rất nhẹ phía sau ảnh bìa — điểm chuyển động duy nhất của cả
-     khối player, thay cho việc cộng dồn nhiều hiệu ứng (quay, nhấp nháy, eq). */
   .player-art-wrap::before{
     content:""; position:absolute; inset:-5px; border-radius:16px;
     background: var(--accent); opacity:0; filter: blur(9px);
@@ -502,8 +579,6 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .playlist-item .pi-dur{ flex-shrink:0; font-size:10.5px; color:var(--text-faint); font-weight:700; }
-  /* Visualizer THẬT trong playlist — chiều cao được JS lấy từ AnalyserNode,
-     không dùng animation CSS giả. Chỉ bài đang phát mới hiển thị. */
   .playlist-playing{
     display:flex; align-items:flex-end; justify-content:center; gap:2px;
     width:15px; height:14px; margin-right:2px;
@@ -560,6 +635,8 @@
     .id-text h1{ font-size: 28px; }
     .content{ padding-top: 32px; gap: 18px; }
     .activity-line, .activity-detail{ max-width: 280px; }
+    .terminal{ width:min(520px, 88vw); }
+    .terminal-field{ inset:-6% -6% -6% 8%; }
   }
   @media (prefers-reduced-motion: reduce){ .link-card{ transition:none; } }
 </style>
@@ -567,8 +644,47 @@
 <body>
 
   <div class="bg" id="bg">
+    <canvas class="bg-shader" id="bgShader" aria-hidden="true"></canvas>
     <video class="bg-media" id="bgVideo" aria-hidden="true" playsinline autoplay muted loop></video>
-  <canvas class="bg-light" id="bgLight" aria-hidden="true"></canvas>
+    <canvas class="bg-light" id="bgLight" aria-hidden="true"></canvas>
+    <div class="terminal-field" aria-hidden="true">
+      <div class="terminal t1">
+        <div class="terminal-head"><span class="traffic"><i></i><i></i><i></i></span><span>~/projects/bio/render.ts</span><span class="terminal-state">shader</span></div>
+        <pre><code><span class="c-dim">import</span> { <span class="c-key">Scene</span>, <span class="c-key">Light</span> } <span class="c-dim">from</span> <span class="c-num">"./gl"</span>;
+
+<span class="c-dim">const</span> <span class="c-key">scene</span> = <span class="c-fn">createScene</span>({
+  <span class="c-var">bg</span>: <span class="c-num">"#0a0f13"</span>,
+  <span class="c-var">bloom</span>: <span class="c-num">true</span>,
+});
+
+<span class="c-type">uniform</span> <span class="c-type">vec3</span> light = <span class="c-fn">mix</span>(mint, cyan, glow);
+scene.<span class="c-fn">reflect</span>(light, surfaceNormal);
+scene.<span class="c-fn">render</span>();</code></pre>
+      </div>
+      <div class="terminal t2">
+        <div class="terminal-head"><span class="traffic"><i></i><i></i><i></i></span><span>~/shader/fragment.glsl</span><span class="terminal-state">live</span></div>
+        <pre><code><span class="c-dim">precision</span> <span class="c-type">mediump</span> <span class="c-type">float</span>;
+<span class="c-dim">varying</span> <span class="c-type">vec2</span> v_uv;
+
+<span class="c-dim">void</span> <span class="c-fn">main</span>() {
+  <span class="c-type">vec2</span> uv = v_uv;
+  <span class="c-type">float</span> bloom = <span class="c-fn">smoothstep</span>(0.8, 0.1, dist);
+  <span class="c-type">vec3</span> color = <span class="c-key">mix</span>(base, glow, bloom);
+  gl_FragColor = <span class="c-key">vec4</span>(color, <span class="c-num">1.0</span>);
+}</code></pre>
+      </div>
+      <div class="terminal t3">
+        <div class="terminal-head"><span class="traffic"><i></i><i></i><i></i></span><span>~/fx/reflection.ts</span><span class="terminal-state">0.24ms</span></div>
+        <pre><code><span class="c-dim">export</span> <span class="c-dim">function</span> <span class="c-fn">sample</span>(uv) {
+  <span class="c-dim">let</span> reflected = <span class="c-fn">read</span>(screenUV);
+  <span class="c-key">if</span> (reflected &gt; <span class="c-num">0.62</span>) {
+    <span class="c-fn">addBloom</span>(mint, amber, cyan);
+  }
+  <span class="c-dim">return</span> reflected;
+}</code></pre>
+      </div>
+    </div>
+    <div class="terminal-glass" aria-hidden="true"></div>
     <div class="bg-fog" id="bgFog"></div>
     <div class="bg-overlay" id="bgOverlay"></div>
   </div>
@@ -602,19 +718,15 @@ const BIO_CONFIG = {
 
   clock: { enabled: true, format24h: true },
 
-  /* ---- BACKGROUND ----
-     type: "video" | "image" | "gradient"
-     source: tên file / URL, ví dụ "bg.mp4" hoặc "bg.jpg"
-  */
   background: {
     enabled: true,
-    type: "image",
+    type: "shader",
     source: "bg.png",
     position: "center center",
     size: "cover",
     overlay: {
-      enabled: false,
-      color: "rgba(115, 120, 125, 0.93)"
+      enabled: true,
+      color: "rgba(116, 122, 126, 0.32)"
     },
     lightMask: {
       enabled: false,
@@ -628,10 +740,10 @@ const BIO_CONFIG = {
       opacity: 0.84
     },
     fog: {
-      enabled: false,
-      blur: 2,
-      opacity: 0.10,
-      color: "rgba(215, 220, 225, 0.22)"
+      enabled: true,
+      blur: 2.5,
+      opacity: 0.12,
+      color: "rgba(210, 215, 218, 0.26)"
     }
   },
 
@@ -641,8 +753,8 @@ const BIO_CONFIG = {
     handle: "@itsrealkhanz",
     bio: "Just a guy who loves creating, exploring new things and enjoying the little moments.",
     avatar: {
-      image: null,                       // ví dụ: "https://example.com/avatar.jpg"
-      fallbackText: "AVATAR\n(thay sau)" // hiện khi chưa có image
+      image: null,
+      fallbackText: "AVATAR\n(thay sau)"
     },
     tags: ["Developer", "Designer", "Gamer"]
   },
@@ -652,46 +764,29 @@ const BIO_CONFIG = {
     { key: "roblox",  name: "Roblox",  url: null },
     { key: "youtube", name: "YouTube", url: null },
     { key: "github",  name: "GitHub",  url: null },
-    // Sau này chỉ cần điền URL, ví dụ: url: "https://..."
   ],
 
-  /* ---- NHẠC — gọn còn 3 trường mỗi bài, thêm bao nhiêu bài tuỳ thích ----
-     title: "Tên bài hát - Ca sĩ"   (trình phát tự tách ra 2 dòng)
-     cover: URL ảnh bìa hoặc tên file, ví dụ "cover.jpg"  (để null nếu chưa có)
-     music: URL file nhạc hoặc tên file, ví dụ "song.mp3" / "song.mp4"
-            — đây là file phát thật, không phải giả lập; thời lượng và
-            thanh tiến trình tự lấy từ chính file này.                     */
   music: {
-    startIndex: 0,      // bài phát mặc định khi mở trang (index trong mảng tracks)
-    autoAdvance: true,  // hết bài thì tự chuyển bài kế
+    startIndex: 0,
+    autoAdvance: true,
     tracks: [
       { title: "Id Thang Máy" , cover: "https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02c138ef03555390be900f338e", music: "https://raw.githubusercontent.com/Kazuuiie/music/main/id%20thang%20m%C3%A1y%20(feat.%20267).mp3" },
-      // thêm bài khác, ví dụ:
-      // { title: "Kill Bill - SZA", cover: "https://.../kill-bill.jpg", music: "https://.../kill-bill.mp3" },
-      // { title: "Snooze - SZA",    cover: "snooze.jpg",                 music: "snooze.mp4" },
     ]
   },
 
-  /* ---- DISCORD — avatar + trạng thái "Online" tự cập nhật theo Discord thật ----
-     Dùng dịch vụ miễn phí Lanyard (không cần token bot riêng).
-     Cách lấy userId: bật Developer Mode trong Discord (Cài đặt > Nâng cao),
-     bấm chuột phải vào avatar của bạn > "Copy User ID".
-     LƯU Ý BẮT BUỘC: tài khoản Discord của bạn phải tham gia server Lanyard
-     tại https://discord.gg/lanyard thì hệ thống mới đọc được trạng thái. */
   discord: {
-    enabled: true,                // đã bật — dùng ID bạn cung cấp
+    enabled: true,
     userId: "1473247060298961040",
-    useAvatar: true,          // avatar tự lấy từ Discord
-    useAvatarDecoration: true,// hiện khung trang trí (Nitro decoration) nếu có đang trang bị
-    useIdentity: true,        // tên hiển thị (h1) + @handle tự lấy theo Discord (global name + username)
-    useActivity: true,        // hiện badge "Đang chơi / Đang nghe / Đang xem" — bấm để xem chi tiết
-    useStatus: true,          // chữ Online/Idle/... + viền màu trạng thái tự đổi theo Discord
-    pollIntervalMs: 20000     // tần suất kiểm tra lại (mili giây)
+    useAvatar: true,
+    useAvatarDecoration: true,
+    useIdentity: true,
+    useActivity: true,
+    useStatus: true,
+    pollIntervalMs: 20000
   },
 
-  /* ---- THỜI TIẾT THỰC TẾ ---- */
   weather: {
-    useGeolocation: false,  // false = không xin quyền vị trí, luôn dùng toạ độ cố định bên dưới
+    useGeolocation: false,
     fallback: { location: "Vĩnh Long, Việt Nam", lat: 10.2537, lon: 105.9722 }
   },
 
@@ -700,7 +795,6 @@ const BIO_CONFIG = {
 /* ========================= HẾT PHẦN CONFIG ============================= */
 
 
-/* ---------------------------- ICON LIBRARY ------------------------------ */
 const ICONS = {
   clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
   arrow: `<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M7 7h10v10"/></svg>`,
@@ -719,8 +813,6 @@ const ICONS = {
   repeat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>`,
   volume: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a9 9 0 0 1 0 12"/></svg>`,
   mute: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m17 9 4 4m0-4-4 4"/></svg>`,
-  /* Icon cho badge activity: game (controller), music_activity (nốt nhạc,
-     dùng khi đang nghe Spotify), eye (đang xem), stream (đang stream). */
   game: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4M15.5 13h.01M18 10.5h.01M17.32 8H6.68a4 4 0 0 0-3.978 4.393l.404 4.06A2.5 2.5 0 0 0 5.59 18.7c.605 0 1.183-.24 1.61-.668L9 16.25a2 2 0 0 1 1.414-.586h3.172a2 2 0 0 1 1.414.586l1.8 1.782a2.28 2.28 0 0 0 1.61.668 2.5 2.5 0 0 0 2.485-2.247l.404-4.06A4 4 0 0 0 17.32 8Z"/></svg>`,
   music_activity: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
   eye: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
@@ -734,22 +826,26 @@ const ICONS = {
   }
 };
 
-/* ------------------------------ HELPERS ---------------------------------- */
 const $ = (sel) => document.querySelector(sel);
+const escapeHtml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 const fmtTime = (s) => {
   if (!isFinite(s) || s < 0) s = 0;
   return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 };
 
-// Tách "Tên bài - Ca sĩ" thành 2 phần để hiển thị 2 dòng như player cũ.
-// Nếu không có " - " thì coi cả chuỗi là tên bài, ca sĩ để trống.
 function parseTrackTitle(raw){
-  const idx = raw.indexOf(' - ');
-  if (idx === -1) return { songTitle: raw, artist: '' };
-  return { songTitle: raw.slice(0, idx), artist: raw.slice(idx + 3) };
+  const value = String(raw ?? '').trim();
+  const idx = value.indexOf(' - ');
+  if (idx === -1) return { songTitle: value || 'Unknown track', artist: '' };
+  return { songTitle: value.slice(0, idx).trim(), artist: value.slice(idx + 3).trim() };
 }
 
-/* ------------------------------ RENDER NAV -------------------------------- */
 function renderNav(){
   const { nav, clock } = BIO_CONFIG;
   const navEl = $('#nav');
@@ -774,7 +870,6 @@ function renderNav(){
   }
 }
 
-/* ---------------------------- RENDER PROFILE ------------------------------ */
 function renderProfile(){
   const { profile } = BIO_CONFIG;
 
@@ -804,7 +899,6 @@ function renderProfile(){
   $('#tags').innerHTML = profile.tags.map(t => `<span class="tag">${t}</span>`).join('');
 }
 
-/* ---------------------------- RENDER SOCIALS ------------------------------ */
 function renderSocials(){
   const { socials } = BIO_CONFIG;
   $('#links').innerHTML = socials.map(s => {
@@ -832,15 +926,10 @@ function renderSocials(){
   });
 }
 
-/* ------------------------------ RENDER FOOTER ------------------------------ */
 function renderFooter(){
   $('#footer').textContent = BIO_CONFIG.footer.text;
 }
 
-/* ------------------------------- MUSIC PLAYER ------------------------------ */
-/* Phát nhạc THẬT qua thẻ <audio> ẩn (đọc được cả .mp3 và file âm thanh
-   trong .mp4) — không còn đếm giờ giả lập. Thời lượng bài hát tự lấy từ
-   chính file nhạc khi tải xong metadata. */
 const Player = {
   tracks: BIO_CONFIG.music.tracks.map(t => ({
     ...parseTrackTitle(t.title),
@@ -853,7 +942,7 @@ const Player = {
   durations: {},
   listOpen: false,
   shuffle: false,
-  repeat: 'all', // off | all | one
+  repeat: 'all',
   volume: 0.86,
   lastVolume: 0.86,
   audioCtx: null,
@@ -912,17 +1001,14 @@ const Player = {
 
     this.audio = $('#pAudio');
     this.audio.volume = this.volume;
-    // Bắt buộc phải đặt crossOrigin TRƯỚC khi gán src và TRƯỚC khi nối vào
-    // Web Audio (setupVisualizer). Nếu bỏ qua bước này, khi phát nhạc từ
-    // một domain khác (vd. GitHub raw) trình duyệt sẽ CÂM TIẾNG hoàn toàn
-    // ngay khi audio được nối qua AnalyserNode — không báo lỗi gì cả, chỉ
-    // đơn giản là không có âm thanh phát ra. Đây là nguyên nhân nhạc "bị lỗi".
     this.audio.crossOrigin = 'anonymous';
     this.setupVisualizer();
 
     this.audio.addEventListener('loadedmetadata', () => {
-      this.durations[this.index] = this.audio.duration;
-      $('#pDuration').textContent = fmtTime(this.audio.duration);
+      if (Number.isFinite(this.audio.duration) && this.audio.duration > 0) {
+        this.durations[this.index] = this.audio.duration;
+      }
+      $('#pDuration').textContent = this.durations[this.index] ? fmtTime(this.durations[this.index]) : '0:00';
       this.renderList();
     });
 
@@ -954,10 +1040,6 @@ const Player = {
     });
 
     this.audio.addEventListener('error', () => {
-      // Nếu server của file nhạc không hỗ trợ CORS, gán crossOrigin sẽ khiến
-      // trình duyệt chặn hẳn việc tải file (lỗi). Trường hợp đó, thử lại
-      // đúng 1 lần mà không có crossOrigin — nhạc vẫn phát bình thường,
-      // chỉ mất phần visualizer thật (playlist bars) cho bài đó.
       if (this.audio.crossOrigin && !this.audio.dataset.corsRetried){
         this.audio.dataset.corsRetried = '1';
         this.audio.removeAttribute('crossorigin');
@@ -1003,7 +1085,6 @@ const Player = {
       source.connect(this.analyser);
       this.analyser.connect(this.audioCtx.destination);
     }catch(err){
-      /* Nguồn cross-origin không cho phép phân tích: vẫn phát nhạc bình thường. */
       this.audioCtx = null;
       this.analyser = null;
       this.analyserData = null;
@@ -1032,7 +1113,6 @@ const Player = {
       for(let j = start; j < end; j++) sum += this.analyserData[j];
       const avg = sum / (end - start);
 
-      /* Nén biên độ để visualizer nhỏ nhưng vẫn bắt được beat/bass. */
       const level = Math.min(1, Math.pow(avg / 255, 0.72) * 1.18);
       const height = 3 + Math.round(level * 11);
 
@@ -1107,10 +1187,10 @@ const Player = {
 
     list.innerHTML = this.tracks.map((t, i) => `
       <div class="playlist-item ${i === this.index ? 'active' : ''}" data-index="${i}">
-        <div class="playlist-thumb" style="${t.cover ? `background-image:url('${t.cover}')` : ''}"></div>
+        <div class="playlist-thumb" style="${t.cover ? `background-image:url('${escapeHtml(t.cover)}')` : ''}"></div>
         <div class="playlist-meta">
-          <span class="pi-name"><b>${t.songTitle}</b></span>
-          <span class="pi-artist">${t.artist || 'Unknown artist'}</span>
+          <span class="pi-name"><b>${escapeHtml(t.songTitle)}</b></span>
+          <span class="pi-artist">${escapeHtml(t.artist || 'Unknown artist')}</span>
         </div>
         <div class="playlist-playing" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
         <span class="pi-dur">${this.durations[i] ? fmtTime(this.durations[i]) : '--:--'}</span>
@@ -1272,12 +1352,8 @@ const Player = {
   }
 };
 
-/* ------------------------------- WEATHER (API THẬT) ------------------------------ */
-/* Dùng Open-Meteo (miễn phí, không cần API key, cho phép gọi trực tiếp từ trình duyệt).
-   Docs: https://open-meteo.com/                                                     */
 const Weather = {
 
-  // Mã thời tiết WMO -> icon + nhãn tiếng Việt (rút gọn các mã phổ biến)
   codeMap(code){
     if (code === 0) return { icon: ICONS.sun, label: 'Trời quang' };
     if ([1,2].includes(code)) return { icon: ICONS.sun, label: 'Ít mây' };
@@ -1363,33 +1439,30 @@ const Weather = {
     }
   },
 
-  // Gọi lại API để cập nhật tình trạng (nắng/mưa/mây...) mà không phải xin
-  // vị trí hay tra tên khu vực lại từ đầu.
   async refresh(){
     if (this.lastLat == null || this.lastLon == null) return;
     try{
       const weatherData = await this.fetchWeather(this.lastLat, this.lastLon);
       this.renderData(this.lastName, weatherData.tempC, weatherData.code);
     }catch(e){
-      // giữ nguyên dữ liệu cũ trên UI nếu lần cập nhật này lỗi, thử lại ở chu kỳ sau
     }
   },
 
   init(){
     this.renderLoading();
     const { fallback } = BIO_CONFIG.weather;
-    // Luôn dùng toạ độ cố định trong config — không xin quyền vị trí trình duyệt.
     this.loadFor(fallback.lat, fallback.lon, fallback.location);
-
-    // Tự động cập nhật tình trạng thời tiết mỗi 10 phút (không load lại trang)
     setInterval(() => this.refresh(), 10 * 60 * 1000);
   }
 };
 
-/* ------------------------------- DISCORD (LANYARD) -------------------------------- */
-/* Lấy avatar + trạng thái online/idle/dnd/offline thật từ Discord qua Lanyard API.
-   Docs: https://github.com/Phineas/lanyard — miễn phí, không cần key,
-   chỉ cần userId đã tham gia server Lanyard.                                        */
+function fetchWithTimeout(url, options = {}, timeoutMs = 12000){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
+
 const Discord = {
   colors: {
     online:  { rgb: '35,165,90',   label: 'Online' },
@@ -1398,48 +1471,47 @@ const Discord = {
     offline: { rgb: '128,132,142', label: 'Offline' }
   },
 
-  // Nhãn tiếng Việt + icon riêng cho từng loại activity Discord trả về.
-  // type: 0 Playing, 1 Streaming, 2 Listening, 3 Watching, 5 Competing.
   activityMeta: {
-    0: { verb: 'Đang chơi',    icon: null }, // gán ICONS.game lúc init()
-    1: { verb: 'Đang stream',  icon: null }, // ICONS.stream
-    2: { verb: 'Đang nghe',    icon: null }, // ICONS.music_activity
-    3: { verb: 'Đang xem',     icon: null }, // ICONS.eye
-    5: { verb: 'Đang thi đấu', icon: null }, // ICONS.game
+    0: { verb: 'Đang chơi',    icon: null },
+    1: { verb: 'Đang stream',  icon: null },
+    2: { verb: 'Đang nghe',    icon: null },
+    3: { verb: 'Đang xem',     icon: null },
+    5: { verb: 'Đang thi đấu', icon: null },
   },
 
-  // Trạng thái mở/đóng của panel chi tiết + hoạt động đang được hiển thị,
-  // lưu lại để giữ nguyên khi Lanyard cập nhật lại (poll mỗi vài giây).
   detailOpen: false,
   currentActivity: null,
 
   avatarUrl(user){
     if (!user) return null;
     if (!user.avatar){
-      // avatar mặc định của Discord nếu người dùng chưa đặt avatar riêng
-      const fallbackIndex = (Number(user.discriminator) || 0) % 5;
+      let fallbackIndex = 0;
+      try {
+        fallbackIndex = Number(BigInt(String(user.id || '0')) >> 22n) % 6;
+      } catch (_) {
+        fallbackIndex = Number(user.discriminator) || 0;
+        fallbackIndex = Math.abs(fallbackIndex) % 6;
+      }
       return `https://cdn.discordapp.com/embed/avatars/${fallbackIndex}.png`;
     }
-    const ext = user.avatar.startsWith('a_') ? 'gif' : 'png'; // avatar động dùng gif
+    const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
     return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=128`;
   },
 
-  // Viền trang trí (avatar decoration / Nitro frame) người dùng đang trang bị trên Discord.
-  // Lanyard trả về null nếu tài khoản không gắn viền nào.
   decorationUrl(discordUser){
     const deco = discordUser && discordUser.avatar_decoration_data;
     if (!deco || !deco.asset) return null;
     return `https://cdn.discordapp.com/avatar-decoration-presets/${deco.asset}.png?size=160`;
   },
 
-  // Ảnh nhỏ của game / app đang chạy (nếu Discord có gửi asset kèm activity),
-  // dùng làm icon cho badge/panel chi tiết thay vì icon SVG chung.
   activityImageUrl(activity){
     const assets = activity && activity.assets;
     if (!assets || !assets.large_image) return null;
     const img = assets.large_image;
     if (img.startsWith('mp:')){
-      return `https://media.discordapp.net/${img.replace('mp:', '')}`;
+      const raw = img.slice(3);
+      if (/^https?:\/\//i.test(raw)) return raw;
+      return `https://media.discordapp.net/${raw}`;
     }
     if (activity.application_id){
       return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
@@ -1447,7 +1519,6 @@ const Discord = {
     return null;
   },
 
-  // "5 phút", "2 giờ 10 phút", "3 ngày"... tính từ mốc timestamps.start Discord gửi
   timeSince(startMs){
     const diff = Math.max(0, Date.now() - startMs);
     const mins = Math.floor(diff / 60000);
@@ -1480,7 +1551,6 @@ const Discord = {
     }
   },
 
-  // Tên hiển thị (h1) lấy từ global_name (display name) của Discord, @handle lấy từ username.
   applyIdentity(discordUser){
     if (!discordUser) return;
     const nameEl = document.querySelector('.id-text h1');
@@ -1489,16 +1559,12 @@ const Discord = {
     if (handleEl) handleEl.textContent = '@' + discordUser.username;
   },
 
-  // Hiện badge "Đang chơi <game>" / "Đang nghe <nhạc>" / custom status ngay
-  // dưới @handle. Nếu là hoạt động thật (chơi game, nghe Spotify, xem...) thì
-  // badge có thể bấm vào để mở rộng ra panel chi tiết bên dưới nó.
   applyActivity(activities){
     const badgeEl = document.querySelector('#discordActivity');
     if (!badgeEl) return;
 
     const list = activities || [];
     const custom = list.find(a => a.type === 4);
-    // ưu tiên "đang chơi game" (type 0) nếu có nhiều hoạt động cùng lúc
     const real = list.find(a => a.type === 0) || list.find(a => a.type !== 4);
 
     this.currentActivity = real || null;
@@ -1533,8 +1599,6 @@ const Discord = {
     this.bindActivityClick();
   },
 
-  // Panel mở rộng: ảnh lớn hơn + tên đầy đủ + details/state đầy đủ +
-  // "đã chơi/nghe được bao lâu" tính từ timestamps.start.
   renderDetail(){
     const detailEl = document.querySelector('#activityDetail');
     if (!detailEl) return;
@@ -1567,8 +1631,6 @@ const Discord = {
     if (open) this.renderDetail();
   },
 
-  // Gắn sự kiện click 1 lần duy nhất (badge được cập nhật innerHTML liên tục
-  // qua các lần poll, nhưng bản thân phần tử #discordActivity không đổi).
   bindActivityClick(){
     const badgeEl = document.querySelector('#discordActivity');
     if (!badgeEl || badgeEl.dataset.bound) return;
@@ -1588,7 +1650,6 @@ const Discord = {
 
     if (dot) dot.style.setProperty('--status-rgb', info.rgb);
     if (labelEl) labelEl.textContent = info.label;
-    // Quầng sáng kiểu đám mây quanh avatar đổi màu theo trạng thái (xem @keyframes cloudGlow)
     if (avatarEl) avatarEl.style.setProperty('--status-rgb', info.rgb);
   },
 
@@ -1611,7 +1672,6 @@ const Discord = {
   },
 
   init(){
-    // gán icon SVG vào activityMeta ở đây (ICONS đã có sẵn khi init() chạy)
     this.activityMeta[0].icon = ICONS.game;
     this.activityMeta[1].icon = ICONS.stream;
     this.activityMeta[2].icon = ICONS.music_activity;
@@ -1619,16 +1679,12 @@ const Discord = {
     this.activityMeta[5].icon = ICONS.game;
 
     const cfg = BIO_CONFIG.discord;
-    if (!cfg.enabled || !cfg.userId) return; // chưa bật hoặc chưa điền userId thì bỏ qua, giữ avatar/tên tĩnh
+    if (!cfg.enabled || !cfg.userId) return;
     this.fetchPresence();
     setInterval(() => this.fetchPresence(), cfg.pollIntervalMs || 20000);
   }
 };
 
-/* ------------------------- CURSOR SPOTLIGHT + CARD GLOW --------------------- */
-/* Quầng sáng nhỏ bám theo con trỏ chuột (chỉ trên thiết bị có chuột thật,
-   tắt hẳn nếu người dùng bật "giảm hiệu ứng chuyển động"). Toạ độ được
-   throttle qua requestAnimationFrame để không ảnh hưởng hiệu năng cuộn/gõ. */
 function initSpotlight(){
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
@@ -1652,18 +1708,136 @@ function initSpotlight(){
   }, { passive: true });
 
   window.addEventListener('pointerleave', () => spot.classList.remove('show'));
-
-  // Glow cục bộ theo con trỏ trên từng link-card (biến --mx/--my dùng ở CSS ::after)
-  document.querySelectorAll('.link-card').forEach(card => {
-    card.addEventListener('pointermove', (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
-  });
 }
 
-/* ------------------------------- BACKGROUND -------------------------------- */
+const ShaderBackground = (() => {
+  const canvas = document.getElementById('bgShader');
+  if (!canvas) return { start(){} };
+  const gl = canvas.getContext('webgl', { alpha:true, antialias:false, premultipliedAlpha:false });
+  if (!gl) { console.warn('[Shader] WebGL unavailable'); return { start(){} }; }
+
+  const vs = `
+    attribute vec2 a_position;
+    varying vec2 v_uv;
+    void main(){
+      v_uv = a_position * 0.5 + 0.5;
+      v_uv.y = 1.0 - v_uv.y;
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }`;
+
+  const fs = `
+    precision mediump float;
+    uniform vec2 u_res;
+    uniform float u_time;
+    varying vec2 v_uv;
+
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453123); }
+    float noise(vec2 p){
+      vec2 i=floor(p), f=fract(p);
+      f=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+    }
+    float blob(vec2 p, vec2 c, vec2 s){
+      vec2 q=(p-c)/s;
+      return exp(-dot(q,q)*1.45);
+    }
+
+    void main(){
+      vec2 p = v_uv;
+      float aspect = u_res.x / max(u_res.y, 1.0);
+      vec2 q = vec2((p.x-0.5)*aspect, p.y-0.5);
+      float n = noise(q*3.1 + vec2(u_time*.035, -u_time*.022));
+
+      vec3 base = vec3(0.024,0.031,0.036);
+      base += vec3(0.025,0.040,0.048) * (1.0-p.y);
+      base += vec3(0.014,0.020,0.022) * n;
+
+      float mint  = blob(q, vec2(0.19,-0.08), vec2(0.19,0.74));
+      float cyan  = blob(q, vec2(0.55, 0.06), vec2(0.18,0.62));
+      float amber = blob(q, vec2(0.43, 0.34), vec2(0.17,0.55));
+      float lime  = blob(q, vec2(0.72,-0.21), vec2(0.12,0.44));
+
+      float drift = sin((q.x*2.1 + q.y*3.4) - u_time*.18)*0.5 + 0.5;
+      base += vec3(0.18,0.90,0.66) * mint  * (0.13 + 0.05*drift);
+      base += vec3(0.17,0.78,0.98) * cyan  * 0.115;
+      base += vec3(1.00,0.72,0.32) * amber * 0.075;
+      base += vec3(0.45,1.00,0.66) * lime  * 0.085;
+
+      float band1 = exp(-pow((q.y + q.x*0.34 + 0.05 + sin(u_time*.11)*0.02),2.0)/0.018);
+      float band2 = exp(-pow((q.y - q.x*0.20 - 0.20),2.0)/0.028);
+      vec3 reflection = vec3(0.25,0.82,0.68)*band1*0.065 + vec3(0.55,0.70,0.76)*band2*0.032;
+      base += reflection;
+
+      float haze = smoothstep(0.12,0.95,1.0-abs(p.y-0.5)*1.7);
+      base = mix(base, base + vec3(0.10,0.115,0.12), haze*0.34);
+
+      float vign = smoothstep(0.92,0.25,length((p-0.5)*vec2(1.0,0.82)));
+      base *= 0.72 + 0.28*vign;
+
+      gl_FragColor = vec4(base, 1.0);
+    }`;
+
+  function compile(type, src){
+    const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn('[Shader]',gl.getShaderInfoLog(s)); return null; }
+    return s;
+  }
+  const v=compile(gl.VERTEX_SHADER,vs), f=compile(gl.FRAGMENT_SHADER,fs);
+  if(!v||!f) return { start(){} };
+  const program=gl.createProgram(); gl.attachShader(program,v); gl.attachShader(program,f); gl.linkProgram(program);
+  if(!gl.getProgramParameter(program,gl.LINK_STATUS)){ console.warn('[Shader]',gl.getProgramInfoLog(program)); return { start(){} }; }
+
+  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(program,'a_position');
+  gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const uRes=gl.getUniformLocation(program,'u_res');
+  const uTime=gl.getUniformLocation(program,'u_time');
+  let start=performance.now(), raf=0;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function resize(){
+    const r=canvas.getBoundingClientRect(); const d=Math.min(window.devicePixelRatio||1,1.35);
+    const w=Math.max(2,Math.floor(r.width*d)), h=Math.max(2,Math.floor(r.height*d));
+    if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+    gl.viewport(0,0,w,h);
+  }
+
+  function draw(t){
+    resize();
+    gl.useProgram(program);
+    gl.uniform2f(uRes,canvas.width,canvas.height);
+    gl.uniform1f(uTime,(t-start)/1000);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+
+  function frame(t){
+    draw(t);
+    raf=requestAnimationFrame(frame);
+  }
+
+  function startLoop(){
+    resize();
+    cancelAnimationFrame(raf);
+    if (reduced.matches || document.hidden){
+      draw(performance.now());
+      return;
+    }
+    raf=requestAnimationFrame(frame);
+  }
+
+  function handleVisibility(){
+    cancelAnimationFrame(raf);
+    raf=0;
+    startLoop();
+  }
+
+  window.addEventListener('resize',resize,{passive:true});
+  document.addEventListener('visibilitychange',handleVisibility,{passive:true});
+  reduced.addEventListener?.('change',handleVisibility);
+  return { start:startLoop };
+})();
+
 const Background = (() => {
   const root = document.getElementById('bg');
   const video = document.getElementById('bgVideo');
@@ -1842,7 +2016,6 @@ const Background = (() => {
     const dprCap = mobile ? 1.0 : 1.2;
     let dpr = Math.min(rawDpr, dprCap);
 
-    // Keep the shader lightweight on unusually large screens/high-DPR devices.
     const maxPixels = mobile ? 520000 : 980000;
     const estimated = Math.max(1, rect.width * rect.height * dpr * dpr);
     if (estimated > maxPixels) dpr *= Math.sqrt(maxPixels / estimated);
@@ -1934,10 +2107,28 @@ const Background = (() => {
     lightCanvas.style.display = 'none';
     fog.style.display = 'none';
     overlay.style.display = 'none';
+    root.style.backgroundImage = '';
+    root.style.backgroundPosition = '';
+    root.style.backgroundSize = '';
+    root.style.backgroundRepeat = '';
 
     if (cfg.enabled === false) return;
 
-    if (type === 'video' && cfg.source) {
+    if (type === 'shader') {
+      ShaderBackground.start();
+      const ov = cfg.overlay || {};
+      overlay.style.background = ov.color || 'rgba(118,124,128,.24)';
+      overlay.style.display = 'block';
+      if (cfg.fog?.enabled) {
+        const fg = cfg.fog;
+        fog.style.background = fg.color || 'rgba(205,210,214,.18)';
+        const fogBlur = Math.max(0, Number(fg.blur || 0));
+        fog.style.backdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
+        fog.style.webkitBackdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
+        fog.style.opacity = String(clamp01(fg.opacity ?? 0.12));
+        fog.style.display = 'block';
+      }
+    } else if (type === 'video' && cfg.source) {
       video.src = cfg.source;
       video.muted = true;
       video.autoplay = true;
@@ -1987,15 +2178,16 @@ const Background = (() => {
     }
   }
 
-  const resizeObserver = new ResizeObserver(() => resizeCanvas());
-  if (root && 'ResizeObserver' in window) resizeObserver.observe(root);
+  const resizeObserver = 'ResizeObserver' in window
+    ? new ResizeObserver(() => resizeCanvas())
+    : null;
+  if (resizeObserver && root) resizeObserver.observe(root);
 
   window.addEventListener('resize', resizeCanvas, { passive: true });
   window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 120), { passive: true });
   return { apply };
 })();
 
-/* --------------------------------- INIT ------------------------------------ */
 Background.apply();
 renderNav();
 renderProfile();
@@ -2006,9 +2198,7 @@ Weather.init();
 Discord.init();
 initSpotlight();
 
-// Kích hoạt hiệu ứng mở trang tuần tự đúng một lần (xem class .reveal / .ready)
 requestAnimationFrame(() => document.body.classList.add('ready'));
 </script>
-
 </body>
 </html>
