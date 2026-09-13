@@ -608,16 +608,16 @@ const BIO_CONFIG = {
   */
   background: {
     enabled: true,
-    type: "video",
-    source: "https://raw.githubusercontent.com/Kazuuiie/bioxyz_v1.0/main/bg.mp4",
+    type: "image",
+    source: "bg.png",
     position: "center center",
     size: "cover",
     overlay: {
-      enabled: true,
+      enabled: false,
       color: "rgba(115, 120, 125, 0.93)"
     },
     lightMask: {
-      enabled: true,
+      enabled: false,
       threshold: 0.48,
       softness: 0.20,
       strength: 1.00,
@@ -628,7 +628,7 @@ const BIO_CONFIG = {
       opacity: 0.84
     },
     fog: {
-      enabled: true,
+      enabled: false,
       blur: 2,
       opacity: 0.10,
       color: "rgba(215, 220, 225, 0.22)"
