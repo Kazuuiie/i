@@ -668,6 +668,18 @@ body{
   .bg::before{animation:none!important}.link-card::before{display:none}
 }
 
+
+/* ================= ULTRA PERFORMANCE OVERRIDES ================= */
+.bg-light,#bgLight,.grain,.spotlight,.bg-fog,.bg-overlay{display:none!important;}
+.bg::before,.bg::after{animation:none!important;}
+.avatar-wrap::before,.avatar,.player-art-wrap::before,.status .dot{animation:none!important;}
+.link-card::before,.link-card::after{display:none!important;}
+.clock-pill,.link-card,.player,.weather,.activity-line,.activity-detail,.tag{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+.player{box-shadow:0 10px 24px rgba(0,0,0,.18)!important;}
+.link-card:hover{transform:none!important;}
 </style>
 </head>
 <body>
@@ -715,7 +727,7 @@ const BIO_CONFIG = {
   background: {
     enabled: true,
     type: "video",
-    source: "bg.mp4",
+    source: "bg_loop_optimized.mp4",
     position: "center center",
     size: "cover",
     overlay: {
@@ -723,7 +735,7 @@ const BIO_CONFIG = {
       color: "rgba(115, 120, 125, 0.93)"
     },
     lightMask: {
-      enabled: true,
+      enabled: false,
       threshold: 0.48,
       softness: 0.20,
       strength: 1.00,
@@ -734,7 +746,7 @@ const BIO_CONFIG = {
       opacity: 0.84
     },
     fog: {
-      enabled: true,
+      enabled: false,
       blur: 2,
       opacity: 0.10,
       color: "rgba(215, 220, 225, 0.22)"
@@ -1095,64 +1107,15 @@ const Player = {
   },
 
   setupVisualizer(){
-    if (this.audioCtx || !this.audio) return;
-    try{
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      this.audioCtx = new AudioCtx();
-      this.analyser = this.audioCtx.createAnalyser();
-      this.analyser.fftSize = 128;
-      this.analyser.smoothingTimeConstant = 0.78;
-      this.analyserData = new Uint8Array(this.analyser.frequencyBinCount);
-
-      const source = this.audioCtx.createMediaElementSource(this.audio);
-      source.connect(this.analyser);
-      this.analyser.connect(this.audioCtx.destination);
-    }catch(err){
-      /* Nguồn cross-origin không cho phép phân tích: vẫn phát nhạc bình thường. */
-      this.audioCtx = null;
-      this.analyser = null;
-      this.analyserData = null;
-    }
+    // Performance mode: giữ audio playback nhưng bỏ Web Audio analyser/FFT.
+    this.audioCtx = null;
+    this.analyser = null;
+    this.analyserData = null;
   },
 
-  updatePlaylistVisualizer(){
-    if (!this.analyser || !this.analyserData || !this.playing){
-      this.stopPlaylistVisualizer(true);
-      return;
-    }
+  updatePlaylistVisualizer(){ return; },
 
-    this.analyser.getByteFrequencyData(this.analyserData);
-
-    const item = document.querySelector(`.playlist-item[data-index="${this.index}"]`);
-    if (!item) return;
-
-    const bars = item.querySelectorAll('.playlist-playing i');
-    const n = bars.length;
-    const bins = this.analyserData.length;
-
-    for(let i = 0; i < n; i++){
-      const start = Math.floor((i / n) * bins * 0.55);
-      const end = Math.max(start + 1, Math.floor(((i + 1) / n) * bins * 0.55));
-      let sum = 0;
-      for(let j = start; j < end; j++) sum += this.analyserData[j];
-      const avg = sum / (end - start);
-
-      /* Nén biên độ để visualizer nhỏ nhưng vẫn bắt được beat/bass. */
-      const level = Math.min(1, Math.pow(avg / 255, 0.72) * 1.18);
-      const height = 3 + Math.round(level * 11);
-
-      bars[i].style.height = `${height}px`;
-      bars[i].style.opacity = `${0.62 + level * 0.38}`;
-    }
-
-    this.vizFrame = requestAnimationFrame(() => this.updatePlaylistVisualizer());
-  },
-
-  startPlaylistVisualizer(){
-    if (this.vizFrame) cancelAnimationFrame(this.vizFrame);
-    this.updatePlaylistVisualizer();
-  },
+  startPlaylistVisualizer(){ return; },
 
   stopPlaylistVisualizer(clear = false){
     if (this.vizFrame){
@@ -1735,39 +1698,7 @@ const Discord = {
 /* Quầng sáng nhỏ bám theo con trỏ chuột (chỉ trên thiết bị có chuột thật,
    tắt hẳn nếu người dùng bật "giảm hiệu ứng chuyển động"). Toạ độ được
    throttle qua requestAnimationFrame để không ảnh hưởng hiệu năng cuộn/gõ. */
-function initSpotlight(){
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
-  const lowPower = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-  if (reduceMotion || !hasFinePointer || lowPower) return;
-
-  const spot = document.getElementById('spotlight');
-  if (!spot) return;
-
-  let raf = null, px = 0, py = 0;
-  const apply = () => {
-    spot.style.setProperty('--sx', px + 'px');
-    spot.style.setProperty('--sy', py + 'px');
-    raf = null;
-  };
-
-  window.addEventListener('pointermove', (e) => {
-    px = e.clientX; py = e.clientY;
-    spot.classList.add('show');
-    if (!raf) raf = requestAnimationFrame(apply);
-  }, { passive: true });
-
-  window.addEventListener('pointerleave', () => spot.classList.remove('show'));
-
-  // Glow cục bộ theo con trỏ trên từng link-card (biến --mx/--my dùng ở CSS ::after)
-  document.querySelectorAll('.link-card').forEach(card => {
-    card.addEventListener('pointermove', (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
-  });
-}
+function initSpotlight(){ return; }
 
 /* ------------------------------- BACKGROUND -------------------------------- */
 const Background = (() => {
@@ -2116,60 +2047,9 @@ initSpotlight();
 requestAnimationFrame(() => document.body.classList.add('ready'));
 
 
-/* ================= SMART FX CONTROLLER ================= */
+/* ================= PERFORMANCE MODE ================= */
 (function(){
-  const fine=matchMedia('(pointer:fine)').matches;
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const low=(navigator.hardwareConcurrency||8)<=4 || /Mobi|Android/i.test(navigator.userAgent);
-  if(!fine || reduced) return;
-  const root=document.documentElement;
-  let tx=50,ty=50,cx=50,cy=50,raf=0;
-  function frame(){
-    cx += (tx-cx)*0.12; cy += (ty-cy)*0.12;
-    root.style.setProperty('--sx',cx+'%'); root.style.setProperty('--sy',cy+'%');
-    raf=requestAnimationFrame(frame);
-  }
-  addEventListener('pointermove',e=>{
-    tx=(e.clientX/innerWidth)*100; ty=(e.clientY/innerHeight)*100;
-    if(!raf) raf=requestAnimationFrame(frame);
-  },{passive:true});
-  addEventListener('pointerleave',()=>{tx=50;ty=50},{passive:true});
-  frame();
-
-  // Depth tilt chỉ cho desktop GPU tương đối tốt.
-  if(!low){
-    const cards=[...document.querySelectorAll('.link-card,.player,.weather,.clock-pill')];
-    cards.forEach(el=>{
-      let local=0;
-      el.addEventListener('pointermove',e=>{
-        const r=el.getBoundingClientRect();
-        const x=(e.clientX-r.left)/r.width-.5;
-        const y=(e.clientY-r.top)/r.height-.5;
-        el.style.setProperty('--rx',(-y*2.2).toFixed(2)+'deg');
-        el.style.setProperty('--ry',(x*2.2).toFixed(2)+'deg');
-        if(!local){ local=1; requestAnimationFrame(()=>{ el.style.transform=`perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-2px)`; local=0;}); }
-      });
-      el.addEventListener('pointerleave',()=>{
-        el.style.transform='';
-      });
-    });
-  }
-})();
-
-/* Extra WebGL quality tuning without touching the existing feature/API logic. */
-(function(){
-  const canvas=document.getElementById('bgLight');
-  if(!canvas) return;
-  const observer=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      canvas.style.opacity=e.isIntersecting?'':'0';
-    });
-  },{threshold:0.01});
-  observer.observe(canvas);
-  document.addEventListener('visibilitychange',()=>{
-    if(document.hidden){ canvas.style.opacity='0'; }
-    else canvas.style.opacity='';
-  });
+  // Intentionally empty: pointer spotlight, depth tilt and canvas observers are disabled.
 })();
 
 </script>
