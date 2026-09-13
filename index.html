@@ -87,15 +87,6 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Quầng sáng mềm bám theo con trỏ chuột — chỉ bật trên thiết bị có
-     chuột thật và khi người dùng không yêu cầu giảm hiệu ứng chuyển động. */
-  .spotlight{
-    position: fixed; z-index: 1; inset: 0; pointer-events:none;
-    opacity: 0; transition: opacity .4s ease;
-    background: radial-gradient(480px circle at var(--sx,50%) var(--sy,50%), rgba(125,211,168,0.06), transparent 72%);
-  }
-  .spotlight.show{ opacity: 1; }
-
   .scrim-left{
     position: fixed; inset: 0; z-index: 2;
     background: linear-gradient(90deg,
@@ -573,7 +564,6 @@
     <div class="bg-overlay" id="bgOverlay"></div>
   </div>
   <div class="grain"></div>
-  <div class="spotlight" id="spotlight"></div>
   <div class="scrim-left"></div>
 
   <div class="page">
@@ -1625,43 +1615,6 @@ const Discord = {
   }
 };
 
-/* ------------------------- CURSOR SPOTLIGHT + CARD GLOW --------------------- */
-/* Quầng sáng nhỏ bám theo con trỏ chuột (chỉ trên thiết bị có chuột thật,
-   tắt hẳn nếu người dùng bật "giảm hiệu ứng chuyển động"). Toạ độ được
-   throttle qua requestAnimationFrame để không ảnh hưởng hiệu năng cuộn/gõ. */
-function initSpotlight(){
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
-  const lowPower = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-  if (reduceMotion || !hasFinePointer || lowPower) return;
-
-  const spot = document.getElementById('spotlight');
-  if (!spot) return;
-
-  let raf = null, px = 0, py = 0;
-  const apply = () => {
-    spot.style.setProperty('--sx', px + 'px');
-    spot.style.setProperty('--sy', py + 'px');
-    raf = null;
-  };
-
-  window.addEventListener('pointermove', (e) => {
-    px = e.clientX; py = e.clientY;
-    spot.classList.add('show');
-    if (!raf) raf = requestAnimationFrame(apply);
-  }, { passive: true });
-
-  window.addEventListener('pointerleave', () => spot.classList.remove('show'));
-
-  // Glow cục bộ theo con trỏ trên từng link-card (biến --mx/--my dùng ở CSS ::after)
-  document.querySelectorAll('.link-card').forEach(card => {
-    card.addEventListener('pointermove', (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
-  });
-}
 
 /* ------------------------------- BACKGROUND -------------------------------- */
 const Background = (() => {
