@@ -581,19 +581,22 @@
   /* Music player — no dark panel behind it, only the controls/content remain visible. */
   .player{
     position:relative;
-    background: transparent;
-    border:0;
-    backdrop-filter:none;
-    -webkit-backdrop-filter:none;
+    /* 1. Thay đổi độ trong suốt của màu nền (giảm giá trị Alpha xuống .25 và .12) */
+    background: linear-gradient(180deg, rgba(143, 214, 176, 0.25), rgba(125, 211, 168, 0.12));
+    border: 1px solid rgba(255, 255, 255, 0.15); /* 2. Thêm viền trắng mỏng để tạo hiệu ứng nổi khối */
+    
+    /* 3. BẬT hiệu ứng kính mờ (Làm nhòe những gì phía sau khung nhạc) */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
     border-radius:9px;
-    padding:0;
+    padding:14px; /* 4. NÊN TĂNG PADDING (cũ là 0) để nội dung không bị dính sát vào viền nền mới */
     max-width:420px;
     display:flex;
     flex-direction:column;
     gap:10px;
-    box-shadow:none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 5. Thêm đổ bóng nhẹ để tách biệt với nền */
     transition:none;
-    background:linear-gradient(180deg,rgba(143,214,176,.58),rgba(125,211,168,.30));
   }
   .player.is-playing{ border-color:transparent; }
 
