@@ -579,24 +579,22 @@
   @media (prefers-reduced-motion: reduce){ .link-card, .link-card svg.icon, .link-card svg.arrow{ transition:none; } }
 
   /* Music player — no dark panel behind it, only the controls/content remain visible. */
+  /* Music player — translucent white glass effect. */
   .player{
     position:relative;
-    /* 1. Thay đổi độ trong suốt của màu nền (giảm giá trị Alpha xuống .25 và .12) */
-    background: linear-gradient(180deg, rgba(143, 214, 176, 0.25), rgba(125, 211, 168, 0.12));
-    border: 1px solid rgba(255, 255, 255, 0.15); /* 2. Thêm viền trắng mỏng để tạo hiệu ứng nổi khối */
-    
-    /* 3. BẬT hiệu ứng kính mờ (Làm nhòe những gì phía sau khung nhạc) */
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.10));
+    border: 1px solid rgba(255, 255, 255, 0.25); 
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    
     border-radius:9px;
-    padding:14px; /* 4. NÊN TĂNG PADDING (cũ là 0) để nội dung không bị dính sát vào viền nền mới */
+    padding:14px; 
     max-width:420px;
     display:flex;
     flex-direction:column;
     gap:10px;
     transition:none;
   }
+
   .player.is-playing{ border-color:transparent; }
 
   /* Floating music box — mathematically centered and independent from .reveal transforms. */
