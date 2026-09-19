@@ -578,29 +578,58 @@
   .link-card .label{ font-size: 12.5px; font-weight: 600; position:relative; z-index:1; }
   @media (prefers-reduced-motion: reduce){ .link-card, .link-card svg.icon, .link-card svg.arrow{ transition:none; } }
 
+  /* Music player — no dark panel behind it, only the controls/content remain visible. */
   .player{
     position:relative;
-    background: var(--panel-strong);
-    border: 1px solid rgba(255,255,255,0.09);
-    backdrop-filter: blur(22px) saturate(130%); -webkit-backdrop-filter: blur(22px) saturate(130%);
-    border-radius: 18px; padding: 14px; max-width: 420px;
-    display:flex; flex-direction:column; gap: 12px;
-    box-shadow: 0 14px 34px rgba(0,0,0,.22);
-    transition: border-color .25s ease;
+    background:transparent;
+    border:0;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    border-radius:0;
+    padding:0;
+    max-width:420px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    box-shadow:none;
+    transition:none;
   }
-  .player.is-playing{ border-color: rgba(143,214,176,.16); }
+  .player.is-playing{ border-color:transparent; }
 
-  /* Floating music box — centered at the bottom on every viewport. */
+  /* Floating music box — mathematically centered and independent from .reveal transforms. */
   #player{
     position:fixed;
     left:50%;
-    bottom:clamp(16px,2.4vw,28px);
+    bottom:clamp(14px,2.2vw,26px);
     z-index:30;
     width:min(390px,calc(100vw - 28px));
     max-width:none;
     margin:0;
-    transform:translateX(-50%);
+    transform:translate3d(-50%,0,0) !important;
     overflow:visible;
+    opacity:1;
+  }
+
+  /* The player is fixed, so don't let the generic reveal animation overwrite its centering transform. */
+  .ready #player.reveal{
+    animation:none !important;
+    opacity:1;
+    transform:translate3d(-50%,0,0) !important;
+  }
+
+  @media (max-width:560px){
+    #player{
+      width:min(360px,calc(100vw - 20px));
+      bottom:10px;
+    }
+  }
+
+
+  .player .player-info,
+  .player .progress-row,
+  .player .player-controls,
+  .player .volume-wrap{
+    text-shadow:0 1px 7px rgba(0,0,0,.55);
   }
 
   .player-top{ display:flex; align-items:center; gap:12px; }
@@ -727,10 +756,10 @@
     z-index:5;
     border:1px solid rgba(255,255,255,.095);
     border-radius:14px;
-    background:rgba(11,13,17,.94);
-    box-shadow:0 16px 34px rgba(0,0,0,.28);
-    backdrop-filter:blur(18px) saturate(120%);
-    -webkit-backdrop-filter:blur(18px) saturate(120%);
+    background:rgba(11,13,17,.72);
+    box-shadow:0 12px 26px rgba(0,0,0,.16);
+    backdrop-filter:blur(12px) saturate(115%);
+    -webkit-backdrop-filter:blur(12px) saturate(115%);
     scrollbar-width:thin;
     scrollbar-color:rgba(125,211,168,.42) transparent;
     visibility:hidden;
