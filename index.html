@@ -389,7 +389,7 @@
   .ready .bio-text.reveal{ animation-delay: .34s; }
   .ready .tags.reveal{ animation-delay: .42s; }
   .ready .links.reveal{ animation-delay: .5s; }
-  .ready .player.reveal{ animation-delay: .6s; }
+  .ready ..reveal{ animation-delay: .6s; }
   .ready .weather.reveal{ animation-delay: .72s; }
   @keyframes revealUp{
     to{ opacity:1; transform: translateY(0); }
@@ -578,11 +578,11 @@
   .link-card .label{ font-size: 12.5px; font-weight: 600; position:relative; z-index:1; }
   @media (prefers-reduced-motion: reduce){ .link-card, .link-card svg.icon, .link-card svg.arrow{ transition:none; } }
 
-  /* Music player — no dark panel behind it, only the controls/content remain visible. */
+  /* Music  — no dark panel behind it, only the controls/content remain visible. */
   /* Music player — translucent white glass effect. */
   .player{
     position:relative;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.10));
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.20));
     border: 1px solid rgba(255, 255, 255, 0.25); 
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
