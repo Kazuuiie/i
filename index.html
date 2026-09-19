@@ -590,16 +590,17 @@
   }
   .player.is-playing{ border-color: rgba(143,214,176,.16); }
 
-  /* Floating music box — kept in the lower-left safe area so the
-     window/exterior focal point of the background stays visible. */
+  /* Floating music box — centered at the bottom on every viewport. */
   #player{
     position:fixed;
-    left:clamp(18px,3.2vw,48px);
-    bottom:clamp(18px,3.2vw,36px);
-    z-index:20;
-    width:min(390px,calc(100vw - 36px));
+    left:50%;
+    bottom:clamp(16px,2.4vw,28px);
+    z-index:30;
+    width:min(390px,calc(100vw - 28px));
     max-width:none;
     margin:0;
+    transform:translateX(-50%);
+    overflow:visible;
   }
 
   .player-top{ display:flex; align-items:center; gap:12px; }
@@ -710,16 +711,40 @@
     width:9px; height:9px; border:none; border-radius:50%; background:#fff;
   }
 
+  /* Compact playlist popup — appears above the centered music box. */
   .playlist-panel{
-    display:none; flex-direction:column; gap:4px;
-    max-height:250px; overflow-y:auto;
-    border-top:1px solid var(--panel-border);
-    padding-top:10px; margin-top:1px; position:relative; z-index:2;
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:calc(100% + 8px);
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    max-height:168px;
+    overflow-y:auto;
+    padding:7px;
+    margin:0;
+    z-index:5;
+    border:1px solid rgba(255,255,255,.095);
+    border-radius:14px;
+    background:rgba(11,13,17,.94);
+    box-shadow:0 16px 34px rgba(0,0,0,.28);
+    backdrop-filter:blur(18px) saturate(120%);
+    -webkit-backdrop-filter:blur(18px) saturate(120%);
+    scrollbar-width:thin;
+    scrollbar-color:rgba(125,211,168,.42) transparent;
+    visibility:hidden;
+    opacity:0;
+    transform:translateY(7px) scale(.985);
+    transform-origin:bottom center;
+    pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease, visibility .18s ease;
   }
-  .playlist-panel.open{ display:flex; }
-  .playlist-panel{
-    scrollbar-width: thin;
-    scrollbar-color: rgba(125,211,168,.42) transparent;
+  .playlist-panel.open{
+    visibility:visible;
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
   }
   .playlist-panel::-webkit-scrollbar{ width:5px; }
   .playlist-panel::-webkit-scrollbar-track{ background:transparent; }
@@ -735,14 +760,14 @@
   }
 
   .playlist-item{
-    display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
+    display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:10px;
     cursor:pointer; color:var(--text-dim);
     transition:background .15s ease, color .15s ease, transform .15s ease;
   }
   .playlist-item:hover{ background:rgba(255,255,255,.055); color:var(--text); transform:translateX(2px); }
   .playlist-item.active{ background:rgba(125,211,168,.08); color:var(--text); }
   .playlist-thumb{
-    width:38px; height:38px; border-radius:9px; flex:0 0 38px;
+    width:34px; height:34px; border-radius:8px; flex:0 0 34px;
     background:linear-gradient(145deg,#2b2f3a,#121319); background-size:cover; background-position:center;
     border:1px solid rgba(255,255,255,.08);
   }
@@ -777,17 +802,23 @@
 
   @media (max-width:560px){
     #player{
-      left:12px;
-      right:12px;
+      left:50%;
+      right:auto;
       bottom:12px;
-      width:auto;
+      width:calc(100vw - 24px);
       max-width:none;
+      transform:translateX(-50%);
     }
     .player{ padding:11px; border-radius:15px; }
     .player-bottom{ gap:6px; }
     .player-controls{ gap:10px; }
     .volume-wrap{ min-width:52px; }
     .volume-range{ width:32px; }
+    .playlist-panel{
+      bottom:calc(100% + 7px);
+      max-height:152px;
+      padding:6px;
+    }
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -829,7 +860,7 @@
      FINAL BACKGROUND FIX — clean image, no milky veil
      ========================================================= */
   .bg{
-    background-position: right 46%;
+    background-position: right 44%;
     background-size: cover;
     background-repeat: no-repeat;
   }
@@ -851,8 +882,11 @@
   .scrim-left{
     display:none !important;
   }
+  @media (min-width:901px) and (min-aspect-ratio: 1.90){
+    .bg{ background-position:right 30%; }
+  }
   @media (max-width:900px){
-    .bg{ background-position: right 43%; }
+    .bg{ background-position: right 40%; }
     .bg-vignette{
       background: linear-gradient(90deg,
         rgba(3,5,8,.34) 0%,
@@ -861,7 +895,7 @@
     }
   }
   @media (max-width:560px){
-    .bg{ background-position: right 36%; }
+    .bg{ background-position: right 42%; }
     .bg-vignette{
       background: linear-gradient(90deg,
         rgba(3,5,8,.24) 0%,
@@ -921,9 +955,10 @@ const BIO_CONFIG = {
     enabled: true,
     type: "image",
     source: "12.png",
-    position: "92% center",
-    tabletPosition: "96% center",
-    mobilePosition: "100% center",
+    position: "right 44%",
+    widePosition: "right 30%",
+    tabletPosition: "right 40%",
+    mobilePosition: "right 42%",
     size: "cover",
     overlay: {
       enabled: false,
@@ -2170,9 +2205,17 @@ const Background = (() => {
 
   function responsivePosition(cfg){
     const w = window.innerWidth;
-    if (w <= 560) return cfg.mobilePosition || cfg.position || '100% center';
-    if (w <= 900) return cfg.tabletPosition || cfg.position || '96% center';
-    return cfg.position || '92% center';
+    const h = window.innerHeight || 1;
+    const aspect = w / h;
+
+    if (w <= 560) return cfg.mobilePosition || cfg.position || 'right 42%';
+    if (w <= 900) return cfg.tabletPosition || cfg.position || 'right 40%';
+
+    /* Wide desktop: `cover` crops the image vertically.
+       A lower Y value keeps more of the upper window/exterior visible. */
+    if (aspect >= 1.90) return cfg.widePosition || cfg.position || 'right 30%';
+
+    return cfg.position || 'right 44%';
   }
 
   function apply(){
