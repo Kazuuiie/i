@@ -8,225 +8,2300 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#08090d;
-  --panel:rgba(22,23,29,.55);
-  --panel-border:rgba(255,255,255,.08);
-  --panel-strong:rgba(14,15,19,.82);
-  --text:#f4f4f6;
-  --text-dim:#9b9ba5;
-  --text-faint:#6c6c76;
-  --accent:#7dd3a8;
-  --accent-2:#d8b787;
-  --music-accent:#8fd6b0;
-  --music-accent-soft:#c9b79d;
-  --radius:18px;
-  --radius-sm:12px;
-  --ease:cubic-bezier(.16,.9,.3,1);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:rgba(125,211,168,.52) rgba(255,255,255,.035)}
-body{font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:#050609;min-height:100vh;overflow-x:hidden;cursor:default}
-::selection{background:rgba(125,211,168,.28);color:#fff}
-::-webkit-scrollbar{width:9px;height:9px}
-::-webkit-scrollbar-track{background:rgba(255,255,255,.025);border-left:1px solid rgba(255,255,255,.035)}
-::-webkit-scrollbar-thumb{border:2px solid transparent;border-radius:999px;background-clip:padding-box;background:linear-gradient(180deg,rgba(143,214,176,.72),rgba(125,211,168,.42));box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 0 12px rgba(125,211,168,.10)}
-::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(174,238,204,.94),rgba(125,211,168,.68));box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 0 16px rgba(125,211,168,.20)}
-::-webkit-scrollbar-corner{background:transparent}
-.bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:radial-gradient(820px 620px at 82% 12%,rgba(170,255,220,.105),transparent 67%),radial-gradient(700px 520px at 72% 78%,rgba(170,205,255,.055),transparent 70%),radial-gradient(520px 420px at 24% 34%,rgba(120,235,205,.035),transparent 72%),linear-gradient(135deg,#12171b 0%,#0b1014 48%,#06080b 100%)}
-.bg-network{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none;opacity:.78}
-.bg-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(75% 80% at 72% 42%,transparent 48%,rgba(2,4,6,.26) 100%),linear-gradient(90deg,rgba(4,6,8,.58) 0%,rgba(4,6,8,.24) 38%,transparent 62%)}
-.bg-sheen{position:absolute;width:44vw;height:18vw;min-width:360px;min-height:150px;right:-10vw;top:8vh;z-index:2;pointer-events:none;background:linear-gradient(105deg,transparent 0%,rgba(225,255,245,.055) 46%,transparent 74%);filter:blur(18px);transform:rotate(-9deg);opacity:.75}
-.bg-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:none;pointer-events:none;z-index:0;filter:saturate(.92) contrast(1.03) brightness(.78);transform:scale(1.025)}
-.bg-overlay{position:absolute;inset:0;pointer-events:none;display:none;z-index:2}
-.bg-fog{position:absolute;inset:0;pointer-events:none;display:none;z-index:4;transform:translateZ(0)}
-.grain{position:fixed;inset:-10%;z-index:7;pointer-events:none;opacity:.035;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.spotlight{position:fixed;z-index:7;inset:0;pointer-events:none;opacity:0;transition:opacity .4s ease;background:radial-gradient(440px circle at var(--sx,50%) var(--sy,50%),rgba(255,255,255,.028),transparent 72%)}
-.spotlight.show{opacity:1}
-.scrim-left{position:fixed;inset:0;z-index:2;background:linear-gradient(90deg,rgba(5,6,10,.92) 0%,rgba(5,6,10,.78) 30%,rgba(5,6,10,.28) 48%,rgba(5,6,10,0) 60%);pointer-events:none}
-.page{position:relative;z-index:8;min-height:100vh;padding:40px clamp(24px,4.2vw,74px);display:flex;flex-direction:column}
-nav{display:flex;align-items:center;gap:40px;flex-wrap:wrap;row-gap:14px}
-nav a{color:var(--text-dim);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.03em;position:relative;padding-bottom:10px;transition:color .2s ease}
-nav a::before{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:var(--text);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform .28s var(--ease)}
-nav a:hover,nav a.active{color:var(--text)}
-nav a:hover::before{transform:scaleX(1)}
-nav a.active::after{content:"";position:absolute;left:0;bottom:0;width:16px;height:2px;background:var(--accent);border-radius:2px}
-.clock-pill{margin-left:auto;display:flex;align-items:center;gap:8px;background:rgba(12,14,18,.62);border:1px solid rgba(255,255,255,.085);backdrop-filter:blur(20px) saturate(125%);-webkit-backdrop-filter:blur(20px) saturate(125%);padding:10px 16px;border-radius:999px;font-size:13px;font-weight:600;color:var(--text);transition:border-color .25s ease}
-.clock-pill:hover{border-color:rgba(125,211,168,.28)}
-.clock-pill svg{width:14px;height:14px;opacity:.75}
-.reveal{opacity:0;transform:translateY(14px)}
-.ready .reveal{animation:revealUp .7s var(--ease) forwards}
-.ready nav.reveal{animation-delay:.05s}.ready .status.reveal{animation-delay:.16s}.ready .identity.reveal{animation-delay:.24s}.ready .bio-text.reveal{animation-delay:.34s}.ready .tags.reveal{animation-delay:.42s}.ready .links.reveal{animation-delay:.5s}.ready .weather.reveal{animation-delay:.72s}
-@keyframes revealUp{to{opacity:1;transform:translateY(0)}}
-.content{margin-top:auto;padding-top:60px;max-width:560px;display:flex;flex-direction:column;gap:22px}
-.status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);font-weight:600}.status .dot{--status-rgb:125,211,168;width:7px;height:7px;border-radius:50%;background:rgb(var(--status-rgb));animation:statusPulse 2.4s ease-out infinite}
-@keyframes statusPulse{0%{box-shadow:0 0 0 0 rgba(var(--status-rgb),.55)}70%{box-shadow:0 0 0 9px rgba(var(--status-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--status-rgb),0)}}
-.activity-wrap{display:flex;flex-direction:column}.activity-line{display:none;align-items:center;gap:8px;font-size:12.5px;color:var(--text);font-weight:600;margin-top:8px;width:fit-content;max-width:100%;background:rgba(255,255,255,.06);border:1px solid var(--panel-border);padding:5px 12px 5px 5px;border-radius:999px;transition:background .18s ease,border-color .18s ease}.activity-line.clickable{cursor:pointer}.activity-line.clickable:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.16)}.activity-line img{width:20px;height:20px;border-radius:6px;flex-shrink:0;object-fit:cover;background:rgba(255,255,255,.08)}.activity-line svg{width:15px;height:15px;flex-shrink:0;opacity:.9;color:var(--accent)}.activity-line span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.activity-line span b{font-weight:700}.activity-line .chevron{width:11px;height:11px;opacity:.55;margin-left:2px;flex-shrink:0;transition:transform .2s ease}.activity-line.open .chevron{transform:rotate(180deg)}
-.activity-detail{max-height:0;opacity:0;overflow:hidden;width:fit-content;max-width:340px;margin-top:0;background:var(--panel-strong);border:1px solid var(--panel-border);border-radius:var(--radius-sm);transition:max-height .32s ease,opacity .25s ease,margin-top .32s ease}.activity-detail.open{max-height:240px;opacity:1;margin-top:8px}.activity-detail-inner{display:flex;gap:12px;padding:12px 14px}.activity-detail-inner img{width:54px;height:54px;border-radius:12px;flex-shrink:0;object-fit:cover;background:rgba(255,255,255,.08)}.activity-detail-text{display:flex;flex-direction:column;gap:2px;min-width:0}.activity-detail-name{font-size:13.5px;font-weight:700}.activity-detail-line{font-size:12px;color:var(--text-dim);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.activity-detail-time{font-size:11px;color:var(--text-faint);font-weight:600;margin-top:4px}
-.identity{display:flex;align-items:flex-start;gap:22px}.avatar-wrap{position:relative;width:88px;height:88px;flex-shrink:0}.avatar-wrap::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(from 0deg,rgba(125,211,168,.55),rgba(216,183,135,.35),transparent 40%,transparent 60%,rgba(125,211,168,.55));animation:ringSpin 9s linear infinite;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px))}@keyframes ringSpin{to{transform:rotate(360deg)}}
-.avatar{--status-rgb:125,211,168;width:88px;height:88px;border-radius:50%;flex-shrink:0;background:linear-gradient(145deg,#2a2d38,#17181e);background-size:cover;background-position:center;border:1px solid var(--panel-border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.03em;color:rgba(255,255,255,.28);text-align:center;line-height:1.4;padding:6px;white-space:pre-line;animation:cloudGlow 6s ease-in-out infinite}
-@keyframes cloudGlow{0%,100%{box-shadow:0 0 16px 3px rgba(var(--status-rgb),.30),0 0 34px 12px rgba(var(--status-rgb),.16),0 0 56px 22px rgba(var(--status-rgb),.08)}50%{box-shadow:0 0 22px 6px rgba(var(--status-rgb),.40),0 0 44px 16px rgba(var(--status-rgb),.20),0 0 68px 28px rgba(var(--status-rgb),.10)}}
-.avatar-deco{position:absolute;inset:-15%;background-size:contain;background-position:center;background-repeat:no-repeat;pointer-events:none;display:none}.avatar-deco.show{display:block}
-.id-text{min-width:0}.id-text h1{font-family:'Space Grotesk','Manrope',sans-serif;font-size:36px;font-weight:700;letter-spacing:-.02em;line-height:1.1;background:linear-gradient(120deg,#fff 45%,#cfd6d1 75%,var(--accent) 130%);-webkit-background-clip:text;background-clip:text;color:transparent}.id-text .handle{margin-top:7px;font-size:14px;color:var(--text-dim);font-weight:600}.bio-text{font-size:14.5px;line-height:1.65;color:var(--text-dim);max-width:400px}.tags{display:flex;gap:10px;flex-wrap:wrap}.tag{padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--panel-border);font-size:12.5px;font-weight:600;color:var(--text);transition:border-color .2s ease,background .2s ease}.tag:hover{border-color:rgba(125,211,168,.3);background:rgba(125,211,168,.06)}
-.links{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:500px}.link-card{position:relative;overflow:hidden;background:rgba(12,14,18,.62);border:1px solid rgba(255,255,255,.085);backdrop-filter:blur(20px) saturate(125%);-webkit-backdrop-filter:blur(20px) saturate(125%);border-radius:var(--radius-sm);padding:14px 14px 12px;text-decoration:none;color:var(--text);display:flex;flex-direction:column;justify-content:space-between;gap:18px;transition:transform .22s var(--ease),background .18s ease,border-color .18s ease;min-height:78px}button.link-card{appearance:none;-webkit-appearance:none;width:100%;font:inherit;text-align:left;cursor:pointer}.link-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.075);border-color:rgba(255,255,255,.18);box-shadow:0 10px 28px rgba(0,0,0,.16)}.link-card:focus-visible{outline:2px solid rgba(255,255,255,.45);outline-offset:3px}.link-card .top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}.link-card svg.icon{width:18px;height:18px;transition:transform .25s var(--ease)}.link-card:hover svg.icon{transform:translateY(-1px)}.link-card svg.arrow{width:12px;height:12px;opacity:.55;transition:transform .22s var(--ease)}.link-card:hover svg.arrow{transform:translate(1px,-1px);opacity:.85}.link-card .label{font-size:12.5px;font-weight:600;position:relative;z-index:1}
-/* compact music dock */
-.player{position:fixed;left:22px;top:22px;bottom:auto;width:min(360px,calc(100vw - 32px));z-index:20;background:linear-gradient(145deg,rgba(20,24,28,.84),rgba(8,11,14,.78));border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(22px) saturate(135%);-webkit-backdrop-filter:blur(22px) saturate(135%);border-radius:17px;padding:9px 10px 8px;display:flex;flex-direction:column;gap:7px;box-shadow:0 18px 48px rgba(0,0,0,.30),0 1px 0 rgba(255,255,255,.055) inset;opacity:0;transform:translateY(-8px) scale(.985);animation:musicDockIn .55s var(--ease) .25s forwards}
-.player::before{content:"";position:absolute;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(42% 80% at 20% 50%,rgba(125,211,168,.08),transparent 75%),radial-gradient(38% 80% at 82% 48%,rgba(216,183,135,.055),transparent 75%);filter:blur(25px);opacity:.65}@keyframes musicDockIn{to{opacity:1;transform:translateY(0) scale(1)}}
-.player.is-playing{border-color:rgba(143,214,176,.15);box-shadow:0 18px 52px rgba(0,0,0,.34),0 1px 0 rgba(255,255,255,.06) inset,0 0 30px rgba(125,211,168,.045)}
-.player-top{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:9px}.player-art-wrap{position:relative;width:48px;height:48px;flex:0 0 48px}.player-art-wrap::before{content:"";position:absolute;inset:-4px;border-radius:13px;background:linear-gradient(135deg,var(--music-accent),var(--music-accent-soft));opacity:0;filter:blur(9px);animation:breathe 2.6s ease-in-out infinite}.player.is-playing .player-art-wrap::before{opacity:.22}@keyframes breathe{0%,100%{transform:scale(.96);opacity:.18}50%{transform:scale(1.04);opacity:.32}}
-.player-art{width:48px;height:48px;border-radius:12px;position:relative;z-index:1;background:linear-gradient(160deg,#2b2f3a,#121319);background-size:cover;background-position:center;border:1px solid rgba(255,255,255,.10);box-shadow:0 5px 14px rgba(0,0,0,.26)}.player-info{min-width:0}.player-listening{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--text-faint);font-weight:700;margin-bottom:2px;text-transform:uppercase;letter-spacing:.075em}.player-listening .dot{width:4px;height:4px;border-radius:50%;background:var(--accent);box-shadow:0 0 7px rgba(125,211,168,.35);flex:0 0 4px}.player-listening .sep{opacity:.25}.player-listening .count{color:rgba(255,255,255,.35)}.player-title{font-size:12.5px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player-artist{font-size:10.5px;color:var(--text-dim);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.player-actions{display:flex;align-items:center;gap:5px}.icon-btn{width:27px;height:27px;border-radius:9px;background:rgba(255,255,255,.045);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;border:1px solid rgba(255,255,255,.045);cursor:pointer;color:var(--text);transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}.icon-btn:hover{background:rgba(255,255,255,.085);border-color:rgba(255,255,255,.10)}.icon-btn:active{transform:scale(.94)}.icon-btn svg{width:12px;height:12px}.icon-btn.list-open{background:rgba(143,214,176,.10);color:var(--accent);border-color:rgba(143,214,176,.14)}
-.progress-row{display:flex;align-items:center;gap:7px;font-size:8.5px;color:var(--text-faint);font-weight:700}.progress-track{position:relative;flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.08);cursor:pointer}.progress-fill{position:relative;width:0%;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--music-accent),var(--music-accent-soft));box-shadow:0 0 9px rgba(143,214,176,.15);transition:width .15s linear}.progress-thumb{position:absolute;top:50%;right:0;width:7px;height:7px;transform:translate(50%,-50%);border-radius:50%;background:#fff;opacity:0;transition:opacity .16s ease}.progress-track:hover .progress-thumb{opacity:1}
-.player-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}.player-controls{display:flex;align-items:center;justify-content:center;gap:12px;flex:1}.player-controls button{position:relative;background:none;border:none;cursor:pointer;color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;transition:color .16s ease,transform .16s ease}.player-controls button:hover{color:var(--text)}.player-controls button:active{transform:scale(.92)}.player-controls button svg{width:13px;height:13px}.player-controls .play-btn{width:32px;height:32px;background:#f5f7f5;border-radius:50%;color:#0a0a0a;box-shadow:0 4px 12px rgba(0,0,0,.25)}.player-controls .play-btn:hover{color:#0a0a0a;transform:scale(1.04)}.player-controls .play-btn svg{width:13px;height:13px}.control-btn.active{color:var(--accent)}.control-btn.active::after{content:"";position:absolute;bottom:-6px;width:3px;height:3px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor}.volume-wrap{display:flex;align-items:center;gap:4px;min-width:72px}.volume-wrap .volume-btn{width:22px;height:22px;background:transparent;border-color:transparent}.volume-wrap .volume-btn svg{width:12px;height:12px}.volume-range{appearance:none;-webkit-appearance:none;width:42px;height:3px;border-radius:99px;outline:none;cursor:pointer;background:linear-gradient(90deg,var(--music-accent) 0%,var(--music-accent) calc(var(--volume,.86)*100%),rgba(255,255,255,.08) calc(var(--volume,.86)*100%),rgba(255,255,255,.08) 100%)}.volume-range::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:7px;height:7px;border-radius:50%;background:#fff}.volume-range::-moz-range-thumb{width:7px;height:7px;border:none;border-radius:50%;background:#fff}
-.playlist-panel{position:absolute;left:0;right:0;top:calc(100% + 9px);bottom:auto;display:flex;flex-direction:column;gap:3px;max-height:min(330px,52vh);overflow-y:auto;padding:7px;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:linear-gradient(145deg,rgba(20,24,28,.94),rgba(8,11,14,.92));backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);box-shadow:0 18px 50px rgba(0,0,0,.36),0 1px 0 rgba(255,255,255,.05) inset;scrollbar-width:thin;scrollbar-color:rgba(125,211,168,.42) transparent;visibility:hidden;opacity:0;transform:translateY(-6px) scale(.985);transform-origin:top center;pointer-events:none;transition:opacity .2s ease,transform .22s var(--ease),visibility 0s linear .22s}.playlist-panel.open{visibility:visible;opacity:1;transform:translateY(0) scale(1);pointer-events:auto;transition-delay:0s}.playlist-panel::-webkit-scrollbar{width:4px}.playlist-panel::-webkit-scrollbar-track{background:transparent}.playlist-panel::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(143,214,176,.55),rgba(125,211,168,.28));border-radius:999px}.playlist-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 7px 7px 8px;color:var(--text-dim);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.playlist-head strong{color:var(--text);font-size:9.5px}.playlist-head span:last-child{color:var(--text-faint);letter-spacing:.04em}.playlist-item{display:flex;align-items:center;gap:8px;padding:7px;border-radius:11px;cursor:pointer;color:var(--text-dim);transition:background .15s ease,color .15s ease,transform .15s ease,border-color .15s ease;border:1px solid transparent}.playlist-item:hover{background:rgba(255,255,255,.05);color:var(--text);transform:translateX(2px)}.playlist-item.active{background:rgba(125,211,168,.065);color:var(--text);border-color:rgba(143,214,176,.075)}.playlist-thumb{width:34px;height:34px;border-radius:9px;flex:0 0 34px;background:linear-gradient(145deg,#2b2f3a,#121319);background-size:cover;background-position:center;border:1px solid rgba(255,255,255,.07);box-shadow:0 3px 9px rgba(0,0,0,.18)}.playlist-meta{min-width:0;flex:1}.playlist-item .pi-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;font-weight:700}.playlist-item .pi-name b{font-weight:800}.playlist-item .pi-artist{display:block;margin-top:1px;font-size:9.5px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.playlist-item .pi-dur{flex-shrink:0;font-size:9.5px;color:var(--text-faint);font-weight:700}
-footer{margin-top:40px;font-size:12px;color:var(--text-faint);font-weight:600}.weather{position:fixed;right:clamp(24px,5vw,64px);bottom:40px;z-index:9;display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--panel-border);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:12px 18px;border-radius:var(--radius-sm)}.weather-pin{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;flex-shrink:0}.weather-pin svg{width:14px;height:14px}.weather-loc{font-size:12.5px;font-weight:700}.weather-sub{font-size:11px;color:var(--text-dim);margin-top:1px}.weather-temp{display:flex;align-items:center;gap:6px;margin-left:6px;font-size:13px;font-weight:700;white-space:nowrap}.weather-temp svg{width:15px;height:15px;opacity:.8}
-@media (max-width:900px){.links{grid-template-columns:repeat(2,1fr)}.weather{position:static;margin-top:24px;width:fit-content}}
-@media (max-width:700px){.player{left:50%;top:14px;bottom:auto;width:calc(100vw - 24px);max-width:420px;transform:translateX(-50%) translateY(-8px) scale(.985);animation:musicDockInMobile .55s var(--ease) .25s forwards}@keyframes musicDockInMobile{to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}.player-top{grid-template-columns:46px minmax(0,1fr) auto}.player-art-wrap,.player-art{width:46px;height:46px}.player-art{border-radius:11px}.player-title{font-size:12px}.player-artist{font-size:10px}.player-controls{gap:11px}.volume-wrap{min-width:62px}.volume-range{width:34px}.playlist-panel{max-height:48vh;border-radius:14px}}
-@media (max-width:560px){.page{padding:24px 18px}.identity{flex-direction:column;align-items:flex-start;gap:14px}.id-text h1{font-size:28px}.content{padding-top:32px;gap:18px}.activity-line,.activity-detail{max-width:280px}.links{gap:8px}.link-card{min-height:72px;padding:12px}.weather{width:100%}}
-@media (max-width:420px){.player{width:calc(100vw - 16px);top:8px}.player-bottom{gap:4px}.player-controls{gap:9px}.volume-wrap{min-width:52px}.volume-range{width:28px}}
-@media (pointer:coarse),(prefers-reduced-motion:reduce){.cursor-dot,.cursor-ring{display:none}.reveal{opacity:1;transform:none}.ready .reveal{animation:none}.avatar-wrap::before{animation:none}.avatar{animation:none}.player{animation:none;opacity:1;transform:none}.playlist-panel{transition:none}}
+  :root{
+    --bg: #08090d;
+    --panel: rgba(22,23,29,0.55);
+    --panel-border: rgba(255,255,255,0.08);
+    --panel-strong: rgba(14,15,19,0.74);
+    --text: #f4f4f6;
+    --text-dim: #9b9ba5;
+    --text-faint: #6c6c76;
+    --accent: #7dd3a8;
+    --accent-2: #d8b787;
+    --music-accent: #8fd6b0;
+    --music-accent-soft: #c9b79d;
+    --radius: 18px;
+    --radius-sm: 12px;
+    --ease: cubic-bezier(.16,.9,.3,1);
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+
+  body{
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text);
+    background: #050609;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  ::selection{ background: rgba(125,211,168,0.28); color: #fff; }
+
+  /* =========================================================
+     CUSTOM SCROLLBAR — dark glass + mint accent
+     ========================================================= */
+  html{
+    scrollbar-width: thin;
+    scrollbar-color: rgba(125,211,168,.52) rgba(255,255,255,.035);
+    scroll-behavior: smooth;
+  }
+
+  ::-webkit-scrollbar{
+    width: 9px;
+    height: 9px;
+  }
+
+  ::-webkit-scrollbar-track{
+    background: rgba(255,255,255,.025);
+    border-left: 1px solid rgba(255,255,255,.035);
+  }
+
+  ::-webkit-scrollbar-thumb{
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+    background: linear-gradient(
+      180deg,
+      rgba(143,214,176,.72),
+      rgba(125,211,168,.42)
+    );
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.08),
+      0 0 12px rgba(125,211,168,.10);
+  }
+
+  ::-webkit-scrollbar-thumb:hover{
+    background: linear-gradient(
+      180deg,
+      rgba(174,238,204,.94),
+      rgba(125,211,168,.68)
+    );
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.13),
+      0 0 16px rgba(125,211,168,.20);
+  }
+
+  ::-webkit-scrollbar-corner{
+    background: transparent;
+  }
+
+
+  /* =========================================================
+     BACKGROUND — responsive room/window composition
+     ========================================================= */
+  .bg{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    background:
+      radial-gradient(900px 640px at 88% 12%, rgba(170,255,220,.075), transparent 68%),
+      linear-gradient(135deg, #11161a 0%, #0b0f13 48%, #05070a 100%);
+    background-repeat:no-repeat;
+    background-size:cover;
+    background-position:92% center;
+  }
+
+  .bg-vignette{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:
+      radial-gradient(76% 82% at 78% 44%, transparent 45%, rgba(2,4,6,.30) 100%),
+      linear-gradient(90deg,rgba(4,6,8,.60) 0%,rgba(4,6,8,.26) 38%,transparent 64%);
+  }
+
+  .bg-sheen{
+    position:absolute;
+    width:44vw;
+    height:18vw;
+    min-width:360px;
+    min-height:150px;
+    right:-10vw;
+    top:8vh;
+    z-index:2;
+    pointer-events:none;
+    background:linear-gradient(105deg,transparent 0%,rgba(225,255,245,.042) 46%,transparent 74%);
+    filter:blur(18px);
+    transform:rotate(-9deg);
+    opacity:.62;
+  }
+
+  .scrim-left{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:linear-gradient(90deg,
+      rgba(5,6,10,.78) 0%,
+      rgba(5,6,10,.48) 30%,
+      rgba(5,6,10,.14) 48%,
+      rgba(5,6,10,0) 68%);
+  }
+
+  @media (max-width:900px){
+    .bg{ background-position:96% center; }
+    .bg-sheen{ right:-18vw; opacity:.46; }
+    .scrim-left{
+      background:linear-gradient(90deg,
+        rgba(5,6,10,.66) 0%,
+        rgba(5,6,10,.28) 34%,
+        rgba(5,6,10,0) 68%);
+    }
+  }
+
+  @media (max-width:560px){
+    .bg{ background-position:100% center; }
+    .bg-sheen{ display:none; }
+    .bg-vignette{
+      background:
+        linear-gradient(90deg,rgba(4,6,8,.38) 0%,rgba(4,6,8,.12) 30%,transparent 62%),
+        linear-gradient(180deg,rgba(2,4,6,.08),rgba(2,4,6,.22));
+    }
+    .scrim-left{
+      background:linear-gradient(90deg,
+        rgba(5,6,10,.52) 0%,
+        rgba(5,6,10,.16) 38%,
+        rgba(5,6,10,0) 70%);
+    }
+  }
+
+  /* Full-screen rain-glass layer: sits ABOVE terminals but BELOW the real UI. */
+  .glass-mist{
+    position:fixed; inset:-7%; z-index:6; pointer-events:none; overflow:hidden;
+    opacity:.72;
+    background:
+      radial-gradient(34% 28% at 72% 20%, rgba(255,255,255,.15), transparent 72%),
+      radial-gradient(28% 22% at 88% 60%, rgba(242,247,248,.105), transparent 74%),
+      radial-gradient(30% 20% at 48% 78%, rgba(235,241,243,.085), transparent 76%),
+      radial-gradient(22% 18% at 18% 32%, rgba(255,255,255,.065), transparent 78%),
+      linear-gradient(180deg, rgba(246,249,250,.055), rgba(210,217,220,.025) 42%, rgba(245,248,249,.04));
+    backdrop-filter: blur(2.5px) saturate(.78) contrast(.97);
+    -webkit-backdrop-filter: blur(2.5px) saturate(.78) contrast(.97);
+    mix-blend-mode:screen;
+  }
+  .glass-mist::before{
+    content:""; position:absolute; inset:-10%;
+    background:
+      repeating-linear-gradient(108deg, transparent 0 76px, rgba(255,255,255,.018) 79px, transparent 84px 156px),
+      radial-gradient(14% 7% at 76% 28%, rgba(255,255,255,.11), transparent 70%),
+      radial-gradient(18% 8% at 56% 58%, rgba(255,255,255,.075), transparent 72%),
+      radial-gradient(11% 6% at 28% 76%, rgba(255,255,255,.06), transparent 72%);
+    filter:blur(10px);
+    animation:mistDrift 20s ease-in-out infinite alternate;
+  }
+  .glass-mist::after{
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(70px 34px at 78% 19%, rgba(255,255,255,.10), transparent 72%),
+      radial-gradient(96px 42px at 63% 44%, rgba(255,255,255,.065), transparent 75%),
+      radial-gradient(82px 36px at 31% 71%, rgba(255,255,255,.055), transparent 76%),
+      linear-gradient(105deg, transparent 0 46%, rgba(255,255,255,.026) 51%, transparent 57%);
+    filter:blur(16px);
+    opacity:.88;
+    transform:translateZ(0);
+  }
+  @keyframes mistDrift{0%{transform:translate3d(-1.5%,.5%,0) scale(1.02)}50%{transform:translate3d(1.2%,-.8%,0) scale(1.04)}100%{transform:translate3d(-.5%,1%,0) scale(1.02)}}
+
+
+  /* Clean terminal stack: bright glass, low blur, crisp code, lightweight rendering. */
+  .terminal-field{
+    position:absolute; inset:-6% -3% -6% 31%; z-index:5; pointer-events:none;
+    overflow:hidden;
+    opacity:.90;
+  }
+  .terminal{
+    position:absolute;
+    width:min(590px, 42vw);
+    min-height:198px;
+    padding:0 0 14px;
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:16px;
+    background:linear-gradient(145deg, rgba(30,36,40,.72), rgba(11,15,18,.58));
+    box-shadow:
+      0 22px 54px rgba(0,0,0,.24),
+      0 1px 0 rgba(255,255,255,.07) inset;
+    backdrop-filter:blur(10px) saturate(125%);
+    -webkit-backdrop-filter:blur(10px) saturate(125%);
+    transform-origin:center;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .terminal::before{
+    content:"";
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(120deg, rgba(255,255,255,.055), transparent 34%, rgba(132,229,199,.028) 72%, rgba(255,255,255,.02));
+    z-index:-1;
+  }
+  .code-glow{
+    position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;
+    opacity:.96;mix-blend-mode:screen;
+  }
+  /* Frosted "steamed glass" pane sitting above the glow, below the text — pure CSS, no extra JS cost */
+  .terminal::after{
+    content:"";
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(38% 30% at 22% 18%, rgba(255,255,255,.10), transparent 72%),
+      radial-gradient(30% 24% at 68% 42%, rgba(255,255,255,.07), transparent 74%),
+      radial-gradient(34% 26% at 46% 78%, rgba(255,255,255,.065), transparent 76%),
+      radial-gradient(24% 20% at 88% 82%, rgba(255,255,255,.05), transparent 78%);
+    filter: blur(7px);
+    opacity: .8;
+    mix-blend-mode: overlay;
+    animation: frostDrift 14s ease-in-out infinite alternate;
+  }
+  @keyframes frostDrift{
+    0%{ transform: translate3d(-1%, .6%, 0) scale(1.015); }
+    100%{ transform: translate3d(1.1%, -.7%, 0) scale(1.03); }
+  }
+  @media (max-width:560px){
+    .terminal::after{ animation:none; filter: blur(5px); opacity:.55; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .terminal::after{ animation:none; }
+  }
+  .terminal pre,.terminal-head{position:relative;z-index:2;}
+  .terminal-head{
+    display:flex; align-items:center; gap:9px; height:34px; padding:0 13px;
+    color:rgba(239,244,243,.68);
+    font:600 10.5px/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing:.025em;
+    border-bottom:1px solid rgba(255,255,255,.085);
+    background:rgba(255,255,255,.028);
+  }
+  .traffic{display:flex; gap:6px; margin-right:2px;}
+  .traffic i{display:block; width:6px; height:6px; border-radius:50%; background:rgba(232,238,238,.40);}
+  .traffic i:nth-child(2){background:rgba(160,230,203,.65);}
+  .traffic i:nth-child(3){background:rgba(220,183,125,.52);}
+  .terminal-state{margin-left:auto; color:rgba(220,229,227,.50);}
+  .terminal pre{
+    margin:0; padding:14px 16px 12px;
+    color:rgba(239,244,244,.84);
+    font:500 12px/1.78 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space:pre;
+    text-shadow:none;
+  }
+  .terminal .c-dim{color:rgba(202,211,211,.58)}
+  .terminal .c-key{color:rgba(132,244,204,.96); text-shadow:0 0 9px rgba(106,236,190,.22)}
+  .terminal .c-fn{color:rgba(135,220,251,.96); text-shadow:0 0 9px rgba(105,210,247,.20)}
+  .terminal .c-type{color:rgba(244,211,151,.94); text-shadow:0 0 8px rgba(237,200,128,.17)}
+  .terminal .c-var{color:rgba(238,243,243,.76)}
+  .terminal .c-num{color:rgba(255,224,171,.96); text-shadow:0 0 8px rgba(255,216,155,.17)}
+  .terminal.t1{top:3%; left:4%; transform:rotate(-1.1deg) scale(1.04); z-index:3;}
+  .terminal.t2{top:31%; left:28%; transform:rotate(1.2deg) scale(.98); z-index:2;}
+  .terminal.t3{top:61%; left:5%; transform:rotate(-1.3deg) scale(1.01); z-index:1;}
+
+  .bg-media{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:center center;
+    display:none; pointer-events:none; z-index:0;
+    filter: saturate(.92) contrast(1.03) brightness(.78);
+    transform:scale(1.025);
+  }
+
+  .bg-overlay{
+    position:absolute; inset:0; pointer-events:none;
+    display:none; z-index:2;
+  }
+
+  .bg-fog{
+    position:absolute; inset:0; pointer-events:none;
+    display:none; z-index:4;
+    transform:translateZ(0);
+  }
+  @keyframes auroraDrift{
+    0%, 100% { transform: translate3d(0,0,0) scale(1); }
+    50%      { transform: translate3d(-1.5%, 1%, 0) scale(1.035); }
+  }
+
+  .grain{
+    position: fixed; inset: -10%; z-index: 7; pointer-events:none;
+    opacity: .035; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .spotlight{
+    position: fixed; z-index: 7; inset: 0; pointer-events:none;
+    opacity: 0; transition: opacity .4s ease;
+    background: radial-gradient(440px circle at var(--sx,50%) var(--sy,50%), rgba(255,255,255,.028), transparent 72%);
+  }
+  .spotlight.show{ opacity: 1; }
+
+  .scrim-left{
+    position: fixed; inset: 0; z-index: 2;
+    background: linear-gradient(90deg,
+      rgba(5,6,10,0.92) 0%, rgba(5,6,10,0.78) 30%,
+      rgba(5,6,10,0.28) 48%, rgba(5,6,10,0) 60%);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .bg{ animation: none; }
+  }
+
+  .page{
+    position: relative; z-index: 8; min-height: 100vh;
+    padding: 40px clamp(24px, 4.2vw, 74px);
+    display: flex; flex-direction: column;
+  }
+
+  nav{ display:flex; align-items:center; gap: 40px; flex-wrap: wrap; row-gap: 14px; }
+  nav a{
+    color: var(--text-dim); text-decoration:none; font-size: 13px;
+    font-weight: 600; letter-spacing: .03em; position: relative;
+    padding-bottom: 10px; transition: color .2s ease;
+  }
+  nav a::before{
+    content:""; position:absolute; left:0; bottom:0; width:100%; height:2px;
+    background: var(--text); border-radius: 2px; transform: scaleX(0);
+    transform-origin: left; transition: transform .28s var(--ease);
+  }
+  nav a:hover{ color: var(--text); }
+  nav a:hover::before{ transform: scaleX(1); }
+  nav a.active{ color: var(--text); }
+  nav a.active::after{
+    content:""; position:absolute; left:0; bottom:0;
+    width: 16px; height: 2px; background: var(--accent); border-radius: 2px;
+  }
+
+  .clock-pill{
+    margin-left:auto; display:flex; align-items:center; gap:8px;
+    background: rgba(12,14,18,.62); border: 1px solid rgba(255,255,255,.085);
+    backdrop-filter: blur(20px) saturate(125%); -webkit-backdrop-filter: blur(20px) saturate(125%);
+    padding: 10px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; color: var(--text);
+    transition: border-color .25s ease;
+  }
+  .clock-pill:hover{ border-color: rgba(125,211,168,0.28); }
+  .clock-pill svg{ width:14px; height:14px; opacity:.75; }
+
+  .reveal{ opacity:0; transform: translateY(14px); }
+  .ready .reveal{
+    animation: revealUp .7s var(--ease) forwards;
+  }
+  .ready nav.reveal{ animation-delay: .05s; }
+  .ready .status.reveal{ animation-delay: .16s; }
+  .ready .identity.reveal{ animation-delay: .24s; }
+  .ready .bio-text.reveal{ animation-delay: .34s; }
+  .ready .tags.reveal{ animation-delay: .42s; }
+  .ready .links.reveal{ animation-delay: .5s; }
+  .ready .player.reveal{ animation-delay: .6s; }
+  .ready .weather.reveal{ animation-delay: .72s; }
+  @keyframes revealUp{
+    to{ opacity:1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1; transform:none; animation:none !important; }
+  }
+
+  .content{
+    margin-top:auto;
+    padding-top:60px;
+    padding-bottom:150px;
+    max-width:560px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+
+  .status{ display:flex; align-items:center; gap:8px; font-size: 13px; color: var(--text-dim); font-weight: 600; }
+  .status .dot{
+    --status-rgb: 125,211,168;
+    width:7px; height:7px; border-radius:50%;
+    background: rgb(var(--status-rgb));
+    animation: statusPulse 2.4s ease-out infinite;
+  }
+  @keyframes statusPulse{
+    0%   { box-shadow: 0 0 0 0 rgba(var(--status-rgb), 0.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(var(--status-rgb), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--status-rgb), 0); }
+  }
+
+  .activity-wrap{ display:flex; flex-direction:column; }
+
+  .activity-line{
+    display:none; align-items:center; gap:8px;
+    font-size: 12.5px; color: var(--text); font-weight: 600;
+    margin-top: 8px;
+    width: fit-content; max-width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--panel-border);
+    padding: 5px 12px 5px 5px;
+    border-radius: 999px;
+    transition: background .18s ease, border-color .18s ease;
+  }
+  .activity-line.clickable{ cursor: pointer; }
+  .activity-line.clickable:hover{ background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.16); }
+  .activity-line img{
+    width: 20px; height: 20px; border-radius: 6px; flex-shrink:0;
+    object-fit: cover; background: rgba(255,255,255,0.08);
+  }
+  .activity-line svg{ width:15px; height:15px; flex-shrink:0; opacity:.9; color: var(--accent); }
+  .activity-line span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .activity-line span b{ font-weight:700; }
+  .activity-line .chevron{
+    width:11px; height:11px; opacity:.55; margin-left:2px; flex-shrink:0;
+    transition: transform .2s ease;
+  }
+  .activity-line.open .chevron{ transform: rotate(180deg); }
+
+  .activity-detail{
+    max-height: 0; opacity: 0; overflow: hidden;
+    width: fit-content; max-width: 340px;
+    margin-top: 0;
+    background: var(--panel-strong); border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    transition: max-height .32s ease, opacity .25s ease, margin-top .32s ease;
+  }
+  .activity-detail.open{ max-height: 240px; opacity: 1; margin-top: 8px; }
+  .activity-detail-inner{ display:flex; gap:12px; padding: 12px 14px; }
+  .activity-detail-inner img{
+    width: 54px; height: 54px; border-radius: 12px; flex-shrink:0;
+    object-fit: cover; background: rgba(255,255,255,0.08);
+  }
+  .activity-detail-text{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .activity-detail-name{ font-size: 13.5px; font-weight: 700; }
+  .activity-detail-line{
+    font-size: 12px; color: var(--text-dim); font-weight: 600;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .activity-detail-time{ font-size: 11px; color: var(--text-faint); font-weight:600; margin-top: 4px; }
+
+  .identity{ display:flex; align-items:flex-start; gap: 22px; }
+
+  .avatar-wrap{ position: relative; width: 88px; height: 88px; flex-shrink:0; }
+
+  .avatar-wrap::before{
+    content:""; position:absolute; inset:-4px; border-radius:50%;
+    background: conic-gradient(from 0deg, rgba(125,211,168,.55), rgba(216,183,135,.35), transparent 40%, transparent 60%, rgba(125,211,168,.55));
+    animation: ringSpin 9s linear infinite;
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  }
+  @keyframes ringSpin{ to{ transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){ .avatar-wrap::before{ animation: none; } }
+
+  .avatar{
+    --status-rgb: 125,211,168;
+    width: 88px; height: 88px; border-radius: 50%; flex-shrink:0;
+    background: linear-gradient(145deg, #2a2d38, #17181e);
+    background-size: cover; background-position: center;
+    border: 1px solid var(--panel-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 10px; font-weight:700; letter-spacing:.03em;
+    color: rgba(255,255,255,0.28); text-align:center; line-height:1.4; padding: 6px;
+    white-space: pre-line;
+    transition: background-image .35s ease;
+    animation: cloudGlow 6s ease-in-out infinite;
+  }
+
+  @keyframes cloudGlow{
+    0%, 100% {
+      box-shadow:
+        0 0 16px 3px  rgba(var(--status-rgb), 0.30),
+        0 0 34px 12px rgba(var(--status-rgb), 0.16),
+        0 0 56px 22px rgba(var(--status-rgb), 0.08);
+    }
+    50% {
+      box-shadow:
+        0 0 22px 6px  rgba(var(--status-rgb), 0.40),
+        0 0 44px 16px rgba(var(--status-rgb), 0.20),
+        0 0 68px 28px rgba(var(--status-rgb), 0.10);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .avatar{ animation: none; box-shadow: 0 0 24px 8px rgba(var(--status-rgb), 0.22); }
+  }
+
+  .avatar-deco{
+    position: absolute; inset: -15%;
+    background-size: contain; background-position: center; background-repeat: no-repeat;
+    pointer-events: none;
+    display: none;
+  }
+  .avatar-deco.show{ display: block; }
+
+  .id-text{ min-width: 0; }
+  .id-text h1{
+    font-family: 'Space Grotesk', 'Manrope', sans-serif;
+    font-size: 36px; font-weight: 700; letter-spacing: -0.02em; line-height:1.1;
+    background: linear-gradient(120deg, #ffffff 45%, #cfd6d1 75%, var(--accent) 130%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .id-text .handle{ margin-top: 7px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
+
+  .bio-text{ font-size: 14.5px; line-height: 1.65; color: var(--text-dim); max-width: 400px; }
+
+  .tags{ display:flex; gap:10px; flex-wrap:wrap; }
+  .tag{
+    padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--panel-border); font-size: 12.5px; font-weight: 600; color: var(--text);
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .tag:hover{ border-color: rgba(125,211,168,0.3); background: rgba(125,211,168,0.06); }
+
+  .links{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 500px; }
+  .link-card{
+    position: relative; overflow: hidden;
+    background: rgba(12,14,18,.62); border: 1px solid rgba(255,255,255,.085);
+    backdrop-filter: blur(20px) saturate(125%); -webkit-backdrop-filter: blur(20px) saturate(125%);
+    border-radius: var(--radius-sm); padding: 14px 14px 12px; text-decoration:none;
+    color: var(--text); display:flex; flex-direction:column; justify-content:space-between;
+    gap: 18px; transition: transform .22s var(--ease), background .18s ease, border-color .18s ease;
+    min-height: 78px;
+  }
+  button.link-card{
+    appearance:none; -webkit-appearance:none; width:100%; font:inherit; text-align:left; cursor:pointer;
+  }
+
+  .link-card::after{ display:none !important; }
+  .link-card:hover{
+    transform: translateY(-2px);
+    background: rgba(255,255,255,.075);
+    border-color: rgba(255,255,255,.18);
+    box-shadow: 0 10px 28px rgba(0,0,0,.16);
+  }
+  .link-card:focus-visible{
+    outline: 2px solid rgba(255,255,255,.45);
+    outline-offset: 3px;
+  }
+  .link-card .top{ display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
+  .link-card svg.icon{ width:18px; height:18px; transition: transform .25s var(--ease); }
+  .link-card:hover svg.icon{ transform: translateY(-1px); }
+  .link-card svg.arrow{ width:12px; height:12px; opacity:.55; transition: transform .22s var(--ease); }
+  .link-card:hover svg.arrow{ transform: translate(1px,-1px); opacity:.85; }
+  .link-card .label{ font-size: 12.5px; font-weight: 600; position:relative; z-index:1; }
+  @media (prefers-reduced-motion: reduce){ .link-card, .link-card svg.icon, .link-card svg.arrow{ transition:none; } }
+
+  .player{
+    position:relative;
+    background: var(--panel-strong);
+    border: 1px solid rgba(255,255,255,0.09);
+    backdrop-filter: blur(22px) saturate(130%); -webkit-backdrop-filter: blur(22px) saturate(130%);
+    border-radius: 18px; padding: 14px; max-width: 420px;
+    display:flex; flex-direction:column; gap: 12px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.22);
+    transition: border-color .25s ease;
+  }
+  .player.is-playing{ border-color: rgba(143,214,176,.16); }
+
+  /* Floating music box — kept in the lower-left safe area so the
+     window/exterior focal point of the background stays visible. */
+  #player{
+    position:fixed;
+    left:clamp(18px,3.2vw,48px);
+    bottom:clamp(18px,3.2vw,36px);
+    z-index:20;
+    width:min(390px,calc(100vw - 36px));
+    max-width:none;
+    margin:0;
+  }
+
+  .player-top{ display:flex; align-items:center; gap:12px; }
+  .player-art-wrap{ position:relative; width:52px; height:52px; flex:0 0 52px; }
+  .player-art-wrap::before{
+    content:""; position:absolute; inset:-5px; border-radius:16px;
+    background: var(--accent); opacity:0; filter: blur(9px);
+    animation: breathe 2.6s ease-in-out infinite; pointer-events:none;
+  }
+  .player.is-playing .player-art-wrap::before{ opacity:.35; }
+  @keyframes breathe{ 0%,100%{ opacity:.22; transform:scale(.96); } 50%{ opacity:.4; transform:scale(1.04); } }
+  @media (prefers-reduced-motion: reduce){ .player-art-wrap::before{ animation:none; } }
+  .player-art{
+    width:52px; height:52px; border-radius:13px; position:relative; z-index:1;
+    background: linear-gradient(160deg,#2b2f3a,#121319);
+    background-size: cover; background-position: center; flex-shrink:0;
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow: 0 6px 16px rgba(0,0,0,.28);
+  }
+
+  .player-info{ flex:1; min-width:0; cursor:default; }
+  .player-listening{
+    display:flex; align-items:center; gap:6px; font-size:11px;
+    color:var(--text-faint); font-weight:600; margin-bottom:3px;
+  }
+  .player-listening .dot{
+    width:5px; height:5px; border-radius:50%; background:var(--accent);
+    box-shadow:0 0 8px rgba(125,211,168,.4);
+  }
+  .player-title{
+    font-size:14px; font-weight:700; letter-spacing:-.01em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .player-artist{
+    font-size:11.5px; color:var(--text-dim); margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .player-actions{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .icon-btn{
+    width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.05);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    text-decoration:none; border:1px solid transparent; cursor:pointer; color:var(--text);
+    transition:background .18s ease, border-color .18s ease, color .18s ease;
+  }
+  .icon-btn:hover{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.08); }
+  .icon-btn:active{ transform:scale(.94); }
+  .icon-btn svg{ width:13px; height:13px; }
+  .icon-btn.spotify svg{ width:14px; height:14px; color:#1ed760; }
+  .icon-btn.list-open{ background:rgba(143,214,176,.10); color:var(--accent); border-color:rgba(143,214,176,.10); }
+
+  .progress-row{
+    display:flex; align-items:center; gap:8px; font-size:10px;
+    color:var(--text-faint); font-weight:600;
+  }
+  .progress-track{
+    position:relative; flex:1; height:4px; border-radius:99px;
+    background:rgba(255,255,255,.08); cursor:pointer; overflow:visible;
+  }
+  .progress-fill{
+    position:relative; width:0%; height:100%; border-radius:99px;
+    background: var(--accent);
+    transition:width .15s linear;
+  }
+  .progress-thumb{
+    position:absolute; top:50%; right:0; width:9px; height:9px;
+    transform:translate(50%,-50%); border-radius:50%;
+    background:#fff; opacity:0; box-shadow:0 2px 6px rgba(0,0,0,.4);
+    transition:opacity .16s ease;
+  }
+  .progress-track:hover .progress-thumb{ opacity:1; }
+
+  .player-bottom{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .player-controls{ display:flex; align-items:center; justify-content:center; gap:13px; flex:1; }
+  .player-controls button{
+    position:relative; background:none; border:none; cursor:pointer; color:var(--text-dim);
+    display:flex; align-items:center; justify-content:center; padding:0;
+    transition:color .16s ease, transform .16s ease;
+  }
+  .player-controls button:hover{ color:var(--text); }
+  .player-controls button:active{ transform:scale(.92); }
+  .player-controls button svg{ width:14px; height:14px; }
+  .player-controls .play-btn{
+    width:34px; height:34px; background:#fff; border-radius:50%;
+    color:#0a0a0a; box-shadow:0 4px 12px rgba(0,0,0,.25);
+  }
+  .player-controls .play-btn:hover{ color:#0a0a0a; transform:scale(1.04); }
+  .player-controls .play-btn svg{ width:14px; height:14px; }
+
+  .control-btn.active{ color:var(--accent); }
+  .control-btn.active::after{
+    content:""; position:absolute; bottom:-6px; width:3px; height:3px;
+    border-radius:50%; background:currentColor;
+  }
+
+  .volume-wrap{ display:flex; align-items:center; gap:5px; min-width:64px; }
+  .volume-wrap .volume-btn{ width:22px; height:22px; background:transparent; }
+  .volume-wrap .volume-btn svg{ width:13px; height:13px; }
+  .volume-range{
+    appearance:none; -webkit-appearance:none; width:42px; height:3px;
+    border-radius:99px; background:rgba(255,255,255,.09); outline:none; cursor:pointer;
+  }
+  .volume-range::-webkit-slider-thumb{
+    appearance:none; -webkit-appearance:none; width:9px; height:9px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.35);
+  }
+  .volume-range::-moz-range-thumb{
+    width:9px; height:9px; border:none; border-radius:50%; background:#fff;
+  }
+
+  .playlist-panel{
+    display:none; flex-direction:column; gap:4px;
+    max-height:250px; overflow-y:auto;
+    border-top:1px solid var(--panel-border);
+    padding-top:10px; margin-top:1px; position:relative; z-index:2;
+  }
+  .playlist-panel.open{ display:flex; }
+  .playlist-panel{
+    scrollbar-width: thin;
+    scrollbar-color: rgba(125,211,168,.42) transparent;
+  }
+  .playlist-panel::-webkit-scrollbar{ width:5px; }
+  .playlist-panel::-webkit-scrollbar-track{ background:transparent; }
+  .playlist-panel::-webkit-scrollbar-thumb{
+    background:linear-gradient(180deg,rgba(143,214,176,.58),rgba(125,211,168,.30));
+    border-radius:999px;
+    border:1px solid transparent;
+    background-clip:padding-box;
+  }
+  .playlist-panel::-webkit-scrollbar-thumb:hover{
+    background:linear-gradient(180deg,rgba(174,238,204,.82),rgba(125,211,168,.52));
+    background-clip:padding-box;
+  }
+
+  .playlist-item{
+    display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;
+    cursor:pointer; color:var(--text-dim);
+    transition:background .15s ease, color .15s ease, transform .15s ease;
+  }
+  .playlist-item:hover{ background:rgba(255,255,255,.055); color:var(--text); transform:translateX(2px); }
+  .playlist-item.active{ background:rgba(125,211,168,.08); color:var(--text); }
+  .playlist-thumb{
+    width:38px; height:38px; border-radius:9px; flex:0 0 38px;
+    background:linear-gradient(145deg,#2b2f3a,#121319); background-size:cover; background-position:center;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .playlist-meta{ min-width:0; flex:1; }
+  .playlist-item .pi-name{
+    display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-size:12px; font-weight:700;
+  }
+  .playlist-item .pi-name b{ font-weight:800; }
+  .playlist-item .pi-artist{
+    display:block; margin-top:2px; font-size:10.5px; color:var(--text-faint);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .playlist-item .pi-dur{ flex-shrink:0; font-size:10.5px; color:var(--text-faint); font-weight:700; }
+  .playlist-playing{
+    display:flex; align-items:flex-end; justify-content:center; gap:2px;
+    width:15px; height:14px; margin-right:2px;
+    opacity:0; color:var(--music-accent);
+  }
+  .playlist-item.active .playlist-playing{ opacity:1; }
+  .playlist-playing i{
+    display:block; width:2.5px; height:3px; min-height:3px;
+    border-radius:3px; background:linear-gradient(180deg,var(--music-accent),rgba(201,183,157,.72));
+    box-shadow:0 0 7px rgba(143,214,176,.18);
+    transform-origin:bottom;
+    transition:height .07s linear, opacity .1s ease;
+  }
+  .playlist-playing i:nth-child(2){ opacity:.88; }
+  .playlist-playing i:nth-child(3){ opacity:.7; }
+  .playlist-item:not(.active) .playlist-playing i{ height:3px !important; }
+  .playlist-item:not(.active) .playlist-playing{ opacity:0; }
+
+  @media (max-width:560px){
+    #player{
+      left:12px;
+      right:12px;
+      bottom:12px;
+      width:auto;
+      max-width:none;
+    }
+    .player{ padding:11px; border-radius:15px; }
+    .player-bottom{ gap:6px; }
+    .player-controls{ gap:10px; }
+    .volume-wrap{ min-width:52px; }
+    .volume-range{ width:32px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .playlist-playing i{ animation:none !important; }
+  }
+
+  footer{ margin-top: 40px; font-size: 12px; color: var(--text-faint); font-weight: 600; }
+
+  .weather{
+    position: fixed; right: clamp(24px, 5vw, 64px); bottom: 40px; z-index: 9;
+    display:flex; align-items:center; gap: 12px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    padding: 12px 18px; border-radius: var(--radius-sm);
+  }
+  .weather-pin{ width:30px; height:30px; border-radius:50%; background: rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .weather-pin svg{ width:14px; height:14px; }
+  .weather-loc{ font-size: 12.5px; font-weight:700; }
+  .weather-sub{ font-size: 11px; color: var(--text-dim); margin-top:1px; }
+  .weather-temp{ display:flex; align-items:center; gap:6px; margin-left: 6px; font-size: 13px; font-weight:700; white-space:nowrap; }
+  .weather-temp svg{ width:15px; height:15px; opacity:.8; }
+
+  @media (max-width: 900px){
+    .links{ grid-template-columns: repeat(2,1fr); }
+    .weather{ position: static; margin-top: 24px; width: fit-content; }
+  }
+  @media (max-width:560px){
+    .page{ padding:24px 18px; }
+    .identity{ flex-direction:column; align-items:flex-start; gap:14px; }
+    .id-text h1{ font-size:28px; }
+    .content{ padding-top:32px; padding-bottom:188px; gap:18px; }
+    .activity-line, .activity-detail{ max-width:280px; }
+    .terminal{ width:min(520px,88vw); }
+    .terminal-field{ inset:-6% -6% -6% 8%; }
+  }
+  @media (prefers-reduced-motion: reduce){ .link-card{ transition:none; } .terminal{ transform:none !important; } }
 </style>
 </head>
 <body>
-<div class="bg" id="bg" aria-hidden="true">
-  <canvas class="bg-network" id="bgNetwork"></canvas>
-  <div class="bg-sheen"></div>
-  <div class="bg-vignette"></div>
-  <video class="bg-media" id="bgVideo" playsinline muted loop></video>
-  <div class="bg-overlay" id="bgOverlay"></div>
-  <div class="bg-fog" id="bgFog"></div>
-</div>
-<div class="grain" aria-hidden="true"></div>
-<div class="spotlight" id="spotlight" aria-hidden="true"></div>
-<div class="scrim-left" aria-hidden="true"></div>
-<div class="cursor-ring" aria-hidden="true"></div>
-<div class="cursor-dot" aria-hidden="true"></div>
 
-<div class="page">
-  <nav id="nav" class="reveal"></nav>
-  <div class="content">
-    <div class="status reveal" id="status"></div>
-    <div class="identity reveal" id="identity"></div>
-    <p class="bio-text reveal" id="bioText"></p>
-    <div class="tags reveal" id="tags"></div>
-    <div class="links reveal" id="links"></div>
+  <!-- CUSTOM MOUSE -->
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+
+  <!-- RESPONSIVE BACKGROUND -->
+  <div class="bg" id="bg" aria-hidden="true">
+    <video class="bg-media" id="bgVideo" playsinline muted></video>
+    <div class="bg-vignette"></div>
+    <div class="bg-sheen"></div>
+    <div class="scrim-left"></div>
+    <div class="bg-overlay" id="bgOverlay"></div>
+    <div class="bg-fog" id="bgFog"></div>
   </div>
-  <footer id="footer"></footer>
-</div>
-<div class="player" id="player" aria-label="Music player"></div>
-<div class="weather reveal" id="weather"></div>
+
+  <div class="glass-mist" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+  <div class="page">
+    <nav id="nav" class="reveal"></nav>
+
+    <div class="content">
+      <div class="status reveal" id="status"></div>
+      <div class="identity reveal" id="identity"></div>
+      <p class="bio-text reveal" id="bioText"></p>
+      <div class="tags reveal" id="tags"></div>
+      <div class="links reveal" id="links"></div>
+      <div class="player reveal" id="player"></div>
+    </div>
+
+    <footer id="footer"></footer>
+  </div>
+
+  <div class="weather reveal" id="weather"></div>
 
 <script>
-const BIO_CONFIG={
-  nav:[{label:'HOME',href:'#',active:true}],
-  clock:{enabled:true,format24h:true},
-  background:{enabled:true,type:'image',source:'12.png',position:'center center',size:'cover',overlay:{enabled:true,color:'rgba(116,122,126,.32)'},fog:{enabled:true,blur:2.5,opacity:.12,color:'rgba(210,215,218,.26)'}},
-  profile:{status:'Online',name:'khanz',handle:'@itsrealkhanz',bio:'Just a guy who loves creating, exploring new things and enjoying the little moments.',avatar:{image:null,fallbackText:'AVATAR\n(thay sau)'},tags:['Developer','Designer','Gamer']},
-  socials:[{key:'discord',name:'Discord',url:null},{key:'roblox',name:'Roblox',url:null},{key:'youtube',name:'YouTube',url:null},{key:'github',name:'GitHub',url:null}],
-  music:{startIndex:0,autoAdvance:true,tracks:[
-    {title:'Nắng - Jank, Long Nóng Lá ( Remix Đông x Thazh)',cover:'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02e2b9905c7e368d0c0143b42f',music:'https://raw.githubusercontent.com/Kazuuiie/i/main/N%E1%BA%AFng%20Remix%20(%C4%90%C3%B4ng%20x%20Thazh)%20-%20JanK%20%26%20Long%20N%C3%B3n%20L%C3%A1%20x%20H2O%20-%20N%E1%BA%AFng%20Soi%20M%C3%A0u%20M%E1%BA%AFt%20Anh%20Ho%C3%A0i%20C%C3%B2n%20Th%C6%B0%C6%A1ng%20%5BE-7_xqFBIhc%5D.mp3'},
-    {title:'Id Thang Máy',cover:'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02c138ef03555390be900f338e',music:'https://raw.githubusercontent.com/Kazuuiie/music/main/id%20thang%20m%C3%A1y%20(feat.%20267).mp3'}
-  ]},
-  discord:{enabled:true,userId:'1473247060298961040',useAvatar:true,useAvatarDecoration:true,useIdentity:true,useActivity:true,useStatus:true,pollIntervalMs:20000},
-  weather:{useGeolocation:false,fallback:{location:'Vĩnh Long, Việt Nam',lat:10.2537,lon:105.9722}},
-  footer:{text:'© 2025 khanz. All rights reserved.'}
+const BIO_CONFIG = {
+
+  nav: [
+    { label: "HOME", href: "#", active: true },
+  ],
+
+  clock: { enabled: true, format24h: true },
+
+  background: {
+    enabled: true,
+    type: "image",
+    source: "12.png",
+    position: "92% center",
+    tabletPosition: "96% center",
+    mobilePosition: "100% center",
+    size: "cover",
+    overlay: {
+      enabled: true,
+      color: "rgba(116, 122, 126, 0.20)"
+    },
+    fog: {
+      enabled: true,
+      blur: 2.0,
+      opacity: 0.07,
+      color: "rgba(210, 215, 218, 0.20)"
+    }
+  },
+
+  profile: {
+    status: "Online",
+    name: "khanz",
+    handle: "@itsrealkhanz",
+    bio: "Just a guy who loves creating, exploring new things and enjoying the little moments.",
+    avatar: {
+      image: null,
+      fallbackText: "AVATAR\n(thay sau)"
+    },
+    tags: ["Developer", "Designer", "Gamer"]
+  },
+
+  socials: [
+    { key: "discord", name: "Discord", url: null },
+    { key: "roblox",  name: "Roblox",  url: null },
+    { key: "youtube", name: "YouTube", url: null },
+    { key: "github",  name: "GitHub",  url: null },
+  ],
+
+  music: {
+    startIndex: 0,
+    autoAdvance: true,
+    tracks: [
+    { title: "Nắng - Jank, Long Nóng Lá ( Remix Đông x Thazh)", cover:"https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02e2b9905c7e368d0c0143b42f", music: "https://raw.githubusercontent.com/Kazuuiie/i/main/N%E1%BA%AFng%20Remix%20(%C4%90%C3%B4ng%20x%20Thazh)%20-%20JanK%20%26%20Long%20N%C3%B3n%20L%C3%A1%20x%20H2O%20-%20N%E1%BA%AFng%20Soi%20M%C3%A0u%20M%E1%BA%AFt%20Anh%20Ho%C3%A0i%20C%C3%B2n%20Th%C6%B0%C6%A1ng%20%5BE-7_xqFBIhc%5D.mp3"},
+    { title: "Id Thang Máy" , cover: "https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02c138ef03555390be900f338e", music: "https://raw.githubusercontent.com/Kazuuiie/music/main/id%20thang%20m%C3%A1y%20(feat.%20267).mp3" },
+      ]
+    
+  },
+
+  discord: {
+    enabled: true,
+    userId: "1473247060298961040",
+    useAvatar: true,
+    useAvatarDecoration: true,
+    useIdentity: true,
+    useActivity: true,
+    useStatus: true,
+    pollIntervalMs: 20000
+  },
+
+  weather: {
+    useGeolocation: false,
+    fallback: { location: "Vĩnh Long, Việt Nam", lat: 10.2537, lon: 105.9722 }
+  },
+
+  footer: { text: "© 2025 khanz. All rights reserved." }
 };
-const ICONS={
-  clock:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
-  arrow:`<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M7 7h10v10"/></svg>`,
-  chevron:`<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
-  pin:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
-  cloud:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 12.5 4 4 0 0 0 6 20h11.5"/></svg>`,
-  sun:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`,
-  rain:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 16a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 9.5 4 4 0 0 0 6 17.5h11.5"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>`,
-  spotify:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Zm4.586 14.424a.622.622 0 0 1-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 1 1-.277-1.215c3.809-.87 7.077-.496 9.712 1.115a.623.623 0 0 1 .207.857Zm1.223-2.722a.78.78 0 0 1-1.072.257c-2.688-1.652-6.786-2.131-9.966-1.166a.78.78 0 1 1-.454-1.494c3.63-1.102 8.147-.568 11.235 1.332a.78.78 0 0 1 .257 1.071Zm.105-2.835C14.692 9.03 9.375 8.854 6.297 9.798a.936.936 0 1 1-.545-1.79c3.533-1.073 9.402-.865 13.115 1.338a.936.936 0 0 1-.953 1.612Z"/></svg>`,
-  list:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
-  prev:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 9 6V6z"/></svg>`,
-  next:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l9 6-9 6z"/></svg>`,
-  play:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`,
-  pause:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>`,
-  shuffle:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h3c5 0 7 12 12 12h3"/><path d="m18 15 3 3-3 3"/><path d="M3 18h3c1.6 0 2.8-.7 3.8-1.8"/><path d="M14.2 7.8C15.2 6.7 16.5 6 18 6h3"/><path d="m18 3 3 3-3 3"/></svg>`,
-  repeat:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>`,
-  volume:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a9 9 0 0 1 0 12"/></svg>`,
-  mute:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m17 9 4 4m0-4-4 4"/></svg>`,
-  game:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4M15.5 13h.01M18 10.5h.01M17.32 8H6.68a4 4 0 0 0-3.978 4.393l.404 4.06A2.5 2.5 0 0 0 5.59 18.7c.605 0 1.183-.24 1.61-.668L9 16.25a2 2 0 0 1 1.414-.586h3.172a2 2 0 0 1 1.414.586l1.8 1.782a2.28 2.28 0 0 0 1.61.668 2.5 2.5 0 0 0 2.485-2.247l.404-4.06A4 4 0 0 0 17.32 8Z"/></svg>`,
-  music_activity:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
-  eye:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
-  stream:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="10" rx="2"/><path d="M22 8.5v7L16 13z"/></svg>`,
-  social:{
-    discord:`<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3a13.6 13.6 0 0 0-.617 1.25 18.27 18.27 0 0 0-5.536 0A13.6 13.6 0 0 0 9.115 3a19.74 19.74 0 0 0-4.435 1.372C1.933 8.52 1.203 12.573 1.568 16.57a19.9 19.9 0 0 0 5.993 3.03 14.6 14.6 0 0 0 1.283-2.084 12.9 12.9 0 0 1-2.02-.968c.17-.123.336-.252.497-.384a14.24 14.24 0 0 0 12.15 0c.163.132.328.26.497.384-.638.377-1.32.699-2.02.968.372.73.8 1.424 1.283 2.084a19.86 19.86 0 0 0 5.994-3.03c.43-4.63-.734-8.647-3.908-12.201ZM8.02 14.243c-1.183 0-2.157-1.084-2.157-2.418 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.947 2.418-2.157 2.418Zm7.96 0c-1.183 0-2.157-1.084-2.157-2.418 0-1.333.955-2.418 2.157-2.418 1.21 0 2.175 1.094 2.157 2.418 0 1.334-.938 2.418-2.157 2.418Z"/></svg>`,
-    github:`<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.014c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.238-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.622.069-.61.069-.61 1.004.071 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.833.091-.647.35-1.089.636-1.339-2.221-.253-4.556-1.113-4.556-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.269 2.75 1.026A9.6 9.6 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.026 2.747-1.026.546 1.378.203 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.31.679.921.679 1.856 0 1.339-.012 2.419-.012 2.749 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.014C22 6.484 17.522 2 12 2Z"/></svg>`,
-    youtube:`<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.02 3.02 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.02 3.02 0 0 0 .502 6.186 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .502 5.814 3.02 3.02 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.02 3.02 0 0 0 2.122-2.136A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.502-5.814ZM9.545 15.568V8.432L15.818 12l-6.273 3.568Z"/></svg>`,
-    x:`<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231ZM17.083 19.77h1.833L7.084 4.126H5.117Z"/></svg>`,
-    roblox:`<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="m6.21 2.5 13.29 4.64-4.71 14.36-13.29-4.64L6.21 2.5Zm1.9 6.21-1.36 4.16 4.05 1.42 1.36-4.16-4.05-1.42Z"/></svg>`
+/* ========================= HẾT PHẦN CONFIG ============================= */
+
+
+const ICONS = {
+  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
+  arrow: `<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M7 7h10v10"/></svg>`,
+  chevron: `<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
+  pin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
+  cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 12.5 4 4 0 0 0 6 20h11.5"/></svg>`,
+  sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`,
+  rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 16a4.5 4.5 0 1 0-1.41-8.775A6 6 0 0 0 5 9.5 4 4 0 0 0 6 17.5h11.5"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>`,
+  spotify: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Zm4.586 14.424a.622.622 0 0 1-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 1 1-.277-1.215c3.809-.87 7.077-.496 9.712 1.115a.623.623 0 0 1 .207.857Zm1.223-2.722a.78.78 0 0 1-1.072.257c-2.688-1.652-6.786-2.131-9.966-1.166a.78.78 0 1 1-.454-1.494c3.63-1.102 8.147-.568 11.235 1.332a.78.78 0 0 1 .257 1.071Zm.105-2.835C14.692 9.03 9.375 8.854 6.297 9.798a.936.936 0 1 1-.545-1.79c3.533-1.073 9.402-.865 13.115 1.338a.936.936 0 0 1-.953 1.612Z"/></svg>`,
+  list: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
+  prev: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 9 6V6z"/></svg>`,
+  next: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l9 6-9 6z"/></svg>`,
+  play: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`,
+  pause: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>`,
+  shuffle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h3c5 0 7 12 12 12h3"/><path d="m18 15 3 3-3 3"/><path d="M3 18h3c1.6 0 2.8-.7 3.8-1.8"/><path d="M14.2 7.8C15.2 6.7 16.5 6 18 6h3"/><path d="m18 3 3 3-3 3"/></svg>`,
+  repeat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>`,
+  volume: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a9 9 0 0 1 0 12"/></svg>`,
+  mute: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m17 9 4 4m0-4-4 4"/></svg>`,
+  game: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4M15.5 13h.01M18 10.5h.01M17.32 8H6.68a4 4 0 0 0-3.978 4.393l.404 4.06A2.5 2.5 0 0 0 5.59 18.7c.605 0 1.183-.24 1.61-.668L9 16.25a2 2 0 0 1 1.414-.586h3.172a2 2 0 0 1 1.414.586l1.8 1.782a2.28 2.28 0 0 0 1.61.668 2.5 2.5 0 0 0 2.485-2.247l.404-4.06A4 4 0 0 0 17.32 8Z"/></svg>`,
+  music_activity: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+  eye: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  stream: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="10" rx="2"/><path d="M22 8.5v7L16 13z"/></svg>`,
+  social: {
+    discord: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3a13.6 13.6 0 0 0-.617 1.25 18.27 18.27 0 0 0-5.536 0A13.6 13.6 0 0 0 9.115 3a19.74 19.74 0 0 0-4.435 1.372C1.933 8.52 1.203 12.573 1.568 16.57a19.9 19.9 0 0 0 5.993 3.03 14.6 14.6 0 0 0 1.283-2.084 12.9 12.9 0 0 1-2.02-.968c.17-.123.336-.252.497-.384a14.24 14.24 0 0 0 12.15 0c.163.132.328.26.497.384-.638.377-1.32.699-2.02.968.372.73.8 1.424 1.283 2.084a19.86 19.86 0 0 0 5.994-3.03c.43-4.63-.734-8.647-3.908-12.201ZM8.02 14.243c-1.183 0-2.157-1.084-2.157-2.418 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.947 2.418-2.157 2.418Zm7.96 0c-1.183 0-2.157-1.084-2.157-2.418 0-1.333.955-2.418 2.157-2.418 1.21 0 2.175 1.094 2.157 2.418 0 1.334-.938 2.418-2.157 2.418Z"/></svg>`,
+    github: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.014c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.238-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.622.069-.61.069-.61 1.004.071 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.833.091-.647.35-1.089.636-1.339-2.221-.253-4.556-1.113-4.556-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.269 2.75 1.026A9.6 9.6 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.026 2.747-1.026.546 1.378.203 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.31.679.921.679 1.856 0 1.339-.012 2.419-.012 2.749 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.014C22 6.484 17.522 2 12 2Z"/></svg>`,
+    youtube: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.02 3.02 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.02 3.02 0 0 0 .502 6.186 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .502 5.814 3.02 3.02 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.02 3.02 0 0 0 2.122-2.136A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.502-5.814ZM9.545 15.568V8.432L15.818 12l-6.273 3.568Z"/></svg>`,
+    x: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231ZM17.083 19.77h1.833L7.084 4.126H5.117Z"/></svg>`,
+    roblox: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m6.21 2.5 13.29 4.64-4.71 14.36-13.29-4.64L6.21 2.5Zm1.9 6.21-1.36 4.16 4.05 1.42 1.36-4.16-4.05-1.42Z"/></svg>`,
   }
 };
-const $=s=>document.querySelector(s);const fmtTime=s=>{if(!isFinite(s)||s<0)s=0;return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`};
-function parseTrackTitle(raw){const idx=raw.indexOf(' - ');if(idx===-1)return{songTitle:raw,artist:''};return{songTitle:raw.slice(0,idx),artist:raw.slice(idx+3)}}
-function renderNav(){const{nav,clock}=BIO_CONFIG;const navEl=$('#nav');navEl.innerHTML=nav.map(i=>`<a href="${i.href}" class="${i.active?'active':''}">${i.label}</a>`).join('');if(clock.enabled){const pill=document.createElement('div');pill.className='clock-pill';pill.innerHTML=`${ICONS.clock}<span id="clock">--:--</span>`;navEl.appendChild(pill);const update=()=>{const now=new Date();let h=now.getHours();const m=String(now.getMinutes()).padStart(2,'0');if(!clock.format24h)h=((h+11)%12)+1;$('#clock').textContent=`${String(h).padStart(2,'0')}:${m}`};update();setInterval(update,30000)}}
-function renderProfile(){const{profile}=BIO_CONFIG;$('#status').innerHTML=`<span class="dot"></span><span>${profile.status}</span>`;const avatarStyle=profile.avatar.image?`style="background-image:url('${profile.avatar.image}')"`:'';const avatarContent=profile.avatar.image?'':profile.avatar.fallbackText;$('#identity').innerHTML=`<div class="avatar-wrap"><div class="avatar" ${avatarStyle}>${avatarContent}</div><div class="avatar-deco" id="avatarDeco"></div></div><div class="id-text"><h1>${profile.name}</h1><div class="handle">${profile.handle}</div><div class="activity-wrap"><div class="activity-line" id="discordActivity"></div><div class="activity-detail" id="activityDetail"></div></div></div>`;$('#bioText').textContent=profile.bio;$('#tags').innerHTML=profile.tags.map(t=>`<span class="tag">${t}</span>`).join('')}
-function renderSocials(){const{socials}=BIO_CONFIG;$('#links').innerHTML=socials.map(s=>{const icon=ICONS.social[s.key]||'';if(s.url)return`<a class="link-card" href="${s.url}" rel="noopener" data-social="${s.key}"><div class="top">${icon}${ICONS.arrow}</div><span class="label">${s.name}</span></a>`;return`<button class="link-card" type="button" data-social="${s.key}" aria-label="${s.name}"><span class="top">${icon}${ICONS.arrow}</span><span class="label">${s.name}</span></button>`}).join('');$('#links').querySelectorAll('.link-card[data-social]').forEach(el=>el.addEventListener('click',e=>{const item=BIO_CONFIG.socials.find(x=>x.key===el.dataset.social);if(!item?.url)e.preventDefault()}))}
-function renderFooter(){$('#footer').textContent=BIO_CONFIG.footer.text}
-const Player={
- tracks:BIO_CONFIG.music.tracks.map(t=>({...parseTrackTitle(t.title),cover:t.cover||null,music:t.music})),index:Math.max(0,Math.min(BIO_CONFIG.music.startIndex||0,BIO_CONFIG.music.tracks.length-1)),playing:false,audio:null,durations:{},listOpen:false,shuffle:false,repeat:'all',volume:.86,lastVolume:.86,
- currentTrack(){return this.tracks[this.index]},
- mount(){const el=$('#player');el.innerHTML=`<audio id="pAudio" preload="metadata"></audio><div class="player-top"><div class="player-art-wrap"><div class="player-art" id="pArt"></div></div><div class="player-info"><div class="player-listening"><span class="dot"></span><span id="pStatusText">Ready to play</span><span class="sep">•</span><span class="count" id="pTrackCount">1 / 1</span></div><div class="player-title" id="pTitle"></div><div class="player-artist" id="pArtist"></div></div><div class="player-actions"><button class="icon-btn" id="pListBtn" aria-label="Mở playlist" title="Playlist">${ICONS.list}</button></div></div><div class="progress-row"><span id="pElapsed">0:00</span><div class="progress-track" id="pTrack" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tiến trình bài hát"><div class="progress-fill" id="pFill"><span class="progress-thumb"></span></div></div><span id="pDuration">0:00</span></div><div class="player-bottom"><div class="player-controls"><button class="control-btn" id="pShuffle" aria-label="Shuffle" title="Shuffle">${ICONS.shuffle}</button><button id="pPrev" aria-label="Previous" title="Previous">${ICONS.prev}</button><button class="play-btn" id="pPlay" aria-label="Play/Pause" title="Play / Pause">${ICONS.play}</button><button id="pNext" aria-label="Next" title="Next">${ICONS.next}</button><button class="control-btn active" id="pRepeat" aria-label="Repeat" title="Repeat all">${ICONS.repeat}</button></div><div class="volume-wrap"><button class="icon-btn volume-btn" id="pMute" aria-label="Mute" title="Mute">${ICONS.volume}</button><input class="volume-range" id="pVolume" type="range" min="0" max="1" step="0.01" value="${this.volume}" aria-label="Âm lượng" style="--volume:${this.volume}"></div></div><div class="playlist-panel" id="pList" aria-label="Playlist"></div>`;this.audio=$('#pAudio');this.audio.volume=this.volume;this.audio.addEventListener('loadedmetadata',()=>{this.durations[this.index]=this.audio.duration;$('#pDuration').textContent=fmtTime(this.audio.duration);this.renderList()});this.audio.addEventListener('timeupdate',()=>{$('#pElapsed').textContent=fmtTime(this.audio.currentTime);this.updateFill()});this.audio.addEventListener('play',()=>this.setPlayingState(true));this.audio.addEventListener('pause',()=>this.setPlayingState(false));this.audio.addEventListener('ended',()=>{if(this.repeat==='one'){this.audio.currentTime=0;this.play();return}if(this.shuffle&&this.tracks.length>1){this.next(true);return}if(this.index<this.tracks.length-1||this.repeat==='all'){this.next(true)}else{this.pause();this.audio.currentTime=0;this.updateFill()}});this.audio.addEventListener('error',()=>{const status=$('#pStatusText');if(status)status.textContent='Unable to load track';$('#player').classList.remove('is-playing')});$('#pPrev').addEventListener('click',()=>this.prev());$('#pNext').addEventListener('click',()=>this.next());$('#pPlay').addEventListener('click',()=>this.toggle());$('#pShuffle').addEventListener('click',()=>this.toggleShuffle());$('#pRepeat').addEventListener('click',()=>this.cycleRepeat());$('#pTrack').addEventListener('click',e=>this.seek(e));$('#pTrack').addEventListener('keydown',e=>this.seekKeyboard(e));$('#pListBtn').setAttribute('aria-expanded','false');$('#pListBtn').addEventListener('click',()=>this.toggleList());document.addEventListener('keydown',e=>{if(e.key==='Escape'&&this.listOpen)this.toggleList(false)});$('#pMute').addEventListener('click',()=>this.toggleMute());$('#pVolume').addEventListener('input',e=>this.setVolume(Number(e.target.value)));this.loadTrack(this.index,false);this.renderList();this.preloadDurations();this.syncControlUI()},
- setPlayingState(isPlaying){this.playing=isPlaying;$('#player')?.classList.toggle('is-playing',isPlaying);$('#pPlay').innerHTML=isPlaying?ICONS.pause:ICONS.play;$('#pPlay').setAttribute('aria-label',isPlaying?'Pause':'Play');const status=$('#pStatusText');if(status)status.textContent=isPlaying?'Now playing':'Paused';this.renderList()},
- loadTrack(i,autoplay){if(!this.tracks.length)return;this.index=(i+this.tracks.length)%this.tracks.length;const t=this.currentTrack();if(!t)return;this.audio.pause();delete this.audio.dataset.corsRetried;this.audio.src=t.music||'';this.audio.load();$('#pTitle').textContent=t.songTitle;$('#pArtist').textContent=t.artist||'Unknown artist';$('#pTrackCount').textContent=`${this.index+1} / ${this.tracks.length}`;$('#pArt').style.backgroundImage=t.cover?`url('${t.cover}')`:'';$('#pElapsed').textContent='0:00';$('#pDuration').textContent=this.durations[this.index]?fmtTime(this.durations[this.index]):'0:00';$('#pFill').style.width='0%';if(autoplay)this.play();this.renderList()},
- renderList(){const list=$('#pList');if(!list)return;list.innerHTML=`<div class="playlist-head"><strong>Playlist</strong><span>${this.tracks.length} ${this.tracks.length===1?'track':'tracks'}</span></div>${this.tracks.map((t,i)=>`<div class="playlist-item ${i===this.index?'active':''}" data-index="${i}"><div class="playlist-thumb" style="${t.cover?`background-image:url('${t.cover}')`:''}"></div><div class="playlist-meta"><span class="pi-name"><b>${t.songTitle}</b></span><span class="pi-artist">${t.artist||'Unknown artist'}</span></div><span class="pi-dur">${this.durations[i]?fmtTime(this.durations[i]):'--:--'}</span></div>`).join('')}`;list.querySelectorAll('.playlist-item').forEach(item=>item.addEventListener('click',()=>{const i=Number(item.dataset.index);if(i===this.index){this.toggle();return}this.loadTrack(i,true)}))},
- toggleList(force=null){this.listOpen=force===null?!this.listOpen:!!force;$('#pList').classList.toggle('open',this.listOpen);$('#pListBtn').classList.toggle('list-open',this.listOpen);$('#pListBtn').setAttribute('aria-expanded',String(this.listOpen))},
- updateFill(){const dur=this.audio.duration||this.durations[this.index]||0;const pct=dur?Math.min(100,this.audio.currentTime/dur*100):0;$('#pFill').style.width=pct+'%';$('#pTrack').setAttribute('aria-valuenow',Math.round(pct))},
- toggle(){this.playing?this.pause():this.play()},
- play(){if(!this.audio||!this.audio.src)return;const p=this.audio.play();if(p&&p.catch)p.catch(()=>{const status=$('#pStatusText');if(status)status.textContent='Click play to start'})},
- pause(){if(this.audio)this.audio.pause()},
- next(forcePlay=this.playing){if(!this.tracks.length)return;let nextIndex;if(this.shuffle&&this.tracks.length>1){do{nextIndex=Math.floor(Math.random()*this.tracks.length)}while(nextIndex===this.index)}else nextIndex=(this.index+1)%this.tracks.length;this.loadTrack(nextIndex,forcePlay)},
- prev(){if(!this.tracks.length)return;if(this.audio&&this.audio.currentTime>3){this.audio.currentTime=0;this.updateFill();return}this.loadTrack((this.index-1+this.tracks.length)%this.tracks.length,this.playing)},
- seek(e){const track=$('#pTrack'),rect=track.getBoundingClientRect(),clientX=e.clientX??(e.touches&&e.touches[0]?.clientX);if(clientX==null)return;const pct=Math.min(1,Math.max(0,(clientX-rect.left)/rect.width)),dur=this.audio.duration||this.durations[this.index]||0;if(dur)this.audio.currentTime=pct*dur;this.updateFill()},
- seekKeyboard(e){const dur=this.audio.duration||this.durations[this.index]||0;if(!dur)return;const step=Math.max(5,dur/100);if(e.key==='ArrowRight'){e.preventDefault();this.audio.currentTime=Math.min(dur,this.audio.currentTime+step)}if(e.key==='ArrowLeft'){e.preventDefault();this.audio.currentTime=Math.max(0,this.audio.currentTime-step)}if(e.key==='Home'){e.preventDefault();this.audio.currentTime=0}if(e.key==='End'){e.preventDefault();this.audio.currentTime=dur}this.updateFill()},
- toggleShuffle(){this.shuffle=!this.shuffle;$('#pShuffle').classList.toggle('active',this.shuffle);$('#pShuffle').title=this.shuffle?'Shuffle on':'Shuffle off'},
- cycleRepeat(){this.repeat=this.repeat==='all'?'one':this.repeat==='one'?'off':'all';const btn=$('#pRepeat');btn.classList.toggle('active',this.repeat!=='off');btn.title=this.repeat==='one'?'Repeat one':this.repeat==='all'?'Repeat all':'Repeat off';btn.setAttribute('aria-label',btn.title);btn.dataset.mode=this.repeat},
- setVolume(value){this.volume=Math.min(1,Math.max(0,value));this.audio.volume=this.volume;if(this.volume>0)this.lastVolume=this.volume;this.updateVolumeUI()},
- toggleMute(){if(this.audio.volume>0){this.lastVolume=this.audio.volume;this.audio.volume=0;this.volume=0}else{this.volume=this.lastVolume||.8;this.audio.volume=this.volume}this.updateVolumeUI()},
- updateVolumeUI(){const range=$('#pVolume');if(range){range.value=this.audio.volume;range.style.setProperty('--volume',this.audio.volume)}const btn=$('#pMute');if(!btn)return;btn.innerHTML=this.audio.volume===0?ICONS.mute:ICONS.volume;btn.setAttribute('aria-label',this.audio.volume===0?'Unmute':'Mute');btn.title=this.audio.volume===0?'Unmute':'Mute'},
- syncControlUI(){$('#pShuffle').classList.toggle('active',this.shuffle);$('#pRepeat').classList.toggle('active',this.repeat!=='off');$('#pRepeat').dataset.mode=this.repeat;this.updateVolumeUI()},
- preloadDurations(){this.tracks.forEach((t,i)=>{if(i===this.index||this.durations[i]||!t.music)return;const probe=new Audio();probe.preload='metadata';probe.src=t.music;probe.addEventListener('loadedmetadata',()=>{this.durations[i]=probe.duration;this.renderList()})})}
+
+const $ = (sel) => document.querySelector(sel);
+const fmtTime = (s) => {
+  if (!isFinite(s) || s < 0) s = 0;
+  return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 };
-const Weather={
- codeMap(code){if(code===0)return{icon:ICONS.sun,label:'Trời quang'};if([1,2].includes(code))return{icon:ICONS.sun,label:'Ít mây'};if(code===3)return{icon:ICONS.cloud,label:'Nhiều mây'};if([45,48].includes(code))return{icon:ICONS.cloud,label:'Sương mù'};if([51,53,55,56,57].includes(code))return{icon:ICONS.rain,label:'Mưa phùn'};if([61,63,65,66,67,80,81,82].includes(code))return{icon:ICONS.rain,label:'Mưa'};if([71,73,75,77,85,86].includes(code))return{icon:ICONS.cloud,label:'Có tuyết'};if([95,96,99].includes(code))return{icon:ICONS.rain,label:'Dông'};return{icon:ICONS.cloud,label:'Nhiều mây'}},
- renderLoading(){$('#weather').innerHTML=`<div class="weather-pin">${ICONS.pin}</div><div><div class="weather-loc">Đang xác định vị trí...</div><div class="weather-sub">Đang tải thời tiết</div></div>`},
- renderData(locationName,tempC,code){const w=this.codeMap(code);$('#weather').innerHTML=`<div class="weather-pin">${ICONS.pin}</div><div><div class="weather-loc">${locationName}</div><div class="weather-sub">${w.label}</div></div><div class="weather-temp">${w.icon}${Math.round(tempC)}°C</div>`},
- renderError(){$('#weather').innerHTML=`<div class="weather-pin">${ICONS.pin}</div><div><div class="weather-loc">Không lấy được thời tiết</div><div class="weather-sub">Vui lòng thử lại sau</div></div>`},
- async fetchWeather(lat,lon){const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`);if(!res.ok)throw new Error('weather fetch failed');const data=await res.json();return{tempC:data.current.temperature_2m,code:data.current.weather_code}},
- lastLat:null,lastLon:null,lastName:null,
- async loadFor(lat,lon,knownName){this.lastLat=lat;this.lastLon=lon;try{const weatherData=await this.fetchWeather(lat,lon);this.lastName=knownName||'Vị trí của bạn';this.renderData(this.lastName,weatherData.tempC,weatherData.code)}catch(e){this.renderError()}},
- async refresh(){if(this.lastLat==null||this.lastLon==null)return;try{const weatherData=await this.fetchWeather(this.lastLat,this.lastLon);this.renderData(this.lastName,weatherData.tempC,weatherData.code)}catch(e){}},
- init(){this.renderLoading();const{fallback}=BIO_CONFIG.weather;this.loadFor(fallback.lat,fallback.lon,fallback.location);setInterval(()=>this.refresh(),10*60*1000)}
+
+function parseTrackTitle(raw){
+  const idx = raw.indexOf(' - ');
+  if (idx === -1) return { songTitle: raw, artist: '' };
+  return { songTitle: raw.slice(0, idx), artist: raw.slice(idx + 3) };
+}
+
+function renderNav(){
+  const { nav, clock } = BIO_CONFIG;
+  const navEl = $('#nav');
+  navEl.innerHTML = nav.map(item =>
+    `<a href="${item.href}" class="${item.active ? 'active' : ''}">${item.label}</a>`
+  ).join('');
+
+  if (clock.enabled){
+    const pill = document.createElement('div');
+    pill.className = 'clock-pill';
+    pill.innerHTML = `${ICONS.clock}<span id="clock">--:--</span>`;
+    navEl.appendChild(pill);
+    const updateClock = () => {
+      const now = new Date();
+      let h = now.getHours();
+      const m = String(now.getMinutes()).padStart(2,'0');
+      if (!clock.format24h){ h = ((h+11)%12)+1; }
+      $('#clock').textContent = `${String(h).padStart(2,'0')}:${m}`;
+    };
+    updateClock();
+    setInterval(updateClock, 30000);
+  }
+}
+
+function renderProfile(){
+  const { profile } = BIO_CONFIG;
+
+  $('#status').innerHTML = `<span class="dot"></span><span>${profile.status}</span>`;
+
+  const avatarStyle = profile.avatar.image
+    ? `style="background-image:url('${profile.avatar.image}')"`
+    : '';
+  const avatarContent = profile.avatar.image ? '' : profile.avatar.fallbackText;
+
+  $('#identity').innerHTML = `
+    <div class="avatar-wrap">
+      <div class="avatar" ${avatarStyle}>${avatarContent}</div>
+      <div class="avatar-deco" id="avatarDeco"></div>
+    </div>
+    <div class="id-text">
+      <h1>${profile.name}</h1>
+      <div class="handle">${profile.handle}</div>
+      <div class="activity-wrap">
+        <div class="activity-line" id="discordActivity"></div>
+        <div class="activity-detail" id="activityDetail"></div>
+      </div>
+    </div>
+  `;
+
+  $('#bioText').textContent = profile.bio;
+  $('#tags').innerHTML = profile.tags.map(t => `<span class="tag">${t}</span>`).join('');
+}
+
+function renderSocials(){
+  const { socials } = BIO_CONFIG;
+  $('#links').innerHTML = socials.map(s => {
+    const icon = ICONS.social[s.key] || '';
+    const arrow = ICONS.arrow;
+    if (s.url) {
+      return `
+        <a class="link-card" href="${s.url}" rel="noopener" data-social="${s.key}">
+          <div class="top">${icon}${arrow}</div>
+          <span class="label">${s.name}</span>
+        </a>`;
+    }
+    return `
+      <button class="link-card" type="button" data-social="${s.key}" aria-label="${s.name}">
+        <span class="top">${icon}${arrow}</span>
+        <span class="label">${s.name}</span>
+      </button>`;
+  }).join('');
+
+  $('#links').querySelectorAll('.link-card[data-social]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const item = BIO_CONFIG.socials.find(x => x.key === el.dataset.social);
+      if (!item?.url) e.preventDefault();
+    });
+  });
+}
+
+function renderFooter(){
+  $('#footer').textContent = BIO_CONFIG.footer.text;
+}
+
+const Player = {
+  tracks: BIO_CONFIG.music.tracks.map(t => ({
+    ...parseTrackTitle(t.title),
+    cover: t.cover || null,
+    music: t.music
+  })),
+  index: Math.max(0, Math.min(BIO_CONFIG.music.startIndex || 0, BIO_CONFIG.music.tracks.length - 1)),
+  playing: false,
+  audio: null,
+  durations: {},
+  listOpen: false,
+  shuffle: false,
+  repeat: 'all',
+  volume: 0.86,
+  lastVolume: 0.86,
+  audioCtx: null,
+  analyser: null,
+  analyserData: null,
+  vizFrame: 0,
+
+  currentTrack(){ return this.tracks[this.index]; },
+
+  mount(){
+    const el = $('#player');
+    el.innerHTML = `
+      <audio id="pAudio" preload="metadata"></audio>
+
+      <div class="player-top">
+        <div class="player-art-wrap">
+          <div class="player-art" id="pArt"></div>
+        </div>
+
+        <div class="player-info">
+          <div class="player-listening"><span class="dot"></span><span id="pStatusText">Ready to play</span></div>
+          <div class="player-title" id="pTitle"></div>
+          <div class="player-artist" id="pArtist"></div>
+        </div>
+
+        <div class="player-actions">
+          <button class="icon-btn" id="pListBtn" aria-label="Danh sách bài hát" title="Playlist">${ICONS.list}</button>
+        </div>
+      </div>
+
+      <div class="progress-row">
+        <span id="pElapsed">0:00</span>
+        <div class="progress-track" id="pTrack" role="slider" tabindex="0" aria-label="Tiến trình bài hát">
+          <div class="progress-fill" id="pFill"><span class="progress-thumb"></span></div>
+        </div>
+        <span id="pDuration">0:00</span>
+      </div>
+
+      <div class="player-bottom">
+        <div class="player-controls">
+          <button class="control-btn" id="pShuffle" aria-label="Shuffle" title="Shuffle">${ICONS.shuffle}</button>
+          <button id="pPrev" aria-label="Previous" title="Previous">${ICONS.prev}</button>
+          <button class="play-btn" id="pPlay" aria-label="Play/Pause" title="Play / Pause">${ICONS.play}</button>
+          <button id="pNext" aria-label="Next" title="Next">${ICONS.next}</button>
+          <button class="control-btn active" id="pRepeat" aria-label="Repeat" title="Repeat all">${ICONS.repeat}</button>
+        </div>
+
+        <div class="volume-wrap">
+          <button class="icon-btn volume-btn" id="pMute" aria-label="Mute" title="Mute">${ICONS.volume}</button>
+          <input class="volume-range" id="pVolume" type="range" min="0" max="1" step="0.01" value="${this.volume}" aria-label="Âm lượng">
+        </div>
+      </div>
+
+      <div class="playlist-panel" id="pList"></div>
+    `;
+
+    this.audio = $('#pAudio');
+    this.audio.volume = this.volume;
+    this.audio.crossOrigin = 'anonymous';
+    this.setupVisualizer();
+
+    this.audio.addEventListener('loadedmetadata', () => {
+      this.durations[this.index] = this.audio.duration;
+      $('#pDuration').textContent = fmtTime(this.audio.duration);
+      this.renderList();
+    });
+
+    this.audio.addEventListener('timeupdate', () => {
+      $('#pElapsed').textContent = fmtTime(this.audio.currentTime);
+      this.updateFill();
+    });
+
+    this.audio.addEventListener('play', () => this.setPlayingState(true));
+    this.audio.addEventListener('pause', () => this.setPlayingState(false));
+
+    this.audio.addEventListener('ended', () => {
+      if (this.repeat === 'one'){
+        this.audio.currentTime = 0;
+        this.play();
+        return;
+      }
+      if (this.shuffle && this.tracks.length > 1){
+        this.next(true);
+        return;
+      }
+      if (this.index < this.tracks.length - 1 || this.repeat === 'all'){
+        this.next(true);
+      } else {
+        this.pause();
+        this.audio.currentTime = 0;
+        this.updateFill();
+      }
+    });
+
+    this.audio.addEventListener('error', () => {
+      if (this.audio.crossOrigin && !this.audio.dataset.corsRetried){
+        this.audio.dataset.corsRetried = '1';
+        this.audio.removeAttribute('crossorigin');
+        this.audio.crossOrigin = null;
+        this.audio.load();
+        this.play();
+        return;
+      }
+      const status = $('#pStatusText');
+      if (status) status.textContent = 'Unable to load track';
+      $('#player').classList.remove('is-playing');
+    });
+
+    $('#pPrev').addEventListener('click', () => this.prev());
+    $('#pNext').addEventListener('click', () => this.next());
+    $('#pPlay').addEventListener('click', () => this.toggle());
+    $('#pShuffle').addEventListener('click', () => this.toggleShuffle());
+    $('#pRepeat').addEventListener('click', () => this.cycleRepeat());
+    $('#pTrack').addEventListener('click', (e) => this.seek(e));
+    $('#pTrack').addEventListener('keydown', (e) => this.seekKeyboard(e));
+    $('#pListBtn').addEventListener('click', () => this.toggleList());
+    $('#pMute').addEventListener('click', () => this.toggleMute());
+    $('#pVolume').addEventListener('input', (e) => this.setVolume(Number(e.target.value)));
+
+    this.loadTrack(this.index, false);
+    this.renderList();
+    this.preloadDurations();
+    this.syncControlUI();
+  },
+
+  setupVisualizer(){
+    if (this.audioCtx || !this.audio) return;
+    try{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      this.audioCtx = new AudioCtx();
+      this.analyser = this.audioCtx.createAnalyser();
+      this.analyser.fftSize = 128;
+      this.analyser.smoothingTimeConstant = 0.78;
+      this.analyserData = new Uint8Array(this.analyser.frequencyBinCount);
+
+      const source = this.audioCtx.createMediaElementSource(this.audio);
+      source.connect(this.analyser);
+      this.analyser.connect(this.audioCtx.destination);
+    }catch(err){
+      this.audioCtx = null;
+      this.analyser = null;
+      this.analyserData = null;
+    }
+  },
+
+  updatePlaylistVisualizer(){
+    if (!this.analyser || !this.analyserData || !this.playing){
+      this.stopPlaylistVisualizer(true);
+      return;
+    }
+
+    this.analyser.getByteFrequencyData(this.analyserData);
+
+    const item = document.querySelector(`.playlist-item[data-index="${this.index}"]`);
+    if (!item) return;
+
+    const bars = item.querySelectorAll('.playlist-playing i');
+    const n = bars.length;
+    const bins = this.analyserData.length;
+
+    for(let i = 0; i < n; i++){
+      const start = Math.floor((i / n) * bins * 0.55);
+      const end = Math.max(start + 1, Math.floor(((i + 1) / n) * bins * 0.55));
+      let sum = 0;
+      for(let j = start; j < end; j++) sum += this.analyserData[j];
+      const avg = sum / (end - start);
+
+      const level = Math.min(1, Math.pow(avg / 255, 0.72) * 1.18);
+      const height = 3 + Math.round(level * 11);
+
+      bars[i].style.height = `${height}px`;
+      bars[i].style.opacity = `${0.62 + level * 0.38}`;
+    }
+
+    this.vizFrame = requestAnimationFrame(() => this.updatePlaylistVisualizer());
+  },
+
+  startPlaylistVisualizer(){
+    if (this.vizFrame) cancelAnimationFrame(this.vizFrame);
+    this.updatePlaylistVisualizer();
+  },
+
+  stopPlaylistVisualizer(clear = false){
+    if (this.vizFrame){
+      cancelAnimationFrame(this.vizFrame);
+      this.vizFrame = 0;
+    }
+
+    const bars = document.querySelectorAll('.playlist-playing i');
+    bars.forEach(bar => {
+      bar.style.height = '3px';
+      if (clear) bar.style.opacity = '';
+    });
+  },
+
+  setPlayingState(isPlaying){
+    this.playing = isPlaying;
+    $('#player')?.classList.toggle('is-playing', isPlaying);
+    $('#pPlay').innerHTML = isPlaying ? ICONS.pause : ICONS.play;
+    $('#pPlay').setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+    const status = $('#pStatusText');
+    if (status) status.textContent = isPlaying ? 'Now playing' : 'Paused';
+    this.renderList();
+
+    if (isPlaying){
+      if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume().catch(()=>{});
+      this.startPlaylistVisualizer();
+    }else{
+      this.stopPlaylistVisualizer();
+    }
+  },
+
+  loadTrack(i, autoplay){
+    if (!this.tracks.length) return;
+    this.index = (i + this.tracks.length) % this.tracks.length;
+    const t = this.currentTrack();
+    if (!t) return;
+
+    this.audio.pause();
+    delete this.audio.dataset.corsRetried;
+    this.audio.crossOrigin = 'anonymous';
+    this.audio.src = t.music || '';
+    this.audio.load();
+
+    $('#pTitle').textContent = t.songTitle;
+    $('#pArtist').textContent = t.artist || 'Unknown artist';
+    $('#pArt').style.backgroundImage = t.cover ? `url('${t.cover}')` : '';
+    $('#pElapsed').textContent = '0:00';
+    $('#pDuration').textContent = this.durations[this.index] ? fmtTime(this.durations[this.index]) : '0:00';
+    $('#pFill').style.width = '0%';
+
+    if (autoplay) this.play();
+    this.renderList();
+  },
+
+  renderList(){
+    const list = $('#pList');
+    if (!list) return;
+
+    list.innerHTML = this.tracks.map((t, i) => `
+      <div class="playlist-item ${i === this.index ? 'active' : ''}" data-index="${i}">
+        <div class="playlist-thumb" style="${t.cover ? `background-image:url('${t.cover}')` : ''}"></div>
+        <div class="playlist-meta">
+          <span class="pi-name"><b>${t.songTitle}</b></span>
+          <span class="pi-artist">${t.artist || 'Unknown artist'}</span>
+        </div>
+        <div class="playlist-playing" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <span class="pi-dur">${this.durations[i] ? fmtTime(this.durations[i]) : '--:--'}</span>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.playlist-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const i = Number(item.dataset.index);
+        if (i === this.index){
+          this.toggle();
+          return;
+        }
+        this.loadTrack(i, true);
+      });
+    });
+  },
+
+  toggleList(){
+    this.listOpen = !this.listOpen;
+    $('#pList').classList.toggle('open', this.listOpen);
+    $('#pListBtn').classList.toggle('list-open', this.listOpen);
+  },
+
+  updateFill(){
+    const dur = this.audio.duration || this.durations[this.index] || 0;
+    const pct = dur ? Math.min(100, (this.audio.currentTime / dur) * 100) : 0;
+    $('#pFill').style.width = pct + '%';
+    $('#pTrack').setAttribute('aria-valuenow', Math.round(pct));
+  },
+
+  toggle(){ this.playing ? this.pause() : this.play(); },
+
+  play(){
+    if (!this.audio || !this.audio.src) return;
+    this.setupVisualizer();
+    if (this.audioCtx && this.audioCtx.state === 'suspended'){
+      this.audioCtx.resume().catch(()=>{});
+    }
+    const p = this.audio.play();
+    if (p && p.catch){
+      p.catch(() => {
+        const status = $('#pStatusText');
+        if (status) status.textContent = 'Click play to start';
+      });
+    }
+  },
+
+  pause(){ if (this.audio) this.audio.pause(); },
+
+  next(forcePlay = this.playing){
+    if (!this.tracks.length) return;
+    let nextIndex;
+    if (this.shuffle && this.tracks.length > 1){
+      do {
+        nextIndex = Math.floor(Math.random() * this.tracks.length);
+      } while (nextIndex === this.index);
+    } else {
+      nextIndex = (this.index + 1) % this.tracks.length;
+    }
+    this.loadTrack(nextIndex, forcePlay);
+  },
+
+  prev(){
+    if (!this.tracks.length) return;
+    if (this.audio && this.audio.currentTime > 3){
+      this.audio.currentTime = 0;
+      this.updateFill();
+      return;
+    }
+    this.loadTrack((this.index - 1 + this.tracks.length) % this.tracks.length, this.playing);
+  },
+
+  seek(e){
+    const track = $('#pTrack');
+    const rect = track.getBoundingClientRect();
+    const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX);
+    if (clientX == null) return;
+    const pct = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const dur = this.audio.duration || this.durations[this.index] || 0;
+    if (dur) this.audio.currentTime = pct * dur;
+    this.updateFill();
+  },
+
+  seekKeyboard(e){
+    const dur = this.audio.duration || this.durations[this.index] || 0;
+    if (!dur) return;
+    const step = Math.max(5, dur / 100);
+    if (e.key === 'ArrowRight'){ e.preventDefault(); this.audio.currentTime = Math.min(dur, this.audio.currentTime + step); }
+    if (e.key === 'ArrowLeft'){ e.preventDefault(); this.audio.currentTime = Math.max(0, this.audio.currentTime - step); }
+    if (e.key === 'Home'){ e.preventDefault(); this.audio.currentTime = 0; }
+    if (e.key === 'End'){ e.preventDefault(); this.audio.currentTime = dur; }
+    this.updateFill();
+  },
+
+  toggleShuffle(){
+    this.shuffle = !this.shuffle;
+    $('#pShuffle').classList.toggle('active', this.shuffle);
+    $('#pShuffle').title = this.shuffle ? 'Shuffle on' : 'Shuffle off';
+  },
+
+  cycleRepeat(){
+    this.repeat = this.repeat === 'all' ? 'one' : this.repeat === 'one' ? 'off' : 'all';
+    const btn = $('#pRepeat');
+    btn.classList.toggle('active', this.repeat !== 'off');
+    btn.title = this.repeat === 'one' ? 'Repeat one' : this.repeat === 'all' ? 'Repeat all' : 'Repeat off';
+    btn.setAttribute('aria-label', btn.title);
+    btn.dataset.mode = this.repeat;
+  },
+
+  setVolume(value){
+    this.volume = Math.min(1, Math.max(0, value));
+    this.audio.volume = this.volume;
+    if (this.volume > 0) this.lastVolume = this.volume;
+    this.updateVolumeUI();
+  },
+
+  toggleMute(){
+    if (this.audio.volume > 0){
+      this.lastVolume = this.audio.volume;
+      this.audio.volume = 0;
+      this.volume = 0;
+    } else {
+      this.volume = this.lastVolume || 0.8;
+      this.audio.volume = this.volume;
+    }
+    this.updateVolumeUI();
+  },
+
+  updateVolumeUI(){
+    const range = $('#pVolume');
+    if (range) range.value = this.audio.volume;
+    const btn = $('#pMute');
+    if (!btn) return;
+    btn.innerHTML = this.audio.volume === 0 ? ICONS.mute : ICONS.volume;
+    btn.setAttribute('aria-label', this.audio.volume === 0 ? 'Unmute' : 'Mute');
+    btn.title = this.audio.volume === 0 ? 'Unmute' : 'Mute';
+  },
+
+  syncControlUI(){
+    $('#pShuffle').classList.toggle('active', this.shuffle);
+    $('#pRepeat').classList.toggle('active', this.repeat !== 'off');
+    $('#pRepeat').dataset.mode = this.repeat;
+    this.updateVolumeUI();
+  },
+
+  preloadDurations(){
+    this.tracks.forEach((t, i) => {
+      if (i === this.index || this.durations[i] || !t.music) return;
+      const probe = new Audio();
+      probe.preload = 'metadata';
+      probe.src = t.music;
+      probe.addEventListener('loadedmetadata', () => {
+        this.durations[i] = probe.duration;
+        this.renderList();
+      });
+      probe.addEventListener('error', () => {});
+    });
+  }
 };
-const Discord={
- colors:{online:{rgb:'35,165,90',label:'Online'},idle:{rgb:'240,178,50',label:'Idle'},dnd:{rgb:'242,63,67',label:'Do Not Disturb'},offline:{rgb:'128,132,142',label:'Offline'}},
- activityMeta:{0:{verb:'Đang chơi',icon:null},1:{verb:'Đang stream',icon:null},2:{verb:'Đang nghe',icon:null},3:{verb:'Đang xem',icon:null},5:{verb:'Đang thi đấu',icon:null}},detailOpen:false,currentActivity:null,
- avatarUrl(user){if(!user)return null;if(!user.avatar){const fallbackIndex=(Number(user.discriminator)||0)%5;return`https://cdn.discordapp.com/embed/avatars/${fallbackIndex}.png`}const ext=user.avatar.startsWith('a_')?'gif':'png';return`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=128`},
- decorationUrl(user){const deco=user&&user.avatar_decoration_data;if(!deco||!deco.asset)return null;return`https://cdn.discordapp.com/avatar-decoration-presets/${deco.asset}.png?size=160`},
- activityImageUrl(activity){const assets=activity&&activity.assets;if(!assets||!assets.large_image)return null;const img=assets.large_image;if(img.startsWith('mp:'))return`https://media.discordapp.net/${img.replace('mp:','')}`;if(activity.application_id)return`https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;return null},
- timeSince(startMs){const diff=Math.max(0,Date.now()-startMs),mins=Math.floor(diff/60000);if(mins<1)return'vài giây';if(mins<60)return`${mins} phút`;const hrs=Math.floor(mins/60);if(hrs<24)return`${hrs} giờ ${mins%60} phút`;return`${Math.floor(hrs/24)} ngày`},
- applyAvatar(user){const url=this.avatarUrl(user),el=document.querySelector('.avatar');if(el&&url){el.style.backgroundImage=`url('${url}')`;el.textContent=''}},
- applyDecoration(user){const el=document.querySelector('#avatarDeco');if(!el)return;const url=this.decorationUrl(user);if(url){el.style.backgroundImage=`url('${url}')`;el.classList.add('show')}else{el.style.backgroundImage='';el.classList.remove('show')}},
- applyIdentity(user){if(!user)return;const nameEl=document.querySelector('.id-text h1'),handleEl=document.querySelector('.id-text .handle');if(nameEl)nameEl.textContent=user.global_name||user.username;if(handleEl)handleEl.textContent='@'+user.username},
- applyActivity(activities){const badgeEl=document.querySelector('#discordActivity');if(!badgeEl)return;const list=activities||[],custom=list.find(a=>a.type===4),real=list.find(a=>a.type===0)||list.find(a=>a.type!==4);this.currentActivity=real||null;let badgeHtml='';if(real){const meta=this.activityMeta[real.type]||{verb:'',icon:ICONS.game};const imgUrl=this.activityImageUrl(real);const iconHtml=imgUrl?`<img src="${imgUrl}" alt="">`:(meta.icon||ICONS.game);const detailParts=[real.details,real.state].filter(Boolean).join(' • ');badgeHtml=`${iconHtml}<span><b>${meta.verb} ${real.name}</b>${detailParts?' — '+detailParts:''}</span>${ICONS.chevron}`}else if(custom&&(custom.state||custom.emoji)){const emoji=custom.emoji&&custom.emoji.name?custom.emoji.name+' ':'';badgeHtml=`<span>${emoji}${custom.state||''}</span>`}if(badgeHtml){badgeEl.innerHTML=badgeHtml;badgeEl.style.display='flex';badgeEl.classList.toggle('clickable',!!real)}else{badgeEl.innerHTML='';badgeEl.style.display='none'}if(!real)this.setDetailOpen(false);else if(this.detailOpen)this.renderDetail();this.bindActivityClick()},
- renderDetail(){const detailEl=document.querySelector('#activityDetail');if(!detailEl)return;const a=this.currentActivity;if(!a){detailEl.innerHTML='';return}const meta=this.activityMeta[a.type]||{verb:''},imgUrl=this.activityImageUrl(a),timeText=a.timestamps&&a.timestamps.start?this.timeSince(a.timestamps.start):'';detailEl.innerHTML=`<div class="activity-detail-inner">${imgUrl?`<img src="${imgUrl}" alt="">`:''}<div class="activity-detail-text"><div class="activity-detail-name">${a.name}</div>${a.details?`<div class="activity-detail-line">${a.details}</div>`:''}${a.state?`<div class="activity-detail-line">${a.state}</div>`:''}${timeText?`<div class="activity-detail-time">${meta.verb} được ${timeText}</div>`:''}</div></div>`},
- setDetailOpen(open){this.detailOpen=open;const badgeEl=document.querySelector('#discordActivity'),detailEl=document.querySelector('#activityDetail');if(badgeEl)badgeEl.classList.toggle('open',open);if(detailEl)detailEl.classList.toggle('open',open);if(open)this.renderDetail()},
- bindActivityClick(){const badgeEl=document.querySelector('#discordActivity');if(!badgeEl||badgeEl.dataset.bound)return;badgeEl.dataset.bound='1';badgeEl.addEventListener('click',()=>{if(!this.currentActivity)return;this.setDetailOpen(!this.detailOpen)})},
- applyStatus(status){const info=this.colors[status]||this.colors.offline,dot=document.querySelector('#status .dot'),labelEl=document.querySelector('#status span:last-child'),avatarEl=document.querySelector('.avatar');if(dot)dot.style.setProperty('--status-rgb',info.rgb);if(labelEl)labelEl.textContent=info.label;if(avatarEl)avatarEl.style.setProperty('--status-rgb',info.rgb)},
- async fetchPresence(){const cfg=BIO_CONFIG.discord;if(!cfg.userId)return;try{const res=await fetch(`https://api.lanyard.rest/v1/users/${cfg.userId}`),json=await res.json();if(!json.success)throw new Error('Lanyard error');const d=json.data;if(cfg.useAvatar)this.applyAvatar(d.discord_user);if(cfg.useAvatarDecoration)this.applyDecoration(d.discord_user);if(cfg.useIdentity)this.applyIdentity(d.discord_user);if(cfg.useActivity)this.applyActivity(d.activities);if(cfg.useStatus)this.applyStatus(d.discord_status)}catch(e){console.warn('[Discord] Không lấy được trạng thái:',e.message)}},
- init(){this.activityMeta[0].icon=ICONS.game;this.activityMeta[1].icon=ICONS.stream;this.activityMeta[2].icon=ICONS.music_activity;this.activityMeta[3].icon=ICONS.eye;this.activityMeta[5].icon=ICONS.game;const cfg=BIO_CONFIG.discord;if(!cfg.enabled||!cfg.userId)return;this.fetchPresence();setInterval(()=>this.fetchPresence(),cfg.pollIntervalMs||20000)}
+
+const Weather = {
+
+  codeMap(code){
+    if (code === 0) return { icon: ICONS.sun, label: 'Trời quang' };
+    if ([1,2].includes(code)) return { icon: ICONS.sun, label: 'Ít mây' };
+    if (code === 3) return { icon: ICONS.cloud, label: 'Nhiều mây' };
+    if ([45,48].includes(code)) return { icon: ICONS.cloud, label: 'Sương mù' };
+    if ([51,53,55,56,57].includes(code)) return { icon: ICONS.rain, label: 'Mưa phùn' };
+    if ([61,63,65,66,67,80,81,82].includes(code)) return { icon: ICONS.rain, label: 'Mưa' };
+    if ([71,73,75,77,85,86].includes(code)) return { icon: ICONS.cloud, label: 'Có tuyết' };
+    if ([95,96,99].includes(code)) return { icon: ICONS.rain, label: 'Dông' };
+    return { icon: ICONS.cloud, label: 'Nhiều mây' };
+  },
+
+  renderLoading(){
+    $('#weather').innerHTML = `
+      <div class="weather-pin">${ICONS.pin}</div>
+      <div>
+        <div class="weather-loc">Đang xác định vị trí...</div>
+        <div class="weather-sub">Đang tải thời tiết</div>
+      </div>
+    `;
+  },
+
+  renderData(locationName, tempC, code){
+    const w = this.codeMap(code);
+    $('#weather').innerHTML = `
+      <div class="weather-pin">${ICONS.pin}</div>
+      <div>
+        <div class="weather-loc">${locationName}</div>
+        <div class="weather-sub">${w.label}</div>
+      </div>
+      <div class="weather-temp">${w.icon}${Math.round(tempC)}°C</div>
+    `;
+  },
+
+  renderError(){
+    $('#weather').innerHTML = `
+      <div class="weather-pin">${ICONS.pin}</div>
+      <div>
+        <div class="weather-loc">Không lấy được thời tiết</div>
+        <div class="weather-sub">Vui lòng thử lại sau</div>
+      </div>
+    `;
+  },
+
+  async fetchWeather(lat, lon){
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('weather fetch failed');
+    const data = await res.json();
+    return { tempC: data.current.temperature_2m, code: data.current.weather_code };
+  },
+
+  async reverseGeocode(lat, lon){
+    try{
+      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('geocode failed');
+      const data = await res.json();
+      const city = data.city || data.locality || data.principalSubdivision;
+      const country = data.countryName;
+      return [city, country].filter(Boolean).join(', ');
+    }catch(e){
+      return null;
+    }
+  },
+
+  lastLat: null,
+  lastLon: null,
+  lastName: null,
+
+  async loadFor(lat, lon, knownName){
+    this.lastLat = lat;
+    this.lastLon = lon;
+    try{
+      const [weatherData, name] = await Promise.all([
+        this.fetchWeather(lat, lon),
+        knownName ? Promise.resolve(knownName) : this.reverseGeocode(lat, lon)
+      ]);
+      this.lastName = name || 'Vị trí của bạn';
+      this.renderData(this.lastName, weatherData.tempC, weatherData.code);
+    }catch(e){
+      this.renderError();
+    }
+  },
+
+  async refresh(){
+    if (this.lastLat == null || this.lastLon == null) return;
+    try{
+      const weatherData = await this.fetchWeather(this.lastLat, this.lastLon);
+      this.renderData(this.lastName, weatherData.tempC, weatherData.code);
+    }catch(e){
+    }
+  },
+
+  init(){
+    this.renderLoading();
+    const { fallback } = BIO_CONFIG.weather;
+    this.loadFor(fallback.lat, fallback.lon, fallback.location);
+    setInterval(() => this.refresh(), 10 * 60 * 1000);
+  }
 };
-function initSpotlight(){const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches,hasFinePointer=window.matchMedia('(pointer:fine)').matches,lowPower=navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4;if(reduceMotion||!hasFinePointer||lowPower)return;const spot=document.getElementById('spotlight');if(!spot)return;let raf=null,px=0,py=0;const apply=()=>{spot.style.setProperty('--sx',px+'px');spot.style.setProperty('--sy',py+'px');raf=null};window.addEventListener('pointermove',e=>{px=e.clientX;py=e.clientY;spot.classList.add('show');if(!raf)raf=requestAnimationFrame(apply)},{passive:true});window.addEventListener('pointerleave',()=>spot.classList.remove('show'),{passive:true})}
-const NetworkBackground=(()=>{const canvas=document.getElementById('bgNetwork');if(!canvas)return{init(){}};const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return{init(){}};const reduce=window.matchMedia('(prefers-reduced-motion: reduce)'),coarse=window.matchMedia('(pointer: coarse)'),lowPower=(navigator.hardwareConcurrency||8)<=4,opt={desktop:lowPower?20:28,mobile:15,link:170,line:.095,node:.38,speed:.018},st={w:1,h:1,dpr:1,nodes:[],raf:0,running:false,last:0};function seed(){const n=coarse.matches?opt.mobile:opt.desktop;st.nodes=Array.from({length:n},(_,i)=>({x:Math.random()*st.w,y:Math.random()*st.h,vx:(Math.random()-.5)*opt.speed,vy:(Math.random()-.5)*opt.speed,r:i%7===0?1.55:1.05,phase:Math.random()*6.283}))}function resize(){const r=canvas.getBoundingClientRect();st.w=Math.max(1,r.width);st.h=Math.max(1,r.height);st.dpr=Math.min(devicePixelRatio||1,lowPower?1.1:1.3);canvas.width=Math.round(st.w*st.dpr);canvas.height=Math.round(st.h*st.dpr);ctx.setTransform(st.dpr,0,0,st.dpr,0,0);seed();draw(performance.now())}function draw(now){const dt=Math.min(34,st.last?now-st.last:16);ctx.clearRect(0,0,st.w,st.h);const a=st.nodes;for(const n of a){n.x+=n.vx*dt;n.y+=n.vy*dt;if(n.x<-24)n.x=st.w+24;if(n.x>st.w+24)n.x=-24;if(n.y<-24)n.y=st.h+24;if(n.y>st.h+24)n.y=-24}for(let i=0;i<a.length;i++){for(let j=i+1;j<a.length;j++){const b=a[i],c=a[j],dx=b.x-c.x,dy=b.y-c.y,d2=dx*dx+dy*dy,m=opt.link*opt.link;if(d2>m)continue;const al=(1-Math.sqrt(d2)/opt.link)*opt.line;ctx.strokeStyle=`rgba(164,236,214,${al})`;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.stroke()}}for(const n of a){ctx.beginPath();ctx.fillStyle=`rgba(185,248,224,${opt.node*(.86+Math.sin(now*.001+n.phase)*.14)})`;ctx.arc(n.x,n.y,n.r,0,6.283);ctx.fill()}st.last=now;if(st.running&&!reduce.matches&&document.visibilityState==='visible')st.raf=requestAnimationFrame(draw)}function stop(){st.running=false;if(st.raf)cancelAnimationFrame(st.raf);st.raf=0}function start(){if(st.running||reduce.matches)return;st.running=true;st.last=performance.now();st.raf=requestAnimationFrame(draw)}function init(){resize();if('ResizeObserver'in window)new ResizeObserver(resize).observe(canvas);else addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',()=>document.visibilityState==='hidden'?stop():start());start()}return{init}})();
-NetworkBackground.init();
-const Background=(()=>{const root=document.getElementById('bg'),video=document.getElementById('bgVideo'),fog=document.getElementById('bgFog'),overlay=document.getElementById('bgOverlay');if(!root)return{apply(){}};function clamp01(v){return Math.max(0,Math.min(1,Number(v)||0))}function clearVideo(){if(!video)return;try{video.pause()}catch(_){}video.removeAttribute('src');video.load();video.style.display='none'}function apply(){const cfg=BIO_CONFIG.background||{},type=cfg.type||'gradient';clearVideo();if(overlay)overlay.style.display='none';if(fog)fog.style.display='none';root.style.backgroundImage='';root.style.backgroundPosition='';root.style.backgroundSize='';root.style.backgroundRepeat='';if(cfg.enabled===false)return;if(type==='video'&&cfg.source&&video){video.src=cfg.source;video.muted=true;video.autoplay=true;video.loop=true;video.playsInline=true;video.style.objectPosition=cfg.position||'center center';video.style.objectFit=cfg.size||'cover';video.style.display='block';video.play().catch(()=>{})}else if(type==='image'&&cfg.source){const safeSource=String(cfg.source).replace(/"/g,'\\"');root.style.backgroundImage=`url("${safeSource}"),radial-gradient(820px 620px at 82% 12%,rgba(170,255,220,.105),transparent 67%),radial-gradient(700px 520px at 72% 78%,rgba(170,205,255,.055),transparent 70%),radial-gradient(520px 420px at 24% 34%,rgba(120,235,205,.035),transparent 72%),linear-gradient(135deg,#12171b 0%,#0b1014 48%,#06080b 100%)`;root.style.backgroundPosition=`${cfg.position||'center center'},center,center,center,center`;root.style.backgroundSize=`${cfg.size||'cover'},auto,auto,auto,auto`;root.style.backgroundRepeat='no-repeat,no-repeat,no-repeat,no-repeat,no-repeat';root.style.backgroundColor='#06080b'}const ov=cfg.overlay||{};if(overlay&&ov.enabled!==false&&ov.color){overlay.style.background=ov.color;overlay.style.display='block'}const fg=cfg.fog||{};if(fog&&fg.enabled){const fogBlur=Math.min(3,Math.max(0,Number(fg.blur||0)));fog.style.background=fg.color||'rgba(220,230,235,.10)';fog.style.backdropFilter=fogBlur?`blur(${fogBlur}px)`:'none';fog.style.webkitBackdropFilter=fogBlur?`blur(${fogBlur}px)`:'none';fog.style.opacity=String(clamp01(fg.opacity??.08));fog.style.display='block'}}window.addEventListener('beforeunload',clearVideo,{passive:true});return{apply}})();
-function initCustomCursor(){if(!window.matchMedia('(pointer:fine)').matches)return;const dot=document.querySelector('.cursor-dot'),ring=document.querySelector('.cursor-ring');if(!dot||!ring)return;if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my,visible=false,raf=0;const selector=['a','button','input','select','textarea','[role="button"]','.clickable','.progress-track','.playlist-item','.volume-range','.clock-pill'].join(',');const render=()=>{rx+=(mx-rx)*.18;ry+=(my-ry)*.18;dot.style.transform=`translate3d(${mx}px,${my}px,0)`;ring.style.transform=`translate3d(${rx}px,${ry}px,0)`;raf=requestAnimationFrame(render)};const show=()=>{if(!visible){visible=true;dot.classList.remove('is-hidden');ring.classList.remove('is-hidden')}};const hide=()=>{visible=false;dot.classList.add('is-hidden');ring.classList.add('is-hidden');document.body.classList.remove('cursor-hover','cursor-click')};window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;show()},{passive:true});window.addEventListener('mouseleave',hide,{passive:true});window.addEventListener('mouseenter',show,{passive:true});document.addEventListener('mouseover',e=>{if(e.target.closest(selector))document.body.classList.add('cursor-hover')});document.addEventListener('mouseout',e=>{if(e.target.closest(selector)&&!e.relatedTarget?.closest?.(selector))document.body.classList.remove('cursor-hover')});document.addEventListener('mousedown',e=>{if(e.button===0)document.body.classList.add('cursor-click')});window.addEventListener('mouseup',()=>document.body.classList.remove('cursor-click'),{passive:true});window.addEventListener('blur',hide,{passive:true});dot.classList.add('is-hidden');ring.classList.add('is-hidden');cancelAnimationFrame(raf);raf=requestAnimationFrame(render)}
-initCustomCursor();Background.apply();renderNav();renderProfile();renderSocials();renderFooter();Player.mount();Weather.init();Discord.init();initSpotlight();requestAnimationFrame(()=>document.body.classList.add('ready'));
+
+const Discord = {
+  colors: {
+    online:  { rgb: '35,165,90',   label: 'Online' },
+    idle:    { rgb: '240,178,50',  label: 'Idle' },
+    dnd:     { rgb: '242,63,67',   label: 'Do Not Disturb' },
+    offline: { rgb: '128,132,142', label: 'Offline' }
+  },
+
+  activityMeta: {
+    0: { verb: 'Đang chơi',    icon: null },
+    1: { verb: 'Đang stream',  icon: null },
+    2: { verb: 'Đang nghe',    icon: null },
+    3: { verb: 'Đang xem',     icon: null },
+    5: { verb: 'Đang thi đấu', icon: null },
+  },
+
+  detailOpen: false,
+  currentActivity: null,
+
+  avatarUrl(user){
+    if (!user) return null;
+    if (!user.avatar){
+      const fallbackIndex = (Number(user.discriminator) || 0) % 5;
+      return `https://cdn.discordapp.com/embed/avatars/${fallbackIndex}.png`;
+    }
+    const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=128`;
+  },
+
+  decorationUrl(discordUser){
+    const deco = discordUser && discordUser.avatar_decoration_data;
+    if (!deco || !deco.asset) return null;
+    return `https://cdn.discordapp.com/avatar-decoration-presets/${deco.asset}.png?size=160`;
+  },
+
+  activityImageUrl(activity){
+    const assets = activity && activity.assets;
+    if (!assets || !assets.large_image) return null;
+    const img = assets.large_image;
+    if (img.startsWith('mp:')){
+      return `https://media.discordapp.net/${img.replace('mp:', '')}`;
+    }
+    if (activity.application_id){
+      return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
+    }
+    return null;
+  },
+
+  timeSince(startMs){
+    const diff = Math.max(0, Date.now() - startMs);
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'vài giây';
+    if (mins < 60) return `${mins} phút`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} giờ ${mins % 60} phút`;
+    return `${Math.floor(hrs / 24)} ngày`;
+  },
+
+  applyAvatar(discordUser){
+    const url = this.avatarUrl(discordUser);
+    const avatarEl = document.querySelector('.avatar');
+    if (avatarEl && url){
+      avatarEl.style.backgroundImage = `url('${url}')`;
+      avatarEl.textContent = '';
+    }
+  },
+
+  applyDecoration(discordUser){
+    const decoEl = document.querySelector('#avatarDeco');
+    if (!decoEl) return;
+    const url = this.decorationUrl(discordUser);
+    if (url){
+      decoEl.style.backgroundImage = `url('${url}')`;
+      decoEl.classList.add('show');
+    } else {
+      decoEl.style.backgroundImage = '';
+      decoEl.classList.remove('show');
+    }
+  },
+
+  applyIdentity(discordUser){
+    if (!discordUser) return;
+    const nameEl = document.querySelector('.id-text h1');
+    const handleEl = document.querySelector('.id-text .handle');
+    if (nameEl) nameEl.textContent = discordUser.global_name || discordUser.username;
+    if (handleEl) handleEl.textContent = '@' + discordUser.username;
+  },
+
+  applyActivity(activities){
+    const badgeEl = document.querySelector('#discordActivity');
+    if (!badgeEl) return;
+
+    const list = activities || [];
+    const custom = list.find(a => a.type === 4);
+    const real = list.find(a => a.type === 0) || list.find(a => a.type !== 4);
+
+    this.currentActivity = real || null;
+
+    let badgeHtml = '';
+    if (real){
+      const meta = this.activityMeta[real.type] || { verb: '', icon: ICONS.game };
+      const imgUrl = this.activityImageUrl(real);
+      const iconHtml = imgUrl ? `<img src="${imgUrl}" alt="">` : (meta.icon || ICONS.game);
+      const detailParts = [real.details, real.state].filter(Boolean).join(' • ');
+      badgeHtml = `${iconHtml}<span><b>${meta.verb} ${real.name}</b>${detailParts ? ' — ' + detailParts : ''}</span>${ICONS.chevron}`;
+    } else if (custom && (custom.state || custom.emoji)){
+      const emoji = custom.emoji && custom.emoji.name ? custom.emoji.name + ' ' : '';
+      badgeHtml = `<span>${emoji}${custom.state || ''}</span>`;
+    }
+
+    if (badgeHtml){
+      badgeEl.innerHTML = badgeHtml;
+      badgeEl.style.display = 'flex';
+      badgeEl.classList.toggle('clickable', !!real);
+    } else {
+      badgeEl.innerHTML = '';
+      badgeEl.style.display = 'none';
+    }
+
+    if (!real){
+      this.setDetailOpen(false);
+    } else if (this.detailOpen){
+      this.renderDetail();
+    }
+
+    this.bindActivityClick();
+  },
+
+  renderDetail(){
+    const detailEl = document.querySelector('#activityDetail');
+    if (!detailEl) return;
+    const a = this.currentActivity;
+    if (!a){ detailEl.innerHTML = ''; return; }
+
+    const meta = this.activityMeta[a.type] || { verb: '' };
+    const imgUrl = this.activityImageUrl(a);
+    const timeText = (a.timestamps && a.timestamps.start) ? this.timeSince(a.timestamps.start) : '';
+
+    detailEl.innerHTML = `
+      <div class="activity-detail-inner">
+        ${imgUrl ? `<img src="${imgUrl}" alt="">` : ''}
+        <div class="activity-detail-text">
+          <div class="activity-detail-name">${a.name}</div>
+          ${a.details ? `<div class="activity-detail-line">${a.details}</div>` : ''}
+          ${a.state ? `<div class="activity-detail-line">${a.state}</div>` : ''}
+          ${timeText ? `<div class="activity-detail-time">${meta.verb} được ${timeText}</div>` : ''}
+        </div>
+      </div>
+    `;
+  },
+
+  setDetailOpen(open){
+    this.detailOpen = open;
+    const badgeEl = document.querySelector('#discordActivity');
+    const detailEl = document.querySelector('#activityDetail');
+    if (badgeEl) badgeEl.classList.toggle('open', open);
+    if (detailEl) detailEl.classList.toggle('open', open);
+    if (open) this.renderDetail();
+  },
+
+  bindActivityClick(){
+    const badgeEl = document.querySelector('#discordActivity');
+    if (!badgeEl || badgeEl.dataset.bound) return;
+    badgeEl.dataset.bound = '1';
+    badgeEl.addEventListener('click', () => {
+      if (!this.currentActivity) return;
+      this.setDetailOpen(!this.detailOpen);
+    });
+  },
+
+  applyStatus(status){
+    const info = this.colors[status] || this.colors.offline;
+
+    const dot = document.querySelector('#status .dot');
+    const labelEl = document.querySelector('#status span:last-child');
+    const avatarEl = document.querySelector('.avatar');
+
+    if (dot) dot.style.setProperty('--status-rgb', info.rgb);
+    if (labelEl) labelEl.textContent = info.label;
+    if (avatarEl) avatarEl.style.setProperty('--status-rgb', info.rgb);
+  },
+
+  async fetchPresence(){
+    const { userId, useAvatar, useAvatarDecoration, useIdentity, useActivity, useStatus } = BIO_CONFIG.discord;
+    if (!userId) return;
+    try{
+      const res = await fetch(`https://api.lanyard.rest/v1/users/${userId}`);
+      const json = await res.json();
+      if (!json.success) throw new Error('Lanyard trả về lỗi — kiểm tra userId hoặc đã join server Lanyard chưa');
+      const d = json.data;
+      if (useAvatar) this.applyAvatar(d.discord_user);
+      if (useAvatarDecoration) this.applyDecoration(d.discord_user);
+      if (useIdentity) this.applyIdentity(d.discord_user);
+      if (useActivity) this.applyActivity(d.activities);
+      if (useStatus) this.applyStatus(d.discord_status);
+    }catch(e){
+      console.warn('[Discord] Không lấy được trạng thái:', e.message);
+    }
+  },
+
+  init(){
+    this.activityMeta[0].icon = ICONS.game;
+    this.activityMeta[1].icon = ICONS.stream;
+    this.activityMeta[2].icon = ICONS.music_activity;
+    this.activityMeta[3].icon = ICONS.eye;
+    this.activityMeta[5].icon = ICONS.game;
+
+    const cfg = BIO_CONFIG.discord;
+    if (!cfg.enabled || !cfg.userId) return;
+    this.fetchPresence();
+    setInterval(() => this.fetchPresence(), cfg.pollIntervalMs || 20000);
+  }
+};
+
+function initSpotlight(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+  const lowPower = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+  if (reduceMotion || !hasFinePointer || lowPower) return;
+
+  const spot = document.getElementById('spotlight');
+  if (!spot) return;
+
+  let raf = null, px = 0, py = 0;
+  const apply = () => {
+    spot.style.setProperty('--sx', px + 'px');
+    spot.style.setProperty('--sy', py + 'px');
+    raf = null;
+  };
+
+  window.addEventListener('pointermove', (e) => {
+    px = e.clientX; py = e.clientY;
+    spot.classList.add('show');
+    if (!raf) raf = requestAnimationFrame(apply);
+  }, { passive: true });
+
+  window.addEventListener('pointerleave', () => spot.classList.remove('show'), { passive: true });
+}
+
+/* Background network/fiber animation removed intentionally.
+   The room/window image is now the clean visual backdrop. */
+
+/**
+ * CodeGlowWebGL — "frosted glass with glowing code shining through" shader.
+ * Desktop: multi-octave fbm frost + chromatic light scatter + bloom.
+ * Mobile: single-octave frost, no chroma split, lower canvas resolution.
+ * FPS safety: rAF-driven, frame-time watchdog auto-drops to mobile-tier
+ * shader if desktop tier can't sustain ~50fps for a sustained window,
+ * pauses entirely off-screen / hidden tab / reduced-motion.
+ */
+const CodeGlowWebGL = (() => {
+  const canvases = [...document.querySelectorAll('.code-glow')];
+  if (!canvases.length) return { init(){} };
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const contexts = [];
+
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const isNarrow = window.innerWidth < 760;
+  const isLowCore = (navigator.hardwareConcurrency || 8) <= 4;
+  let tier = (isCoarsePointer || isNarrow || isLowCore) ? 'lite' : 'full';
+
+  const VERT = `
+    attribute vec2 a_pos;
+    varying vec2 v_uv;
+    void main(){ v_uv = a_pos * 0.5 + 0.5; gl_Position = vec4(a_pos,0.0,1.0); }
+  `;
+
+  // Shared helpers, injected into both fragment shaders.
+  const NOISE_LIB = `
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453123); }
+    float vnoise(vec2 p){
+      vec2 i = floor(p), f = fract(p);
+      float a = hash(i), b = hash(i + vec2(1.0,0.0));
+      float c = hash(i + vec2(0.0,1.0)), d = hash(i + vec2(1.0,1.0));
+      vec2 u = f*f*(3.0-2.0*f);
+      return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
+    }
+    float gauss(float x,float s){ return exp(-(x*x)/(2.0*s*s)); }
+  `;
+
+  // FULL (desktop): fbm frost distortion + chromatic scatter + bloom halo.
+  const FRAG_FULL = `
+    precision mediump float;
+    varying vec2 v_uv;
+    uniform vec2 u_res;
+    uniform float u_time;
+    uniform float u_lines[18];
+    uniform float u_count;
+    ${NOISE_LIB}
+    float fbm(vec2 p){
+      float v = 0.0, amp = 0.5;
+      for(int i=0;i<3;i++){ v += amp * vnoise(p); p *= 2.02; amp *= 0.52; }
+      return v;
+    }
+    float glowAt(vec2 uv){
+      float glow = 0.0;
+      for(int i=0;i<18;i++){
+        float enabled = step(float(i), u_count-1.0);
+        float y = u_lines[i];
+        float pulse = 0.75 + 0.25*sin(u_time*1.1 + float(i)*0.66);
+        glow += enabled * gauss(uv.y-y,0.011) * pulse;
+      }
+      return glow;
+    }
+    void main(){
+      vec2 uv = v_uv;
+      vec2 fp = uv * vec2(u_res.x/u_res.y * 3.4, 3.4) + vec2(u_time*0.015, -u_time*0.011);
+      float frost = fbm(fp);
+      float frost2 = fbm(fp*1.7 + 4.2);
+      float frostDensity = clamp(frost*0.65 + frost2*0.35, 0.0, 1.0);
+
+      vec2 refract = (vec2(frost, frost2) - 0.5) * 0.010 * (0.5 + frostDensity);
+
+      float glowR = glowAt(uv + refract*1.4);
+      float glowG = glowAt(uv + refract*0.7);
+      float glowB = glowAt(uv - refract*0.9);
+
+      float sweep = 0.09 * gauss(uv.y-(0.18 + 0.22*sin(u_time*0.34)),0.07);
+      float edge = smoothstep(0.0,0.14,uv.x) * (1.0-smoothstep(0.80,1.0,uv.x));
+
+      float scatter = 0.55 + frostDensity*0.75;
+      float bloomR = (glowR*0.16 + sweep*0.05) * scatter;
+      float bloomG = (glowG*0.155 + sweep*0.048) * scatter;
+      float bloomB = (glowB*0.15 + sweep*0.046) * scatter;
+
+      vec3 baseCol = mix(vec3(0.42,1.0,0.82), vec3(0.46,0.80,1.0), uv.x);
+      vec3 hotCol = vec3(0.86,1.0,0.94);
+      float hot = clamp(max(max(glowR,glowG),glowB)*1.6, 0.0, 1.0);
+      vec3 col = mix(baseCol, hotCol, hot*0.6);
+
+      float a = min(0.66, bloomR*0.34 + bloomG*0.33 + bloomB*0.33);
+      a *= edge;
+
+      float frostHaze = frostDensity * 0.028 * edge;
+      col = mix(col, vec3(0.92,0.97,0.96), 0.5);
+      a += frostHaze;
+
+      gl_FragColor = vec4(col, a);
+    }
+  `;
+
+  // LITE (mobile): single-octave frost, no chroma split, cheaper math.
+  const FRAG_LITE = `
+    precision mediump float;
+    varying vec2 v_uv;
+    uniform vec2 u_res;
+    uniform float u_time;
+    uniform float u_lines[18];
+    uniform float u_count;
+    ${NOISE_LIB}
+    void main(){
+      vec2 uv = v_uv;
+      float glow = 0.0;
+      for(int i=0;i<18;i++){
+        float enabled = step(float(i), u_count-1.0);
+        float y = u_lines[i];
+        float pulse = 0.8 + 0.2*sin(u_time*1.0 + float(i)*0.6);
+        glow += enabled * gauss(uv.y-y,0.013) * pulse;
+      }
+      float frost = vnoise(uv * vec2(u_res.x/u_res.y * 2.0, 2.0) + u_time*0.01);
+      float edge = smoothstep(0.0,0.15,uv.x) * (1.0-smoothstep(0.8,1.0,uv.x));
+      float a = min(0.55, (glow*0.14 + frost*0.012) * edge);
+      vec3 c = mix(vec3(0.45,1.0,0.80), vec3(0.48,0.82,1.0), uv.x);
+      gl_FragColor = vec4(c, a);
+    }
+  `;
+
+  function shader(gl,type,src){
+    const sh=gl.createShader(type); gl.shaderSource(sh,src); gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){ gl.deleteShader(sh); return null; }
+    return sh;
+  }
+
+  function buildProgram(gl, fragSrc){
+    const vs=shader(gl,gl.VERTEX_SHADER,VERT), fs=shader(gl,gl.FRAGMENT_SHADER,fragSrc);
+    if(!vs||!fs) return null;
+    const program=gl.createProgram(); gl.attachShader(program,vs); gl.attachShader(program,fs); gl.linkProgram(program);
+    if(!gl.getProgramParameter(program,gl.LINK_STATUS)) return null;
+    return program;
+  }
+
+  function setup(canvas){
+    const gl=canvas.getContext('webgl',{alpha:true,antialias:false,preserveDrawingBuffer:false,powerPreference:'low-power'});
+    if(!gl) return null;
+    const fragSrc = tier === 'full' ? FRAG_FULL : FRAG_LITE;
+    let program = buildProgram(gl, fragSrc);
+    if(!program) program = buildProgram(gl, FRAG_LITE); // safe fallback if fbm variant fails to compile anywhere
+    if(!program) return null;
+
+    const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    const pos=gl.getAttribLocation(program,'a_pos'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+
+    return {
+      gl, program,
+      uRes:gl.getUniformLocation(program,'u_res'),
+      uTime:gl.getUniformLocation(program,'u_time'),
+      uLines:Array.from({length:18},(_,i)=>gl.getUniformLocation(program,'u_lines['+i+']')),
+      uCount:gl.getUniformLocation(program,'u_count'),
+      start:performance.now(),
+      canvas
+    };
+  }
+
+  function sync(c){
+    const rect=c.canvas.getBoundingClientRect();
+    // Mobile renders at a lower internal resolution — same visual size, far fewer pixels to shade.
+    const dprCap = tier === 'full' ? 1.15 : 0.72;
+    const dpr = Math.min(devicePixelRatio||1, dprCap);
+    const w=Math.max(1,Math.round(rect.width*dpr)), h=Math.max(1,Math.round(rect.height*dpr));
+    if(c.canvas.width!==w||c.canvas.height!==h){ c.canvas.width=w; c.canvas.height=h; c.gl.viewport(0,0,w,h); }
+    const pre=c.canvas.parentElement.querySelector('pre');
+    const text=pre?pre.textContent.split('\n'):[];
+    const lineH=parseFloat(getComputedStyle(pre).lineHeight)||20;
+    const top=pre?pre.offsetTop:30;
+    const lines=text.length; const arr=new Float32Array(18);
+    for(let i=0;i<Math.min(lines,18);i++){ const yPx=top + lineH*(i+.55); arr[i]=1-Math.min(.98,Math.max(.02,yPx/rect.height)); }
+    c.lines=arr; c.count=Math.min(lines,18);
+  }
+
+  function draw(c, now){
+    sync(c);
+    const gl=c.gl;
+    gl.useProgram(c.program);
+    gl.uniform2f(c.uRes,c.canvas.width,c.canvas.height);
+    gl.uniform1f(c.uTime,(now-c.start)/1000);
+    gl.uniform1f(c.uCount,c.count);
+    for(let i=0;i<18;i++) gl.uniform1f(c.uLines[i], c.lines[i]||0);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+    gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  }
+
+  // Frame pacing + adaptive downgrade watchdog.
+  let raf=0, running=false, lastFrame=0;
+  const targetInterval = tier === 'full' ? 1000/60 : 1000/30; // desktop 60fps cap, mobile 30fps cap
+  let slowFrameStreak = 0;
+  let lastPerfCheck = 0;
+
+  function rebuildAtTier(newTier){
+    if (newTier === tier) return;
+    tier = newTier;
+    contexts.forEach(c => {
+      const program = buildProgram(c.gl, tier === 'full' ? FRAG_FULL : FRAG_LITE);
+      if (!program) return;
+      c.gl.deleteProgram(c.program);
+      c.program = program;
+      c.uRes=c.gl.getUniformLocation(program,'u_res');
+      c.uTime=c.gl.getUniformLocation(program,'u_time');
+      c.uLines=Array.from({length:18},(_,i)=>c.gl.getUniformLocation(program,'u_lines['+i+']'));
+      c.uCount=c.gl.getUniformLocation(program,'u_count');
+      const pos=c.gl.getAttribLocation(program,'a_pos'); c.gl.enableVertexAttribArray(pos); c.gl.vertexAttribPointer(pos,2,c.gl.FLOAT,false,0,0);
+    });
+  }
+
+  function frame(now){
+    if(!running) return;
+    const elapsed = now - lastFrame;
+    if (elapsed >= targetInterval * 0.98){
+      contexts.forEach(c => draw(c, now));
+
+      // Watchdog: only meaningful on desktop tier (mobile is already the floor).
+      if (tier === 'full'){
+        if (lastPerfCheck){
+          const frameMs = now - lastPerfCheck;
+          slowFrameStreak = frameMs > 34 ? slowFrameStreak + 1 : 0; // sustained sub-30fps-ish frames
+          if (slowFrameStreak > 90) rebuildAtTier('lite'); // ~1.5s of struggle -> permanently drop to lite for this session
+        }
+        lastPerfCheck = now;
+      }
+      lastFrame = now;
+    }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start(){ if(running||reduce.matches) return; running=true; lastFrame=0; lastPerfCheck=0; slowFrameStreak=0; raf=requestAnimationFrame(frame); }
+  function stop(){ running=false; cancelAnimationFrame(raf); raf=0; }
+
+  // Pause rendering for terminals scrolled out of view (mostly relevant on mobile-length pages).
+  let io = null;
+  function observeVisibility(){
+    if (!('IntersectionObserver' in window)) return;
+    io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const ctx = contexts.find(c => c.canvas === entry.target);
+        if (ctx) ctx.offscreen = !entry.isIntersecting;
+      });
+    }, { rootMargin: '200px' });
+    contexts.forEach(c => io.observe(c.canvas));
+  }
+
+  function init(){
+    canvases.forEach(cv => {
+      const c = setup(cv);
+      if (c){ contexts.push(c); cv.parentElement.dataset.glow='1'; }
+    });
+    if(!contexts.length) return;
+
+    const ro = 'ResizeObserver' in window ? new ResizeObserver(() => contexts.forEach(sync)) : null;
+    if (ro) contexts.forEach(c => ro.observe(c.canvas));
+    else addEventListener('resize', () => contexts.forEach(sync), { passive:true });
+
+    observeVisibility();
+    document.addEventListener('visibilitychange', () => document.visibilityState==='hidden' ? stop() : start());
+    start();
+  }
+
+  return { init };
+})();
+CodeGlowWebGL.init();
+
+const Background = (() => {
+  const root = document.getElementById('bg');
+  const video = document.getElementById('bgVideo');
+  const fog = document.getElementById('bgFog');
+  const overlay = document.getElementById('bgOverlay');
+  if (!root) return { apply(){} };
+
+  function clamp01(v){
+    return Math.max(0, Math.min(1, Number(v) || 0));
+  }
+
+  function clearVideo(){
+    if (!video) return;
+    try { video.pause(); } catch (_) {}
+    video.removeAttribute('src');
+    video.load();
+    video.style.display = 'none';
+  }
+
+  function responsivePosition(cfg){
+    const w = window.innerWidth;
+    if (w <= 560) return cfg.mobilePosition || cfg.position || '100% center';
+    if (w <= 900) return cfg.tabletPosition || cfg.position || '96% center';
+    return cfg.position || '92% center';
+  }
+
+  function apply(){
+    const cfg = BIO_CONFIG.background || {};
+    const type = cfg.type || 'gradient';
+
+    clearVideo();
+    if (overlay) overlay.style.display = 'none';
+    if (fog) fog.style.display = 'none';
+    root.style.backgroundImage = '';
+    root.style.backgroundPosition = '';
+    root.style.backgroundSize = '';
+    root.style.backgroundRepeat = '';
+
+    if (cfg.enabled === false) return;
+
+    const pos = responsivePosition(cfg);
+
+    if (type === 'video' && cfg.source && video) {
+      video.src = cfg.source;
+      video.muted = true;
+      video.autoplay = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.style.objectPosition = pos;
+      video.style.objectFit = cfg.size || 'cover';
+      video.style.display = 'block';
+      video.setAttribute('muted', '');
+      video.setAttribute('autoplay', '');
+      video.setAttribute('loop', '');
+      video.setAttribute('playsinline', '');
+      video.play().catch(() => {});
+    } else if (type === 'image' && cfg.source) {
+      const safeSource = String(cfg.source).replace(/"/g, '\\"');
+      root.style.backgroundImage = `url("${safeSource}")`;
+      root.style.backgroundPosition = pos;
+      root.style.backgroundSize = cfg.size || 'cover';
+      root.style.backgroundRepeat = 'no-repeat';
+    }
+
+    const ov = cfg.overlay || {};
+    if (overlay && ov.enabled !== false && ov.color) {
+      overlay.style.background = ov.color;
+      overlay.style.display = 'block';
+    }
+
+    const fg = cfg.fog || {};
+    if (fog && fg.enabled) {
+      const fogBlur = Math.min(3, Math.max(0, Number(fg.blur || 0)));
+      fog.style.background = fg.color || 'rgba(220,230,235,.10)';
+      fog.style.backdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
+      fog.style.webkitBackdropFilter = fogBlur ? `blur(${fogBlur}px)` : 'none';
+      fog.style.opacity = String(clamp01(fg.opacity ?? 0.08));
+      fog.style.display = 'block';
+    }
+  }
+
+  let resizeRAF = 0;
+  window.addEventListener('resize', () => {
+    if (resizeRAF) cancelAnimationFrame(resizeRAF);
+    resizeRAF = requestAnimationFrame(() => apply());
+  }, { passive:true });
+
+  window.addEventListener('beforeunload', clearVideo, { passive:true });
+  return { apply };
+})();
+
+/* =========================================================
+   CUSTOM MOUSE
+   Lightweight RAF-follow cursor. Disabled automatically on
+   touch/coarse pointers and reduced-motion devices.
+   ========================================================= */
+function initCustomCursor(){
+  if (!window.matchMedia('(pointer:fine)').matches) return;
+
+  const dot = document.querySelector('.cursor-dot');
+  const ring = document.querySelector('.cursor-ring');
+  if (!dot || !ring) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  let mx = window.innerWidth / 2;
+  let my = window.innerHeight / 2;
+  let rx = mx;
+  let ry = my;
+  let visible = false;
+  let raf = 0;
+
+  const interactiveSelector = [
+    'a', 'button', 'input', 'select', 'textarea',
+    '[role="button"]', '.clickable',
+    '.progress-track', '.playlist-item',
+    '.volume-range', '.clock-pill'
+  ].join(',');
+
+  const render = () => {
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+
+    dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+
+    raf = requestAnimationFrame(render);
+  };
+
+  const show = () => {
+    if (!visible){
+      visible = true;
+      dot.classList.remove('is-hidden');
+      ring.classList.remove('is-hidden');
+    }
+  };
+
+  const hide = () => {
+    visible = false;
+    dot.classList.add('is-hidden');
+    ring.classList.add('is-hidden');
+    document.body.classList.remove('cursor-hover', 'cursor-click');
+  };
+
+  window.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    show();
+  }, { passive:true });
+
+  window.addEventListener('mouseleave', hide, { passive:true });
+  window.addEventListener('mouseenter', show, { passive:true });
+
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest(interactiveSelector)){
+      document.body.classList.add('cursor-hover');
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest(interactiveSelector) && !e.relatedTarget?.closest?.(interactiveSelector)){
+      document.body.classList.remove('cursor-hover');
+    }
+  });
+
+  document.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    document.body.classList.add('cursor-click');
+  });
+
+  window.addEventListener('mouseup', () => {
+    document.body.classList.remove('cursor-click');
+  }, { passive:true });
+
+  window.addEventListener('blur', hide, { passive:true });
+
+  dot.classList.add('is-hidden');
+  ring.classList.add('is-hidden');
+
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(render);
+}
+
+initCustomCursor();
+
+Background.apply();
+renderNav();
+renderProfile();
+renderSocials();
+renderFooter();
+Player.mount();
+Weather.init();
+Discord.init();
+initSpotlight();
+
+requestAnimationFrame(() => document.body.classList.add('ready'));
 </script>
+
 </body>
 </html>
